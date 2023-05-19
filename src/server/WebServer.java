@@ -1,5 +1,11 @@
 package server;
 
+import server.handler.HandlerException;
+import server.handler.Handlers;
+import server.handler.routes.HomeRoute;
+import server.request.Request;
+import server.response.Response;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -10,6 +16,13 @@ public class WebServer {
     private static boolean running = true;
     private static boolean accepting = true;
     private ServerSocket socket;
+    private Handlers requestHandlers;
+
+    public WebServer() {
+        this.requestHandlers = new Handlers();
+
+        this.requestHandlers.register("/", new HomeRoute());
+    }
 
     public void serve() {
         Socket client;
@@ -34,7 +47,7 @@ public class WebServer {
         }
     }
 
-    static class ConnectionHandler implements Runnable {
+    class ConnectionHandler implements Runnable {
         private final BufferedWriter output;
         private final BufferedReader input;
         private final Socket client;
@@ -71,11 +84,11 @@ public class WebServer {
                 while (true) {
                     System.out.println(inputLine);
                     if (inputLine != null) {
-                        rawRequest.add(inputLine);
-
                         if (inputLine.length() == 0) {
                             break;
                         }
+
+                        rawRequest.add(inputLine);
                     }
 
                     inputLine = this.input.readLine();
@@ -85,33 +98,42 @@ public class WebServer {
                 return;
             }
 
-//            try {
-//                System.out.println("body: ");
-//                System.out.println(this.input.ready());
-//
-//                if (this.input.ready()) {
-//                    String bodyLine = Character.toString(this.input.read());
-//
-//                    System.out.println("body: " + bodyLine);
-//
-//                    while ((this.input.ready()) && (!bodyLine.equals(""))) {
-//                        this.output.write(bodyLine + "\n");
-//                        bodyLine = Character.toString(this.input.read());
-//                        System.out.print(bodyLine);
-//                    }
-//                }
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//                return;
-//            }
 
+            StringBuilder payload = new StringBuilder();
+
+            try {
+                while (this.input.ready()) {
+                    payload.append((char) this.input.read());
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
+
+            rawRequest.add(payload.toString());
 
             Request req = Request.parse(rawRequest);
 
-            System.out.println(req);
+            Response res;
 
-            System.out.println(req.getBody());
+            try {
+                res = requestHandlers.dispatch(req);
+                System.out.println(res);
+                this.output.write(res.toString());
+            } catch (HandlerException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                System.out.println("Error sending response to client.");
+                e.printStackTrace();
+            }
 
+            try {
+                this.input.close();
+                this.output.close();
+                this.client.close();
+            }catch (Exception e) {
+                System.out.println("Failed to close socket");
+            }
         }
     }
 }

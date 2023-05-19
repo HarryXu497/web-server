@@ -7,10 +7,9 @@ import java.nio.file.Path;
 import java.util.*;
 
 public class TemplateEngine {
-    public static <T> void compile(String inputFile, T data, String outputFile) throws IOException, TemplateSyntaxException, NoSuchFieldException, IllegalAccessException {
+    public static <T> String compile(String inputFile, T data) throws IOException, TemplateSyntaxException, NoSuchFieldException, IllegalAccessException {
         String rawFile = read(inputFile);
-        String parsedOutput = parse(rawFile, data);
-        write(parsedOutput, outputFile);
+        return parse(rawFile, data);
     }
 
     private static String read(String inputFile) throws IOException {
