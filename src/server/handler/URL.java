@@ -1,5 +1,7 @@
 package server.handler;
 
+import server.request.Request;
+
 import java.util.Arrays;
 
 public class URL {

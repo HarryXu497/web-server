@@ -29,11 +29,12 @@ public class Response {
             res.append(header.getKey())
                     .append(": ")
                     .append(header.getValue())
-                    .append("\n");
+                    .append("\r\n");
         }
 
-        res.append("\n");
+        res.append("\r\n");
         res.append(this.body);
+        res.append("\r\n");
 
         return res.toString();
     }
@@ -54,7 +55,7 @@ public class Response {
 
         @Override
         public String toString() {
-            return this.protocol + " " + this.code.getCode() + " " + this.code.getMessage() + "\n";
+            return this.protocol + " " + this.code.getCode() + " " + this.code.getMessage() + "\r\n";
         }
     }
 }

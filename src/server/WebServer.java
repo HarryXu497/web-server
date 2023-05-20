@@ -1,27 +1,49 @@
 package server;
 
-import server.handler.HandlerException;
 import server.handler.Handlers;
+import server.handler.routes.FileHandler;
 import server.handler.routes.HomeRoute;
 import server.request.Request;
 import server.response.Response;
+import server.response.ResponseCode;
+import template.TemplateEngine;
+import template.TemplateNotFoundException;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 public class WebServer {
     private static boolean running = true;
     private static boolean accepting = true;
     private ServerSocket socket;
-    private Handlers requestHandlers;
+    private final Handlers requestHandlers;
+    private final TemplateEngine engine;
 
-    public WebServer() {
+
+    public WebServer(TemplateEngine engine, String stylesDirectory) {
         this.requestHandlers = new Handlers();
 
-        this.requestHandlers.register("/", new HomeRoute());
+        this.engine = engine;
+
+        File folder = new File("frontend/styles");
+        File[] files = folder.listFiles();
+
+        if (files != null) {
+            for (File file : files) {
+                System.out.println(file.getPath());
+                this.requestHandlers.register("/styles/" + file.getName(), new FileHandler(engine, stylesDirectory));
+            }
+        }
+
+
+        this.requestHandlers.register("/", new HomeRoute(engine));
+        this.requestHandlers.register("/:id", new HomeRoute(engine));
     }
 
     public void serve() {
@@ -40,15 +62,20 @@ public class WebServer {
 
                 Thread t = new Thread(new ConnectionHandler(client));
                 t.start();
-//                accepting = false;
             }
         } catch (IOException e) {
             System.out.println("Error");
         }
+
+        try {
+            this.socket.close();
+        } catch (IOException e) {
+            System.out.println("Error closing server socket");
+        }
     }
 
     class ConnectionHandler implements Runnable {
-        private final BufferedWriter output;
+        private final OutputStream output;
         private final BufferedReader input;
         private final Socket client;
         private final boolean isRunning;
@@ -57,15 +84,36 @@ public class WebServer {
             this.client = clientSocket;
 
             // Socket streams
-            this.output = new BufferedWriter(new PrintWriter(client.getOutputStream()));
+            this.output = client.getOutputStream();
             InputStreamReader inStream = new InputStreamReader(client.getInputStream());
             this.input = new BufferedReader(inStream);
 
             this.isRunning = true;
         }
 
-        @Override
-        public void run() {
+        /**
+         * close
+         * properly closes the socket
+         */
+        public void close() {
+            try {
+                this.client.shutdownInput();
+                this.client.shutdownOutput();
+                this.input.close();
+                this.output.close();
+                System.out.println("Closing Client");
+                this.client.close();
+            }catch (Exception e) {
+                System.out.println("Failed to close socket");
+                e.printStackTrace();
+            }
+        }
+
+        /**
+         * handleRequest
+         * handles parsing of the request, dispatch of the request handler, and response creating and sending
+         */
+        public void handleRequest() {
             List<String> rawRequest = new ArrayList<>();
 
             try {
@@ -114,26 +162,32 @@ public class WebServer {
 
             Request req = Request.parse(rawRequest);
 
-            Response res;
-
             try {
-                res = requestHandlers.dispatch(req);
-                System.out.println(res);
-                this.output.write(res.toString());
-            } catch (HandlerException e) {
+                Response res = requestHandlers.dispatch(req);
+                this.output.write(res.toString().getBytes(StandardCharsets.UTF_8));
+            } catch (Exception e) {
                 e.printStackTrace();
-            } catch (IOException e) {
-                System.out.println("Error sending response to client.");
-                e.printStackTrace();
-            }
 
-            try {
-                this.input.close();
-                this.output.close();
-                this.client.close();
-            }catch (Exception e) {
-                System.out.println("Failed to close socket");
+                // Load error page
+                try {
+                    Response notFound = new Response(
+                            new Response.StatusLine(ResponseCode.NOT_FOUND),
+                            new HashMap<>(),
+                            engine.getTemplate("frontend/templates/not-found.th")
+                    );
+
+                    this.output.write(notFound.toString().getBytes(StandardCharsets.UTF_8));
+                } catch (IOException | TemplateNotFoundException ex) {
+                    ex.printStackTrace();
+                    System.out.println("Cannot render 404 page.");
+                }
             }
+        }
+
+        @Override
+        public void run() {
+            this.handleRequest();
+            this.close();
         }
     }
 }

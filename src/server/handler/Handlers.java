@@ -21,13 +21,27 @@ public class Handlers {
         this.register(new URL(route), handler);
     }
 
-    public Response dispatch(Request req) throws HandlerException {
+    public Response dispatch(Request req) throws Exception {
         for (Map.Entry<URL, Handler> entry : this.registry.entrySet()) {
-            if (entry.getKey().matches(req.getStatusLine().getURL())) {
+            URL url = entry.getKey();
+            String route = req.getStatusLine().getLocation();
+
+            if (url.matches(route)) {
+                // Populate the request parameters
+                req.getStatusLine().populateRequestParams(url, route);
+
+                System.out.println(req.getStatusLine());
+
+                // Dispatch the handle method
                 return entry.getValue().handle(req);
             }
         }
 
-        throw new HandlerException("No handler can handler the request " + req);
+        throw new HandlerException("No handler can handle the request " + req.getStatusLine());
+    }
+
+    @Override
+    public String toString() {
+        return "Handlers" + registry;
     }
 }

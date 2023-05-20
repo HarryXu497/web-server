@@ -8,7 +8,7 @@ import server.handler.methods.Post;
 import server.handler.methods.Put;
 
 public abstract class Handler {
-    public Response handle(Request req) throws HandlerException {
+    public Response handle(Request req) throws Exception {
         switch (req.getStatusLine().getMethod()) {
             case GET: {
                 if (this instanceof Get) {
