@@ -7,18 +7,67 @@ import java.nio.file.Path;
 import java.util.*;
 
 public class TemplateEngine {
-    public static <T> String compile(String inputFile, T data) throws IOException, TemplateSyntaxException, NoSuchFieldException, IllegalAccessException {
-        String rawFile = read(inputFile);
-        return parse(rawFile, data);
+
+    private final Map<String, String> templates;
+
+    /**
+     * Constructs a template engine with predefined templates registered
+     * @param paths the templates to be registered
+     * @throws IOException if an error occurs while working with the files
+     */
+    public TemplateEngine(String... paths) throws IOException {
+        this.templates = new HashMap<>();
+
+        for (String path : paths) {
+            File dir = new File(path);
+
+            if (dir.isDirectory()) {
+                File[] files = dir.listFiles();
+
+                if (files != null) {
+                    for (File file : files) {
+                        String filename = file.getPath();
+
+                        this.templates.put(filename.replace("\\", "/"), this.read(filename));
+                    }
+                }
+            }
+
+            if (dir.isFile()) {
+                this.templates.put(path, this.read(path));
+            }
+        }
     }
 
-    private static String read(String inputFile) throws IOException {
+    /**
+     * getTemplate
+     * get the raw un-parsed template from the registry
+     * This may be necessary to implement 404 and other error pages
+     * */
+    public String getTemplate(String path) throws TemplateNotFoundException {
+        if (!this.templates.containsKey(path)) {
+            throw new TemplateNotFoundException("Template " + path + " cannot be found");
+        }
+
+
+        return this.templates.get(path);
+    }
+
+    public <T> String compile(String inputFile, T data) throws TemplateSyntaxException, NoSuchFieldException, IllegalAccessException, TemplateNotFoundException {
+        if (!this.templates.containsKey(inputFile)) {
+            throw new TemplateNotFoundException("Template " + inputFile + " cannot be found");
+        }
+
+        return parse(this.templates.get(inputFile), data);
+    }
+
+    private String read(String inputFile) throws IOException {
         List<String> lines = Files.readAllLines(Path.of(inputFile));
 
         return String.join("\n", lines);
     }
 
-    private static void write(String output, String outputFile) throws IOException {
+    private void write(String output, String outputFile) throws IOException {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(outputFile))) {
             bw.write(output);
         }
@@ -32,7 +81,7 @@ public class TemplateEngine {
      * @param data the data object
      * @return the parsed and evaluated HTML string
      */
-    private static <T> String parse(String input, T data) throws TemplateSyntaxException, NoSuchFieldException, IllegalAccessException {
+    private <T> String parse(String input, T data) throws TemplateSyntaxException, NoSuchFieldException, IllegalAccessException {
         // put data object into namespace
         Map<String, Object> namespace = new HashMap<>();
         namespace.put("data", data);
@@ -40,7 +89,7 @@ public class TemplateEngine {
         return parse(input, namespace);
     }
 
-    private static <T> String parse(String input, Map<String, Object> namespace) throws TemplateSyntaxException, NoSuchFieldException, IllegalAccessException {
+    private <T> String parse(String input, Map<String, Object> namespace) throws TemplateSyntaxException, NoSuchFieldException, IllegalAccessException {
         // Keeps track of curly braces
         int interpolationStartIndex = -1;
         int interpolationEndIndex = -1;
@@ -185,6 +234,24 @@ public class TemplateEngine {
                         throw new TemplateSyntaxException("Illegal directive closing tag");
                     }
                 } else {
+                    // Do not evaluate values inside an if directive if the directive will not be rendered
+                    Directive topDirective = directivesStack.peek();
+
+                    if ((topDirective != null) && (topDirective.getType() == DirectiveType.IF)) {
+                        String ifValue = topDirective.getTokens()[1];
+
+                        Object value = parseExpression(ifValue, namespace, directiveVariables);
+
+                        // Skip value
+                        if (value instanceof Boolean) {
+                            if (!((Boolean) value)) {
+                                interpolationStartIndex = -1;
+                                interpolationEndIndex = -1;
+                                continue;
+                            }
+                        }
+                    }
+
                     // Expression
                     String replacedExpr = parseExpression(token, namespace, directiveVariables).toString();
 
@@ -204,13 +271,20 @@ public class TemplateEngine {
         return input;
     }
 
-    private static Object parseExpression(String exp, Map<String, Object> namespace, Set<String> allowedRoots) throws TemplateSyntaxException, NoSuchFieldException, IllegalAccessException {
+    private Object parseExpression(String exp, Map<String, Object> namespace, Set<String> allowedRoots) throws TemplateSyntaxException, NoSuchFieldException, IllegalAccessException {
         String[] commands = exp.split("\\.");
 
-        if (namespace.containsKey(commands[0])) {
+        String root = commands[0];
+
+        // Support for basic negation
+        if (commands[0].startsWith("!")) {
+            root = commands[0].substring(1);
+        }
+
+        if (namespace.containsKey(root)) {
             // Data interpolation with variable
 
-            return evaluateValue(commands, namespace.get(commands[0]));
+            return evaluateValue(commands, namespace.get(root));
         } else if (allowedRoots.contains(commands[0])) {
             //Skip these braces
             return "{" + exp + "}";
@@ -219,9 +293,17 @@ public class TemplateEngine {
         }
     }
 
-    private static <T> Object evaluateValue(String[] path, T data) throws NoSuchFieldException, IllegalAccessException {
+    private <T> Object evaluateValue(String[] path, T data) throws NoSuchFieldException, IllegalAccessException {
         if (path.length == 1) {
             return data;
+        }
+
+        boolean negateValue = false;
+
+        // Negation
+        if (path[0].startsWith("!")) {
+            path[0] = path[0].substring(1);
+            negateValue = true;
         }
 
         Field current = data.getClass().getDeclaredField(path[1]);
@@ -231,6 +313,12 @@ public class TemplateEngine {
             current = current.getClass().getDeclaredField(field);
         }
 
-        return current.get(data);
+        Object value = current.get(data);
+
+        if ((negateValue) && (value instanceof Boolean)) {
+            return !((Boolean) value);
+        }
+
+        return value;
     }
 }
