@@ -10,9 +10,17 @@ import template.TemplateEngine;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Handles all assets and files which must be statically hosted
+ * @author Harry Xu
+ * @version 1.0 - May 21st 2023
+ */
 public class FileHandler extends Handler implements Get {
 
+    /** The template engine which holds all the asset files */
     private final TemplateEngine templateEngine;
+
+    /** The directory of the file to host */
     private final String directory;
 
     public FileHandler(TemplateEngine templateEngine, String directory) {
@@ -21,7 +29,7 @@ public class FileHandler extends Handler implements Get {
     }
 
     @Override
-    public Response get(Request req) throws Exception {
+    public Response get(Request req) {
 
         Map<String, String> headers = new HashMap<>();
 
@@ -33,6 +41,9 @@ public class FileHandler extends Handler implements Get {
 
         headers.put("Content-Type", "text/" + extension);
         headers.put("Content-Length", Integer.toString(fileContent.length()));
+        headers.put("Cache-Control", "public, max-age=86400");
+        headers.put("Vary", "Accept-Encoding");
+        headers.put("Accept-Ranges", "none");
 
         return new Response(
                 new Response.StatusLine(ResponseCode.OK),

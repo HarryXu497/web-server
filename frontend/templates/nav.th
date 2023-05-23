@@ -1,0 +1,14 @@
+<nav class="nav">
+    <div class="nav__logo">
+        CS@RHHS
+    </div>
+    <div class="nav__links">
+        <ul>
+            <li><a href="/problems">Problems</a></li>
+            <li><a href="/contests">Contests</a></li>
+            <li><a href="/discussion">Discussion</a></li>
+            <li><a href="/about">About</a></li>
+            <li><a href="/log-in">Get Started</a></li>
+        </ul>
+    </div>
+</nav>

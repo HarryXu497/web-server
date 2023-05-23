@@ -2,34 +2,71 @@ package server.request;
 
 import server.handler.URL;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Represents an HTTP request to the server, to which the server responds to
+ * An HTTP requests consists of a status line, containing the protocol, request method, and url,
+ * the requests headers, and the requests body.
+ * @author Harry Xu
+ * @version 1.0 - May 21st 2023
+ */
 public class Request {
+    /** the status line, which contains the request protocol, method, and url */
     private final StatusLine statusLine;
+
+    /** a map of the request headers */
     private final Map<String, String> headers;
+
+    /** a map of all key value pairs in the request body */
     private final Map<String, String> body;
 
+    /**
+     * constructs an HTTP request with a status line, headers, and body
+     * @param statusLine the HTTP requests status line
+     * @param headers a map of the request headers
+     * @param body a map of the request body
+     */
     public Request(StatusLine statusLine, Map<String, String> headers, Map<String, String> body) {
         this.headers = headers;
         this.body = body;
         this.statusLine = statusLine;
     }
 
+    /**
+     * getStatusLine
+     * gets the status line of the request
+     * @return the status line
+     */
     public StatusLine getStatusLine() {
         return this.statusLine;
     }
 
+    /**
+     * getHeaders
+     * gets the headers of the request
+     * @return the request headers
+     */
     public Map<String, String> getHeaders() {
         return this.headers;
     }
 
+    /**
+     * getBody
+     * gets the body of the request
+     * @return the request body
+     */
     public Map<String, String> getBody() {
         return this.body;
     }
 
+    /**
+     * toString
+     * converts the request to a string
+     * @return the request in string representation
+     */
     @Override
     public String toString() {
         return "Request{" +
@@ -39,6 +76,12 @@ public class Request {
                 '}';
     }
 
+    /**
+     * parse
+     * parses and constructs an HTTP request from an HTTP request string.
+     * @param lines a list of all lines in the request
+     * @return the parsed request as a {@link Request}
+     */
     public static Request parse(List<String> lines) {
         // The first line contains the status line
         // e.g. GET / HTTP/1.1
@@ -53,11 +96,11 @@ public class Request {
         StatusLine statusLine = new StatusLine(RequestMethod.valueOf(method), URL, status);
 
         // Headers
-        List<String> rawHeaders = lines.subList(1, lines.size() - 2);
+        List<String> rawHeaders = lines.subList(1, lines.size() - 1);
         Map<String, String> headers = new HashMap<>();
 
         for (String line : rawHeaders) {
-            String key = line.substring(0, line.indexOf(" "));
+            String key = line.substring(0, line.indexOf(":"));
             String value = line.substring(line.indexOf(" ") + 1);
 
             headers.put(key, value);
@@ -82,24 +125,49 @@ public class Request {
         return new Request(statusLine, headers, body);
     }
 
+    /**
+     * Represents the status line of an HTTP requests, which is the first line in the request.
+     * It contains the request method, url, and protocol
+     * @author Harry Xu
+     * @version 1.0 - May 21st 2023
+     */
     public static class StatusLine {
+        /** the request method of the request */
         private final RequestMethod method;
-        private final String URL;
-        private final String protocol;
+
+        /** the full url, including query parameters */
+        private final String url;
+
+        /** the url, without any query parameters */
         private final String location;
+
+        /** the request protocol, usually HTTP/1.1 */
+        private final String protocol;
+
+        /** the query parameters of the request, parsed into a map */
         private final Map<String, String> queryParams;
+
+        /** the route parameters of the request, which must be parsed and populated according to a {@link URL}*/
         private Map<String, String> routeParams;
 
-        public StatusLine(RequestMethod method, String URL, String protocol) {
+        /**
+         * constructs a status line with a method, url, and protocol
+         * @param method the request method
+         * @param url the full url of the request
+         * @param protocol the protocol of the request
+         */
+        public StatusLine(RequestMethod method, String url, String protocol) {
             this.method = method;
-            this.URL = URL;
+            this.url = url;
             this.protocol = protocol;
 
-            String[] splitUrl = this.URL.split("\\?");
+            // Parse location and query params
+            String[] splitUrl = this.url.split("\\?");
 
             this.location = splitUrl[0];
             this.queryParams = new HashMap<>();
 
+            // populate query params if they exist
             if (splitUrl.length == 2) {
                 for (String pair : splitUrl[1].split("&")) {
                     String[] keyValue = pair.split("=");
@@ -118,15 +186,13 @@ public class Request {
          * populates the request params of the request given the URL it has matched with
          * @param url the url to populate the request param keys from
          * @param route the actual visited route to retrieve the request param values from
+         * @throws IllegalStateException if the routes do not match. They should be checked for matching with url.matches() first
          */
         public void populateRequestParams(URL url, String route) {
             this.routeParams = new HashMap<>();
 
             String[] routeSegments = route.split("/");
             String[] urlSegments = url.getPathSegments();
-
-            System.out.println(Arrays.toString(routeSegments));
-            System.out.println(Arrays.toString(urlSegments));
 
             if (urlSegments.length != routeSegments.length) {
                 throw new IllegalStateException("The 2 routes should be checked if they matched with url.matches() before invoking this method");
@@ -144,26 +210,57 @@ public class Request {
             }
         }
 
+        /**
+         * getMethod
+         * gets the request method
+         * @return the request method
+         */
         public RequestMethod getMethod() {
             return this.method;
         }
 
-        public String getURL() {
-            return this.URL;
+        /**
+         * getUrl
+         * gets the request url
+         * @return the request url
+         */
+        public String getUrl() {
+            return this.url;
         }
 
-        public String getProtocol() {
-            return this.protocol;
-        }
-
-        public Map<String, String> getQueryParams() {
-            return this.queryParams;
-        }
-
+        /**
+         * getLocation
+         * gets the request location
+         * @return the request location
+         */
         public String getLocation() {
             return this.location;
         }
 
+        /**
+         * getProtocol
+         * gets the request protocol
+         * @return the request protocol
+         */
+        public String getProtocol() {
+            return this.protocol;
+        }
+
+        /**
+         * getQueryParams
+         * gets the query parameters in a map
+         * @return the query parameters
+         */
+        public Map<String, String> getQueryParams() {
+            return this.queryParams;
+        }
+
+        /**
+         * getRouteParams
+         * gets the route parameters in a map
+         * @return the route parameters
+         * @throws IllegalStateException if the request parameters have not been populated before invoking this method
+         */
         public Map<String, String> getRouteParams() {
             if (this.routeParams == null) {
                 throw new IllegalStateException("populateRequestParams() should be invoked calling this method");
@@ -172,11 +269,16 @@ public class Request {
             return this.routeParams;
         }
 
+        /**
+         * toString
+         * converts the status line to a string
+         * @return the status line in string representation
+         */
         @Override
         public String toString() {
             return "StatusLine{" +
                     "method=" + method +
-                    ", URL='" + URL + '\'' +
+                    ", url='" + url + '\'' +
                     ", protocol='" + protocol + '\'' +
                     ", location='" + location + '\'' +
                     ", queryParams=" + queryParams +

@@ -1,9 +1,33 @@
 import server.WebServer;
+import server.handler.Handler;
+import server.handler.routes.HomeRoute;
+import template.TemplateEngine;
+
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class Main {
     public static void main(String[] args) {
-        WebServer server = new WebServer();
+        try {
+            TemplateEngine templateEngine = new TemplateEngine("frontend/templates", "frontend/styles");
 
-        server.serve();
+            // Routes
+            LinkedHashMap<String, Handler> routes = new LinkedHashMap<>();
+
+            routes.put("/", new HomeRoute(templateEngine));
+            routes.put("/:id", new HomeRoute(templateEngine));
+
+            // Assets
+            Map<String, String> assets = new HashMap<>();
+            assets.put("frontend/styles/", "/static/css/");
+
+            WebServer server = new WebServer(templateEngine, routes, assets);
+
+            server.serve(5000);
+        } catch (Exception e) {
+            System.out.println("An Error occurred");
+            e.printStackTrace();
+        }
     }
 }

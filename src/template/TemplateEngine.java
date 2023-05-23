@@ -2,12 +2,18 @@ package template;
 
 import java.io.*;
 import java.lang.reflect.Field;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 
+/**
+ * An engine to compile the custom templating language (.th files) into HTML for the browser
+ * This engine allows for data interpolation in single braces (e.g. {data.age})
+ * it also allows for IF and FOR directives to expression control flow in the template.
+ * The template has access to a root `data` object, inputted by the developer, that holds dynamic data.
+ * @author Harry Xu
+ * @version 1.0 - May 20th 2023
+ */
 public class TemplateEngine {
-
+    /** the registry for templates*/
     private final Map<String, String> templates;
 
     /**
@@ -42,7 +48,10 @@ public class TemplateEngine {
     /**
      * getTemplate
      * get the raw un-parsed template from the registry
-     * This may be necessary to implement 404 and other error pages
+     * This is necessary to implement 404 and other error pages, as well as non template files such as stylesheets
+     * @param path the registered path of the template
+     * @return the read template string
+     * @throws TemplateNotFoundException if no template is registered under the path
      * */
     public String getTemplate(String path) throws TemplateNotFoundException {
         if (!this.templates.containsKey(path)) {
@@ -53,43 +62,72 @@ public class TemplateEngine {
         return this.templates.get(path);
     }
 
-    public <T> String compile(String inputFile, T data) throws TemplateSyntaxException, NoSuchFieldException, IllegalAccessException, TemplateNotFoundException {
+    /**
+     * compile
+     * retrieves and templates a file into an HTML string
+     * @param inputFile the registered path of a template
+     * @param data the root `data` object
+     * @param <T> the type of the root `data` object
+     * @return the compiled template string
+     * @throws TemplateSyntaxException if a syntax error occurs while compiling the template
+     * @throws TemplateNotFoundException if the requested template is not registered
+     */
+    public <T> String compile(String inputFile, T data) throws TemplateSyntaxException, TemplateNotFoundException {
         if (!this.templates.containsKey(inputFile)) {
             throw new TemplateNotFoundException("Template " + inputFile + " cannot be found");
         }
 
-        return parse(this.templates.get(inputFile), data);
+        return template(this.templates.get(inputFile), data);
     }
 
+    /**
+     * read
+     * opens and reads a file and joins its content together into one string
+     * @param inputFile the path of the file to read from
+     * @return the contents of the input file as a string
+     * @throws IOException if an error occurs while opening or reading the file
+     */
     private String read(String inputFile) throws IOException {
-        List<String> lines = Files.readAllLines(Path.of(inputFile));
+        List<String> lines = new ArrayList<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(inputFile))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                lines.add(line);
+            }
+        }
 
         return String.join("\n", lines);
     }
 
-    private void write(String output, String outputFile) throws IOException {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(outputFile))) {
-            bw.write(output);
-        }
-    }
-
     /**
-     * parse
-     * reads and parses a .th template file into an HTML string.
+     * template
+     * reads and template (interpolate values and resolve directives) a .th template file into an HTML string.
      * The template wll be given access to a top level data object
      * @param input the input template string
      * @param data the data object
+     * @param <T> the type of the root `data` property in the template
      * @return the parsed and evaluated HTML string
+     * @throws TemplateSyntaxException if a syntax error occurs while parsing and templating the input string
      */
-    private <T> String parse(String input, T data) throws TemplateSyntaxException, NoSuchFieldException, IllegalAccessException {
+    private <T> String template(String input, T data) throws TemplateSyntaxException {
         // put data object into namespace
         Map<String, Object> namespace = new HashMap<>();
         namespace.put("data", data);
 
-        return parse(input, namespace);
+        return template(input, namespace);
     }
 
-    private <T> String parse(String input, Map<String, Object> namespace) throws TemplateSyntaxException, NoSuchFieldException, IllegalAccessException {
+    /**
+     * template
+     * reads and template (interpolate values and resolve directives) a .th template file into an HTML string.
+     * The template wll be given access to the namespace of the scope
+     * @param input the input template string
+     * @param namespace a map of variables and their values to allow for more templating flexibility
+     * @return the parsed and evaluated HTML string
+     * @throws TemplateSyntaxException if a syntax error occurs while parsing and templating the input string
+     */
+    private <T> String template(String input, Map<String, Object> namespace) {
         // Keeps track of curly braces
         int interpolationStartIndex = -1;
         int interpolationEndIndex = -1;
@@ -136,9 +174,19 @@ public class TemplateEngine {
                         directiveVariables.add(directiveTokens[1]);
 
                         directivesStack.push(new Directive(DirectiveType.FOREACH, interpolationStartIndex, interpolationEndIndex + 1, directiveTokens));
+
                     } else if ((directiveTokens.length == 2) && (directiveTokens[0].equals("if"))) {
                         // If directive
                         directivesStack.push(new Directive(DirectiveType.IF, interpolationStartIndex, interpolationEndIndex + 1, directiveTokens));
+
+                    } else if ((directiveTokens.length == 2) && (directiveTokens[0].equals("include"))) {
+                        // Include directive
+
+                        // Insert partial
+                        String newInput = input = input.substring(0, interpolationStartIndex) + this.compile(directiveTokens[1], namespace.get("data")) + input.substring(interpolationEndIndex + 1);
+                        i += (newInput.length() - input.length());
+                        input = newInput;
+
                     } else {
                         // Illegal directive
                         throw new TemplateSyntaxException("no directive type exists for this syntax");
@@ -168,7 +216,7 @@ public class TemplateEngine {
                                 for (Object v : (Object[]) value) {
                                     // Parse with target variable in namespace
                                     namespace.put(openingDirTokens[1], v);
-                                    String parsedSnippet = parse(snippet, namespace);
+                                    String parsedSnippet = template(snippet, namespace);
                                     namespace.remove(openingDirTokens[1]);
 
                                     // Add snippet
@@ -179,7 +227,7 @@ public class TemplateEngine {
                                 for (Object v : (Iterable<?>) value) {
                                     // Parse with target variable in namespace
                                     namespace.put(openingDirTokens[1], v);
-                                    String parsedSnippet = parse(snippet, namespace);
+                                    String parsedSnippet = template(snippet, namespace);
                                     namespace.remove(openingDirTokens[1]);
 
                                     // Add snippet
@@ -261,6 +309,7 @@ public class TemplateEngine {
                     input = newInput;
                 }
 
+                // Reset indices
                 interpolationStartIndex = -1;
                 interpolationEndIndex = -1;
             }
@@ -271,7 +320,20 @@ public class TemplateEngine {
         return input;
     }
 
-    private Object parseExpression(String exp, Map<String, Object> namespace, Set<String> allowedRoots) throws TemplateSyntaxException, NoSuchFieldException, IllegalAccessException {
+    /**
+     * parseExpression
+     * parses an expression in interpolation braces
+     * An expression is any value in the template expected to be computed dynamically (e.g. data.product.price)
+     * @param exp the expression to parse
+     * @param namespace a map containing the different variables and values in the current directive scope
+     * @param allowedRoots the allowed roots of an expression (i.e. the first token of an expression).
+     *                     Allows certain expressions to be skipped until their roots can be populated with a
+     *                     concrete value. This is used in for directives where the target variable cannot be populated
+     *                     until the end of the directive is reached, and so skips certain expressions.
+     * @throws TemplateSyntaxException if a syntax error occurs while parsing and evaluating the expression
+     * */
+    private Object parseExpression(String exp, Map<String, Object> namespace, Set<String> allowedRoots) {
+        // Split into tokens
         String[] commands = exp.split("\\.");
 
         String root = commands[0];
@@ -281,19 +343,30 @@ public class TemplateEngine {
             root = commands[0].substring(1);
         }
 
+        // Variable lookup
         if (namespace.containsKey(root)) {
             // Data interpolation with variable
 
             return evaluateValue(commands, namespace.get(root));
         } else if (allowedRoots.contains(commands[0])) {
-            //Skip these braces
+            //Skip this expression
+
             return "{" + exp + "}";
         } else {
             throw new TemplateSyntaxException("variable " + commands[0] + " does not exist");
         }
     }
 
-    private <T> Object evaluateValue(String[] path, T data) throws NoSuchFieldException, IllegalAccessException {
+    /**
+     * evaluateValue
+     * evaluates and computes an expression with the root data
+     * @param <T> the type of the root data, usually
+     * @param path the path to the data from the root (e.g. data.product.name)
+     * @param data the root data object (e.g. data)
+     *             This object should contain public fields to allow for data access.
+     * @throws TemplateSyntaxException if the expression contains a field that does not exist or cannot be accessed
+     */
+    private <T> Object evaluateValue(String[] path, T data)  {
         if (path.length == 1) {
             return data;
         }
@@ -306,19 +379,23 @@ public class TemplateEngine {
             negateValue = true;
         }
 
-        Field current = data.getClass().getDeclaredField(path[1]);
+        try {
+            Field current = data.getClass().getDeclaredField(path[1]);
 
-        for (int i = 2; i < path.length; i++) {
-            String field = path[i];
-            current = current.getClass().getDeclaredField(field);
+            for (int i = 2; i < path.length; i++) {
+                String field = path[i];
+                current = current.getClass().getDeclaredField(field);
+            }
+
+            Object value = current.get(data);
+
+            if ((negateValue) && (value instanceof Boolean)) {
+                return !((Boolean) value);
+            }
+
+            return value;
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new TemplateSyntaxException(e);
         }
-
-        Object value = current.get(data);
-
-        if ((negateValue) && (value instanceof Boolean)) {
-            return !((Boolean) value);
-        }
-
-        return value;
     }
 }

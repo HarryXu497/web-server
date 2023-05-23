@@ -5,11 +5,33 @@
     <title>Welcome!</title>
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="description" content="" />
-    <link rel="stylesheet" href="../styles/reset.css">
-    <link rel="stylesheet" href="../styles/index.css">
-    <link rel="icon" href="favicon.png">
+    <link rel="stylesheet" href="/static/css/fonts.css">
+    <link rel="stylesheet" href="/static/css/reset.css">
+    <link rel="stylesheet" href="/static/css/nav.css">
+    <link rel="stylesheet" href="/static/css/index.css">
 </head>
 <body>
-    <h1>Welcome to this awesome website</h1>
+    {#include frontend/templates/nav.th}
+    <main class="hero">
+        <h1>Online Programming Judge</h1>
+        <h2>Computer Science @ RHHS</h2>
+        <a class="hero__learn-more">
+            <button>
+                Learn More
+            </button>
+        </a>
+
+        {#if data.isSignedIn}
+        <div>
+            <h3>You are logged in!!</h3>
+        </div>
+        {/if}
+
+        {#if data.idExists}
+        <div>
+            <h3>{data.id}</h3>
+        </div>
+        {/if}
+    </main>
 </body>
 </html>

@@ -19,11 +19,14 @@ public class HomeRoute extends Handler implements Get {
     }
 
     @Override
-    public Response get(Request req) throws Exception {
+    public Response get(Request req) {
 
         Map<String, String> headers = new HashMap<>();
 
         headers.put("Content-Type", "text/html; charset=iso-8859-1");
+        headers.put("Vary", "Accept-Encoding");
+        headers.put("Accept-Ranges", "none");
+        headers.put("Set-Cookie", "beans=bagels");
 
         boolean isSignedIn = req.getStatusLine().getQueryParams().containsKey("isSignedIn");
         String id = req.getStatusLine().getRouteParams().get("id");

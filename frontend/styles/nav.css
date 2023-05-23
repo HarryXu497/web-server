@@ -1,0 +1,37 @@
+.nav {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    position: relative;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: black;
+    padding: 1.5rem 3rem;
+}
+
+.nav__logo {
+    font-family: 'Oswald', sans-serif;
+    font-size: 2rem;
+    color: white;
+    font-weight: 500;
+}
+
+.nav__links {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.nav__links > ul {
+    font-family: 'Montserrat', sans-serif;
+    display: flex;
+    flex-direction: row;
+    gap: 1em;
+    justify-content: space-between;
+}
+
+.nav__links a {
+    color: white;
+    text-decoration: none;
+}

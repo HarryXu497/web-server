@@ -1,85 +1,117 @@
 package server;
 
+import server.handler.Handler;
+import server.handler.HandlerException;
 import server.handler.Handlers;
 import server.handler.routes.FileHandler;
-import server.handler.routes.HomeRoute;
 import server.request.Request;
 import server.response.Response;
 import server.response.ResponseCode;
 import template.TemplateEngine;
 import template.TemplateNotFoundException;
+import template.TemplateSyntaxException;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
+/**
+ * A multithreaded web server which parses HTTP requests, dispatches route handlers, and stringifies HTTP responses to the client.
+ * This server uses sockets and server sockets to communicate HTTP requests and responses over TCP/IP.
+ * @author Harry Xu
+ * @version 1.0 - May 20th 2023
+ */
 public class WebServer {
+    /** determines if the server is currently running */
     private static boolean running = true;
+
+    /** determines if the server is currently accepting requests */
     private static boolean accepting = true;
-    private ServerSocket socket;
+
+    /** The request handlers of the server */
     private final Handlers requestHandlers;
+
+    /** The template engine of the server */
     private final TemplateEngine engine;
 
-
-    public WebServer(TemplateEngine engine, String stylesDirectory) {
+    /**
+     * constructs a web server with a templating engine and the directory of styles
+     * @param engine the templating engine used to compile .th files to html
+     * @param assetMap maps the assets in a directory to a URL on which to host them
+     * */
+    public WebServer(TemplateEngine engine, LinkedHashMap<String, Handler> routes, Map<String, String> assetMap) {
         this.requestHandlers = new Handlers();
 
         this.engine = engine;
 
-        File folder = new File("frontend/styles");
-        File[] files = folder.listFiles();
+        // Maps each file in each directory of assets to a corresponding route
+        for (Map.Entry<String, String> assetPair : assetMap.entrySet()) {
+            File folder = new File(assetPair.getKey());
+            File[] files = folder.listFiles();
 
-        if (files != null) {
-            for (File file : files) {
-                System.out.println(file.getPath());
-                this.requestHandlers.register("/styles/" + file.getName(), new FileHandler(engine, stylesDirectory));
+            if (files != null) {
+                for (File file : files) {
+                    this.requestHandlers.register(assetPair.getValue() + file.getName(), new FileHandler(engine, assetPair.getKey()));
+                }
             }
         }
 
+        // Registers all routes
+        for (Map.Entry<String, Handler> route : routes.entrySet()) {
+            String url = route.getKey();
+            Handler handler = route.getValue();
 
-        this.requestHandlers.register("/", new HomeRoute(engine));
-        this.requestHandlers.register("/:id", new HomeRoute(engine));
+            this.requestHandlers.register(url, handler);
+        }
     }
 
-    public void serve() {
-        Socket client;
+    /**
+     * serve
+     * Serves the server at the specified port
+     * @param port the port to serve on
+     */
+    public void serve(int port) {
+        // open the server socket
+        try (ServerSocket socket = new ServerSocket(port)) {
+            // Server loop
+            // Accept client connections and delegate each connection to a separate thread
+            try {
+                while (accepting) {
+                    Socket client = socket.accept();
 
-        try {
-            this.socket = new ServerSocket(5000);
-        } catch (IOException e) {
-            System.out.println("Error accepting connection");
-        }
-
-        try {
-            while (accepting) {
-                client = this.socket.accept();
-                System.out.println("Client connected");
-
-                Thread t = new Thread(new ConnectionHandler(client));
-                t.start();
+                    Thread t = new Thread(new ConnectionHandler(client));
+                    t.start();
+                }
+            } catch (IOException e) {
+                System.out.println("Error when waiting for connection");
             }
         } catch (IOException e) {
-            System.out.println("Error");
-        }
-
-        try {
-            this.socket.close();
-        } catch (IOException e) {
-            System.out.println("Error closing server socket");
+            System.out.println("Error opening server socket");
         }
     }
 
+    /**
+     * A runnable responsible for handling each request made to the server
+     * @author Harry Xu
+     * @version 1.0 - May 20th 2023
+     */
     class ConnectionHandler implements Runnable {
-        private final OutputStream output;
-        private final BufferedReader input;
+        /** The socket of the client to read from and write to */
         private final Socket client;
-        private final boolean isRunning;
 
+        /** The output stream of the socket */
+        private final OutputStream output;
+
+        /** The input stream of the socket wrapped by a {@link BufferedReader} */
+        private final BufferedReader input;
+
+        /**
+         * constructs a connection handler with a client socket to read to and write from
+         * @param clientSocket the socket to communicate with
+         * @throws IOException if an exception occurs while working with the input or output streams of the client
+         * */
         public ConnectionHandler(Socket clientSocket) throws IOException {
             this.client = clientSocket;
 
@@ -87,13 +119,11 @@ public class WebServer {
             this.output = client.getOutputStream();
             InputStreamReader inStream = new InputStreamReader(client.getInputStream());
             this.input = new BufferedReader(inStream);
-
-            this.isRunning = true;
         }
 
         /**
          * close
-         * properly closes the socket
+         * properly closes the socket and its input and output streams
          */
         public void close() {
             try {
@@ -101,9 +131,8 @@ public class WebServer {
                 this.client.shutdownOutput();
                 this.input.close();
                 this.output.close();
-                System.out.println("Closing Client");
                 this.client.close();
-            }catch (Exception e) {
+            } catch (Exception e) {
                 System.out.println("Failed to close socket");
                 e.printStackTrace();
             }
@@ -114,8 +143,7 @@ public class WebServer {
          * handles parsing of the request, dispatch of the request handler, and response creating and sending
          */
         public void handleRequest() {
-            List<String> rawRequest = new ArrayList<>();
-
+            // End execution if input stream is not read
             try {
                 if (!this.input.ready()) {
                     return;
@@ -125,19 +153,14 @@ public class WebServer {
                 return;
             }
 
+            List<String> rawRequest = new ArrayList<>();
+
+            // Read HTTP request into a list of strings
             try {
                 String inputLine = this.input.readLine();
 
-
-                while (true) {
-                    System.out.println(inputLine);
-                    if (inputLine != null) {
-                        if (inputLine.length() == 0) {
-                            break;
-                        }
-
-                        rawRequest.add(inputLine);
-                    }
+                while ((inputLine != null) && (inputLine.length() != 0)) {
+                    rawRequest.add(inputLine);
 
                     inputLine = this.input.readLine();
                 }
@@ -146,7 +169,7 @@ public class WebServer {
                 return;
             }
 
-
+            // Read request body
             StringBuilder payload = new StringBuilder();
 
             try {
@@ -158,16 +181,19 @@ public class WebServer {
                 return;
             }
 
+            // Append request body to the request list
             rawRequest.add(payload.toString());
 
+            // Parse request into Request object
             Request req = Request.parse(rawRequest);
 
+            // Dispatch the correct handler
             try {
                 Response res = requestHandlers.dispatch(req);
                 this.output.write(res.toString().getBytes(StandardCharsets.UTF_8));
-            } catch (Exception e) {
+            } catch (HandlerException e) {
                 e.printStackTrace();
-
+                // No handler/inappropriate handler
                 // Load error page
                 try {
                     Response notFound = new Response(
@@ -179,11 +205,38 @@ public class WebServer {
                     this.output.write(notFound.toString().getBytes(StandardCharsets.UTF_8));
                 } catch (IOException | TemplateNotFoundException ex) {
                     ex.printStackTrace();
-                    System.out.println("Cannot render 404 page.");
+                    System.out.println("Cannot render 404 page");
                 }
+
+            } catch (TemplateSyntaxException | TemplateNotFoundException e) {
+                e.printStackTrace();
+                // Handler cannot load template
+
+                System.out.println("Error loading template");
+
+                // Load server error page
+                try {
+                    Response serverError = new Response(
+                            new Response.StatusLine(ResponseCode.INTERNAL_SERVER_ERROR),
+                            new HashMap<>(),
+                            engine.getTemplate("frontend/templates/error.th")
+                    );
+
+                    this.output.write(serverError.toString().getBytes(StandardCharsets.UTF_8));
+                } catch (IOException | TemplateNotFoundException ex) {
+                    ex.printStackTrace();
+                    System.out.println("Cannot render 500 page");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.out.println("Error writing response to client");
             }
         }
 
+        /**
+         * run
+         * starts execution of the thread separately from the main thread
+         */
         @Override
         public void run() {
             this.handleRequest();
