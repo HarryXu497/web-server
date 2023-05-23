@@ -20,24 +20,41 @@ public class FileHandler extends Handler implements Get {
     /** The template engine which holds all the asset files */
     private final TemplateEngine templateEngine;
 
-    /** The directory of the file to host */
+    /** The url on which to host the file */
     private final String directory;
 
+    /**
+     * constructs a File Handler which is used to handle static file assets
+     * @param templateEngine the template engine which holds the static asset
+     * @param directory the url on which to host the file
+     */
     public FileHandler(TemplateEngine templateEngine, String directory) {
         this.templateEngine = templateEngine;
         this.directory = directory;
     }
 
+    /**
+     * get
+     * handles the GET request on the request's url
+     * @param req the HTTP request to handle
+     * @return the server HTTP response
+     */
     @Override
     public Response get(Request req) {
-
-        Map<String, String> headers = new HashMap<>();
-
+        // Full request URL
         String url = req.getStatusLine().getLocation();
+
+        // Get file name
+        String filename = url.substring(url.lastIndexOf("/") + 1);
+
+        // Get file extension
         String extension = url.substring(url.lastIndexOf(".") + 1);
 
-        String location = req.getStatusLine().getLocation();
-        String fileContent = this.templateEngine.getTemplate(this.directory + location.substring(location.lastIndexOf("/") + 1));
+        // Appends file name to hosting directory
+        String fileContent = this.templateEngine.getTemplate(this.directory + filename);
+
+        // Headers
+        Map<String, String> headers = new HashMap<>();
 
         headers.put("Content-Type", "text/" + extension);
         headers.put("Content-Length", Integer.toString(fileContent.length()));
@@ -48,6 +65,7 @@ public class FileHandler extends Handler implements Get {
         return new Response(
                 new Response.StatusLine(ResponseCode.OK),
                 headers,
-                fileContent);
+                fileContent
+        );
     }
 }
