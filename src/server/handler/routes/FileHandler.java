@@ -1,11 +1,11 @@
 package server.handler.routes;
 
+import assets.AssetEngine;
 import server.handler.Handler;
 import server.handler.methods.Get;
 import server.request.Request;
 import server.response.Response;
 import server.response.ResponseCode;
-import template.TemplateEngine;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,18 +18,18 @@ import java.util.Map;
 public class FileHandler extends Handler implements Get {
 
     /** The template engine which holds all the asset files */
-    private final TemplateEngine templateEngine;
+    private final AssetEngine assets;
 
     /** The url on which to host the file */
     private final String directory;
 
     /**
      * constructs a File Handler which is used to handle static file assets
-     * @param templateEngine the template engine which holds the static asset
+     * @param assets the asset engine which holds the static asset
      * @param directory the url on which to host the file
      */
-    public FileHandler(TemplateEngine templateEngine, String directory) {
-        this.templateEngine = templateEngine;
+    public FileHandler(AssetEngine assets, String directory) {
+        this.assets = assets;
         this.directory = directory;
     }
 
@@ -51,12 +51,14 @@ public class FileHandler extends Handler implements Get {
         String extension = url.substring(url.lastIndexOf(".") + 1);
 
         // Appends file name to hosting directory
-        String fileContent = this.templateEngine.getTemplate(this.directory + filename);
+        String fileContent = this.assets.getAsset(this.directory + filename);
 
         // Headers
         Map<String, String> headers = new HashMap<>();
 
-        headers.put("Content-Type", "text/" + extension);
+        String contentType = "text/" + extension;
+
+        headers.put("Content-Type", contentType);
         headers.put("Content-Length", Integer.toString(fileContent.length()));
         headers.put("Cache-Control", "public, max-age=86400");
         headers.put("Vary", "Accept-Encoding");

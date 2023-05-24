@@ -1,3 +1,4 @@
+import assets.AssetEngine;
 import server.WebServer;
 import server.handler.Handler;
 import server.handler.routes.HomeRoute;
@@ -10,7 +11,9 @@ import java.util.Map;
 public class Main {
     public static void main(String[] args) {
         try {
-            TemplateEngine templateEngine = new TemplateEngine("frontend/templates", "frontend/styles");
+            TemplateEngine templateEngine = new TemplateEngine("frontend/templates");
+
+            AssetEngine assetEngine = new AssetEngine("frontend/styles");
 
             // Routes
             LinkedHashMap<String, Handler> routes = new LinkedHashMap<>();
@@ -22,7 +25,7 @@ public class Main {
             Map<String, String> assets = new HashMap<>();
             assets.put("frontend/styles/", "/static/css/");
 
-            WebServer server = new WebServer(templateEngine, routes, assets);
+            WebServer server = new WebServer(templateEngine, assetEngine, routes, assets);
 
             server.serve(5000);
         } catch (Exception e) {

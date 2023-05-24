@@ -53,7 +53,7 @@ public class TemplateEngine {
      * @return the read template string
      * @throws TemplateNotFoundException if no template is registered under the path
      * */
-    public String getTemplate(String path) throws TemplateNotFoundException {
+    public String getTemplate(String path) {
         if (!this.templates.containsKey(path)) {
             throw new TemplateNotFoundException("Template " + path + " cannot be found");
         }

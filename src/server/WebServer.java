@@ -1,5 +1,6 @@
 package server;
 
+import assets.AssetEngine;
 import server.handler.Handler;
 import server.handler.HandlerException;
 import server.handler.Handlers;
@@ -36,15 +37,20 @@ public class WebServer {
     /** The template engine of the server */
     private final TemplateEngine engine;
 
+    /** The asset engine of the server */
+    private final AssetEngine assets;
+
     /**
      * constructs a web server with a templating engine and the directory of styles
      * @param engine the templating engine used to compile .th files to html
      * @param assetMap maps the assets in a directory to a URL on which to host them
      * */
-    public WebServer(TemplateEngine engine, LinkedHashMap<String, Handler> routes, Map<String, String> assetMap) {
+    public WebServer(TemplateEngine engine, AssetEngine assets, LinkedHashMap<String, Handler> routes, Map<String, String> assetMap) {
         this.requestHandlers = new Handlers();
 
         this.engine = engine;
+
+        this.assets = assets;
 
         // Maps each file in each directory of assets to a corresponding route
         for (Map.Entry<String, String> assetPair : assetMap.entrySet()) {
@@ -53,7 +59,7 @@ public class WebServer {
 
             if (files != null) {
                 for (File file : files) {
-                    this.requestHandlers.register(assetPair.getValue() + file.getName(), new FileHandler(engine, assetPair.getKey()));
+                    this.requestHandlers.register(assetPair.getValue() + file.getName(), new FileHandler(assets, assetPair.getKey()));
                 }
             }
         }
