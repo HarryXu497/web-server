@@ -4,6 +4,7 @@ import template.TemplateNotFoundException;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.List;
 
@@ -25,7 +26,7 @@ public class AssetEngine {
     }
 
     /** the registry for templates*/
-    private final Map<String, String> assets;
+    private final Map<String, byte[]> assets;
 
     /**
      * Constructs a template engine with predefined templates registered
@@ -64,7 +65,7 @@ public class AssetEngine {
      * @return the read template string
      * @throws TemplateNotFoundException if no template is registered under the path
      * */
-    public String getAsset(String path) {
+    public byte[] getAsset(String path) {
         if (!this.assets.containsKey(path)) {
             throw new AssetNotFoundException("Asset " + path + " cannot be found");
         }
@@ -79,11 +80,11 @@ public class AssetEngine {
      * @return the contents of the input file as a string
      * @throws IOException if an error occurs while opening or reading the file
      */
-    private String read(String inputFile) throws IOException {
+    private byte[] read(String inputFile) throws IOException {
         String extension = inputFile.substring(inputFile.lastIndexOf('.') + 1);
 
         if (TEXT_EXTENSIONS.contains(extension)) {
-            return readText(inputFile);
+            return readText(inputFile).getBytes(StandardCharsets.UTF_8);
         }
 
         if (IMAGE_EXTENSIONS.contains(extension)) {
@@ -120,32 +121,26 @@ public class AssetEngine {
      * @return the contents of the input file as a string
      * @throws IOException if an error occurs while opening or reading the file
      */
-    private String readImage(String inputFile) throws IOException {
+    private byte[] readImage(String inputFile) throws IOException {
         File imageFile = new File(inputFile);
-        InputStream stream = new FileInputStream(imageFile);
+        List<Byte> bytes = new ArrayList<>(10000);
 
-        StringBuilder s = new StringBuilder();
+        try (InputStream stream = Files.newInputStream(imageFile.toPath())) {
 
-        int c;
+            int c;
 
-        int i = 0;
-
-        while ((c = stream.read()) != -1) {
-            if (i < 5) {
-                System.out.println((byte) c);
+            while ((c = stream.read()) != -1) {
+                bytes.add((byte) c);
             }
-            s.append((byte) c);
-
-            i++;
         }
 
-        System.out.println(s.toString().getBytes(StandardCharsets.UTF_8)[0]);
-        System.out.println(s.toString().getBytes(StandardCharsets.UTF_8)[1]);
-        System.out.println(s.toString().getBytes(StandardCharsets.UTF_8)[2]);
-        System.out.println(s.toString().getBytes(StandardCharsets.UTF_8)[3]);
-        System.out.println(s.toString().getBytes(StandardCharsets.UTF_8)[4]);
+        byte[] buffer = new byte[bytes.size()];
 
-        return s.toString();
+        for (int i = 0; i < bytes.size(); i++) {
+            buffer[i] = bytes.get(i);
+        }
+
+        return buffer;
     }
 
     public static boolean isText(String extension) {

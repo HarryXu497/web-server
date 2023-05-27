@@ -196,7 +196,7 @@ public class WebServer {
             // Dispatch the correct handler
             try {
                 Response res = requestHandlers.dispatch(req);
-                this.output.write(res.toString().getBytes(StandardCharsets.UTF_8));
+                this.output.write(res.toBytes());
             } catch (HandlerException e) {
                 e.printStackTrace();
                 // No handler/inappropriate handler

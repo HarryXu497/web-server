@@ -1,5 +1,6 @@
 package server.response;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 /**
@@ -17,7 +18,7 @@ public class Response {
     private final Map<String, String> headers;
 
     /** the HTTP response body */
-    private final String body;
+    private final byte[] body;
 
     /**
      * constructs a response with a status line, headers, and a body
@@ -26,12 +27,22 @@ public class Response {
      * @param body the HTTP response body
      */
     public Response(StatusLine statusLine, Map<String, String> headers, String body) {
+        this(statusLine, headers, body.getBytes(StandardCharsets.UTF_8));
+    }
+
+    /**
+     * constructs a response with a status line, headers, and a body
+     * @param statusLine the HTTP response status line
+     * @param headers a map of the HTTP response headers
+     * @param body the HTTP response body
+     */
+    public Response(StatusLine statusLine, Map<String, String> headers, byte[] body) {
         this.statusLine = statusLine;
         this.headers = headers;
         this.body = body;
 
-        if (body.length() > 0) {
-            this.headers.put("Content-Length", Integer.toString(body.length()));
+        if (body.length > 0) {
+            this.headers.put("Content-Length", Integer.toString(body.length));
         }
     }
 
@@ -41,8 +52,7 @@ public class Response {
      * allowing it to be sent to the client.
      * @return the HTTP response as a string
      */
-    @Override
-    public String toString() {
+    public byte[] toBytes() {
         StringBuilder res = new StringBuilder();
 
         // Status line
@@ -56,12 +66,18 @@ public class Response {
                     .append("\r\n");
         }
 
-        // Body
-        res.append("\r\n");
-        res.append(this.body);
         res.append("\r\n");
 
-        return res.toString();
+        byte[] statusAndHeaders = res.toString().getBytes(StandardCharsets.UTF_8);
+        byte[] body = this.body;
+
+        byte[] responseInBytes = new byte[statusAndHeaders.length + body.length];
+
+        System.arraycopy(statusAndHeaders, 0, responseInBytes, 0, statusAndHeaders.length);
+
+        System.arraycopy(body, 0, responseInBytes, statusAndHeaders.length, body.length);
+
+        return responseInBytes;
     }
 
     /**

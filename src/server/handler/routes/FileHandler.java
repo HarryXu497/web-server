@@ -51,15 +51,22 @@ public class FileHandler extends Handler implements Get {
         String extension = url.substring(url.lastIndexOf(".") + 1);
 
         // Appends file name to hosting directory
-        String fileContent = this.assets.getAsset(this.directory + filename);
+        byte[] fileContent = this.assets.getAsset(this.directory + filename);
 
         // Headers
         Map<String, String> headers = new HashMap<>();
 
         String contentType = "text/" + extension;
 
+        switch (extension) {
+            case "jpg":
+            case "jpeg":
+                contentType = "image/jpeg";
+                break;
+        }
+
         headers.put("Content-Type", contentType);
-        headers.put("Content-Length", Integer.toString(fileContent.length()));
+        headers.put("Content-Length", Integer.toString(fileContent.length));
         headers.put("Cache-Control", "public, max-age=86400");
         headers.put("Vary", "Accept-Encoding");
         headers.put("Accept-Ranges", "none");

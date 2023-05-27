@@ -8,6 +8,7 @@
     grid-template-columns: repeat(12, 1fr);
     grid-template-rows: repeat(12, 1fr);
 	object-fit: contain;
+	background-image: url("/static/images/bg.jpg");
 	z-index: 1;
 }
 

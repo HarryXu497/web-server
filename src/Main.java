@@ -13,7 +13,7 @@ public class Main {
         try {
             TemplateEngine templateEngine = new TemplateEngine("frontend/templates");
 
-            AssetEngine assetEngine = new AssetEngine("frontend/styles");
+            AssetEngine assetEngine = new AssetEngine("frontend/styles", "frontend/images");
 
             // Routes
             LinkedHashMap<String, Handler> routes = new LinkedHashMap<>();
@@ -24,6 +24,7 @@ public class Main {
             // Assets
             Map<String, String> assets = new HashMap<>();
             assets.put("frontend/styles/", "/static/css/");
+            assets.put("frontend/images/", "/static/images/");
 
             WebServer server = new WebServer(templateEngine, assetEngine, routes, assets);
 
