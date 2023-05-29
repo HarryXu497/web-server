@@ -77,7 +77,11 @@ public class TemplateEngine {
             throw new TemplateNotFoundException("Template " + inputFile + " cannot be found");
         }
 
-        return template(this.templates.get(inputFile), data);
+        String template =  template(this.templates.get(inputFile), data);
+
+        template = template.replace("\\{", "{").replace("\\}", "}");
+
+        return template;
     }
 
     /**

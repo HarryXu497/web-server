@@ -1,0 +1,36 @@
+body {
+	min-height: 100vh;
+	background-color: black;
+}
+
+.judge {
+	width: clamp(20rem, 60%, 64rem);
+	margin: 2rem auto;
+}
+
+.judge .title {
+	color: white;
+}
+
+.judge .title h1 {
+	font-family: "Monserrat", sans-serif;
+	font-size: 2.5rem;
+}
+
+.judge .title span {
+	font-weight: bold;
+}
+
+#code-editor {
+    font-family: "Consolas", monospaced;
+    text-align: left;
+    background-color: #222222;
+    border-radius: 10px;
+    width: auto;
+    min-height: 75vh;
+    font-size: 1rem;
+}
+
+.code-submit {
+    display: none;
+}

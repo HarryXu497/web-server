@@ -18,6 +18,7 @@ public class AssetEngine {
         // Text extensions
         TEXT_EXTENSIONS.add("css");
         TEXT_EXTENSIONS.add("html");
+        TEXT_EXTENSIONS.add("js");
 
         // Image extensions
         IMAGE_EXTENSIONS.add("jpg");

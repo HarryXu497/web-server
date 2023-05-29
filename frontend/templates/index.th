@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="/static/css/reset.css">
     <link rel="stylesheet" href="/static/css/nav.css">
     <link rel="stylesheet" href="/static/css/index.css">
+    <script defer src="/static/js/nav.js"></script>
 </head>
 <body>
     {#include frontend/templates/nav.th}

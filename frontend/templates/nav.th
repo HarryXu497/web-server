@@ -10,5 +10,10 @@
             <li><a href="/about">About</a></li>
             <li><a href="/log-in">Get Started</a></li>
         </ul>
+        <div class="nav__hamburger">
+            <div class="nav__hamburger__line"></div>
+            <div class="nav__hamburger__line"></div>
+            <div class="nav__hamburger__line"></div>
+        </div>
     </div>
 </nav>
