@@ -14,6 +14,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Responsible for handling the problem submission route ("/problems/:problemId/submit")
+ * @author Harry Xu
+ * @version 1.0 - May 30th 2023
+ */
 public class SubmitRoute extends Handler implements Get, Post {
 
     private final TemplateEngine templateEngine;
@@ -24,7 +29,6 @@ public class SubmitRoute extends Handler implements Get, Post {
 
     @Override
     public Response get(Request req) {
-
         // Compile template with data
         String body = this.templateEngine.compile("frontend/templates/submit.th", null);
 

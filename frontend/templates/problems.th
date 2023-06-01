@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Welcome!</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="/static/css/fonts.css">
+    <link rel="stylesheet" href="/static/css/reset.css">
+    <link rel="stylesheet" href="/static/css/nav.css">
+    <link rel="stylesheet" href="/static/css/problems.css">
+    <script defer src="/static/js/nav.js"></script>
+</head>
+<body>
+    {#include frontend/templates/nav.th}
+    <main>
+        <section class="problems-content">
+            <h1>
+                Problems
+            </h1>
+            <div class="problems">
+                <div class="problems__problem header">
+                    <h2 class="problems__problem__name">
+                        Name
+                    </h2>
+                    <p class="problems__problem__type">
+                        Category
+                    </p>
+                    <p class="problems__problem__submissions">
+                        Users
+                    </p>
+                    <p class="problems__problem__rate">
+                        AC %
+                    </p>
+                </div>
+                {#for problem in data.problems}
+                    <div class="problems__problem">
+                        <h2 class="problems__problem__name">
+                            <a href="problems/{problem.id}">
+                                {problem.name}
+                            </a>
+                        </h2>
+                        <p class="problems__problem__type">
+                            {problem.type}
+                        </p>
+                        <p class="problems__problem__submissions">
+                            {problem.submissionCount}
+                        </p>
+                        <p class="problems__problem__rate">
+                            {problem.successRateAsString}
+                        </p>
+                    </div>
+                {/for}
+            </div>
+        </section>
+    </main>
+</body>
+</html>

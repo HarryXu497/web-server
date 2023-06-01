@@ -1,0 +1,77 @@
+body {
+	background-color: black;
+}
+
+main {
+    padding-top: 2rem;
+	height: calc(100vh - 7rem);
+    object-fit: contain;
+    background:
+        linear-gradient(
+              rgba(0, 0, 0, 0.7),
+              rgba(0, 0, 0, 0.7)
+        ),
+        url("/static/images/bg.jpg");
+
+}
+
+.problems-content {
+    width: clamp(20rem, 60%, 64rem);
+    margin: 0 auto;
+    color: white;
+    height: 100%;
+}
+
+h1 {
+    font-size: 3rem;
+    font-weight: bold;
+	font-family: "Oswald", sans-serif;
+}
+
+.problems {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.problems__problem {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    padding: 0.25rem 0;
+    font-size: 1.25rem;
+	font-family: "Montserrat", sans-serif;
+}
+
+.problems__problem * {
+    font-weight: 200;
+}
+
+.problems__problem.header * {
+    font-weight: 400;
+}
+
+.problems__problem a {
+    color: white;
+    text-decoration: none;
+}
+
+.problems__problem__name {
+    flex-grow: 1;
+}
+
+.problems__problem__type {
+    flex-basis: 20%;
+}
+
+.problems__problem__submissions {
+    flex-basis: 10%;
+}
+
+.problems__problem__successful {
+    flex-basis: 10%;
+}
+
+.problems__problem__rate {
+    flex-basis: 10%;
+}

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Welcome!</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="/static/css/fonts.css">
+    <link rel="stylesheet" href="/static/css/reset.css">
+    <link rel="stylesheet" href="/static/css/nav.css">
+    <link rel="stylesheet" href="/static/css/problem.css">
+    <script defer src="/static/js/nav.js"></script>
+</head>
+<body>
+    {#include frontend/templates/nav.th}
+    <main>
+        <section class="problem">
+            <h2 class="problem__name">
+                {data.name}
+            </h2>
+            <p class="problem__content">
+                {data.content}
+            </p>
+            <p class="problem__type">
+                {data.type}
+            </p>
+            <p class="problem__submissions">
+                {data.submissions}
+            </p>
+            <p class="problem__rate">
+                {data.rate}
+            </p>
+        </section>
+    </main>
+</body>
+</html>

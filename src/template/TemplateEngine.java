@@ -386,10 +386,15 @@ public class TemplateEngine {
         try {
             Field current = data.getClass().getDeclaredField(path[1]);
 
+            System.out.println(current);
+
             for (int i = 2; i < path.length; i++) {
                 String field = path[i];
                 current = current.getClass().getDeclaredField(field);
+                System.out.println(current);
             }
+
+            System.out.println(current);
 
             Object value = current.get(data);
 

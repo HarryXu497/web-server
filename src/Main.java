@@ -2,6 +2,8 @@ import assets.AssetEngine;
 import server.WebServer;
 import server.handler.Handler;
 import server.handler.routes.HomeRoute;
+import server.handler.routes.ProblemRoute;
+import server.handler.routes.ProblemsRoute;
 import server.handler.routes.SubmitRoute;
 import template.TemplateEngine;
 
@@ -20,8 +22,10 @@ public class Main {
             LinkedHashMap<String, Handler> routes = new LinkedHashMap<>();
 
             routes.put("/", new HomeRoute(templateEngine));
-            routes.put("/:id", new HomeRoute(templateEngine));
+            routes.put("/problems/", new ProblemsRoute(templateEngine));
+            routes.put("/problems/:problemId", new ProblemRoute(templateEngine));
             routes.put("/problems/:problemId/submit", new SubmitRoute(templateEngine));
+            routes.put("/:id", new HomeRoute(templateEngine));
 
             // Assets
             Map<String, String> assets = new HashMap<>();

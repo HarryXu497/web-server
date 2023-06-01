@@ -10,6 +10,11 @@ import template.TemplateEngine;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Responsible for handling the root route ("/")
+ * @author Harry Xu
+ * @version 1.0 - May 30th 2023
+ */
 public class HomeRoute extends Handler implements Get {
 
     /** The template engine which contains and compiles the templates */
