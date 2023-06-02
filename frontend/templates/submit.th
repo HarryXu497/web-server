@@ -21,7 +21,7 @@
             <div id="code-editor">
             </div>
             <textarea class="code-submit" name="code"></textarea>
-            <button class="submit">Submit</button>
+            <button type="submit">Submit</button>
 		</form>
 	</main>
 

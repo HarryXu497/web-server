@@ -18,7 +18,7 @@ public class ProblemsRoute extends Handler implements Get {
     private final TemplateEngine templateEngine;
 
     /**
-     * constructs a ProblemsRoute handler which is used to handle static file assets
+     * constructs a ProblemsRoute handler
      * @param templateEngine the template engine which holds and compiles the templates
      */
     public ProblemsRoute(TemplateEngine templateEngine) {

@@ -1,10 +1,8 @@
 import assets.AssetEngine;
+import coderunner.CodeRunner;
 import server.WebServer;
 import server.handler.Handler;
-import server.handler.routes.HomeRoute;
-import server.handler.routes.ProblemRoute;
-import server.handler.routes.ProblemsRoute;
-import server.handler.routes.SubmitRoute;
+import server.handler.routes.*;
 import template.TemplateEngine;
 
 import java.util.HashMap;
@@ -18,13 +16,17 @@ public class Main {
 
             AssetEngine assetEngine = new AssetEngine("frontend/styles", "frontend/images", "frontend/js");
 
+            CodeRunner codeRunner = new CodeRunner();
+
             // Routes
             LinkedHashMap<String, Handler> routes = new LinkedHashMap<>();
 
             routes.put("/", new HomeRoute(templateEngine));
             routes.put("/problems/", new ProblemsRoute(templateEngine));
             routes.put("/problems/:problemId", new ProblemRoute(templateEngine));
-            routes.put("/problems/:problemId/submit", new SubmitRoute(templateEngine));
+            routes.put("/problems/:problemId/submit", new SubmitRoute(templateEngine, codeRunner));
+            routes.put("/problems/:problemId/tests", new TestsRoute(templateEngine, codeRunner));
+            routes.put("/problems/:problemId/submissions", new SubmissionPollRoute(codeRunner));
             routes.put("/:id", new HomeRoute(templateEngine));
 
             // Assets

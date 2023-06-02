@@ -21,6 +21,25 @@ body {
 	font-weight: bold;
 }
 
+.judge button[type="submit"] {
+    unset: all;
+    padding: 0.5rem;
+    background-color: hsl(2, 77%, 66%);
+    font-weight: bold;
+    font-size: 1.25rem;
+    margin-top: 0.5rem;
+    border: none;
+    border-radius: 5px;
+    color: white;
+
+	transition: background-color 100ms ease-in;
+}
+
+.judge button[type="submit"]:hover {
+	cursor: pointer;
+	background-color: hsl(0, 0%, 55%);
+}
+
 #code-editor {
     font-family: "Consolas", monospaced;
     text-align: left;

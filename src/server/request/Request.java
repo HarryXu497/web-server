@@ -23,6 +23,9 @@ public class Request {
     /** a map of all key value pairs in the request body */
     private final Map<String, String> body;
 
+    /** a map of all cookies from the headers */
+    private final Map<String, String> cookies;
+
     /**
      * constructs an HTTP request with a status line, headers, and body
      * @param statusLine the HTTP requests status line
@@ -33,6 +36,18 @@ public class Request {
         this.headers = headers;
         this.body = body;
         this.statusLine = statusLine;
+
+        // Populate cookies
+        this.cookies = new HashMap<>();
+
+        String rawCookies = this.headers.get("Cookie");
+
+        if (rawCookies != null) {
+            for (String cookiePair : rawCookies.split(";")) {
+                String[] cookieKeyValue = cookiePair.trim().split("=");
+                this.cookies.put(cookieKeyValue[0], cookieKeyValue[1]);
+            }
+        }
     }
 
     /**
@@ -60,6 +75,15 @@ public class Request {
      */
     public Map<String, String> getBody() {
         return this.body;
+    }
+
+    /**
+     * getCookies
+     * gets the cookies of the request
+     * @return the request cookies parsed from the headers
+     */
+    public Map<String, String> getCookies() {
+        return this.cookies;
     }
 
     /**

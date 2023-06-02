@@ -324,6 +324,14 @@ public class TemplateEngine {
         return input;
     }
 
+    private void shiftPositions(Deque<Directive> queue, int shiftBy) {
+
+        for (Directive dir : queue) {
+            dir.setStartNumber(dir.getStartNumber() + shiftBy);
+            dir.setEndNumber(dir.getEndNumber() + shiftBy);
+        }
+    }
+
     /**
      * parseExpression
      * parses an expression in interpolation braces
@@ -386,15 +394,10 @@ public class TemplateEngine {
         try {
             Field current = data.getClass().getDeclaredField(path[1]);
 
-            System.out.println(current);
-
             for (int i = 2; i < path.length; i++) {
                 String field = path[i];
                 current = current.getClass().getDeclaredField(field);
-                System.out.println(current);
             }
-
-            System.out.println(current);
 
             Object value = current.get(data);
 

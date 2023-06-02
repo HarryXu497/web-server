@@ -39,8 +39,9 @@ public class Task {
             throw new RuntimeException("cannot compile");
         }
 
-        String compiledFilePath = this.sourceFile.substring(this.sourceFile.lastIndexOf("\\") + 1, this.sourceFile.lastIndexOf("."));
+        String compiledFilePath = this.sourceFile.substring(this.sourceFile.lastIndexOf("/") + 1, this.sourceFile.lastIndexOf("."));
 
+        System.out.println("Path");
         System.out.println(compiledFilePath);
 
         for (int i = 0; i < inputFiles.size(); i++) {
@@ -53,6 +54,14 @@ public class Task {
         }
 
         this.testIndex = 0;
+    }
+
+    public int getTestIndex() {
+        return this.testIndex;
+    }
+
+    public int getTestCount() {
+        return this.tests.size();
     }
 
     private void filter() {

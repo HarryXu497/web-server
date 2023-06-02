@@ -21,7 +21,7 @@ public class HomeRoute extends Handler implements Get {
     private final TemplateEngine templateEngine;
 
     /**
-     * constructs a HomeRoute handler which is used to handle static file assets
+     * constructs a HomeRoute handler
      * @param templateEngine the template engine which holds and compiles the templates
      */
     public HomeRoute(TemplateEngine templateEngine) {

@@ -10,6 +10,7 @@ import java.util.Deque;
 public class CodeRunner {
 
     private final Deque<Submission> submissionQueue;
+    private Submission currentSubmission;
     private final Object syncObject;
 
     public CodeRunner() {
@@ -21,6 +22,7 @@ public class CodeRunner {
 
     public void enqueue(Submission submission) {
         this.submissionQueue.push(submission);
+        submission.setStatus(Submission.Status.QUEUED);
 
         synchronized (this.syncObject) {
             this.syncObject.notify();
@@ -29,13 +31,16 @@ public class CodeRunner {
         System.out.println("Queued file " + submission.getTask());
     }
 
+    public Submission getCurrentSubmission() {
+        return this.currentSubmission;
+    }
+
     public class CodeTest implements Runnable {
 
         @Override
         public void run() {
             while (true) {
-                Submission currentSubmission;
-
+                currentSubmission = null;
                 // Wait for queuing if queue is empty
                 if (submissionQueue.size() == 0) {
                     synchronized (syncObject) {
@@ -48,6 +53,7 @@ public class CodeRunner {
                 }
 
                 currentSubmission = submissionQueue.pop();
+                currentSubmission.setStatus(Submission.Status.PENDING);
 
 
 
@@ -73,6 +79,8 @@ public class CodeRunner {
                         System.out.println("ACCEPTED");
                     }
                 }
+
+                currentSubmission.setStatus(Submission.Status.COMPLETED);
             }
         }
     }

@@ -18,10 +18,10 @@ public class Directive {
     private final DirectiveType type;
 
     /** The start of the interpolation braces as an index number */
-    private final int startNumber;
+    private int startNumber;
 
     /** The end of the interpolation braces as an index number */
-    private final int endNumber;
+    private int endNumber;
 
     /** The tokens of the directive */
     private final String[] tokens;
@@ -74,5 +74,23 @@ public class Directive {
      */
     public String[] getTokens() {
         return this.tokens;
+    }
+
+    /**
+     * setStartNumber
+     * sets the index of the opening directive brace
+     * @param startNumber the start index
+     */
+    public void setStartNumber(int startNumber) {
+        this.startNumber = startNumber;
+    }
+
+    /**
+     * setEndNumber
+     * sets the index of the closing directive brace
+     * @param endNumber the end index
+     */
+    public void setEndNumber(int endNumber) {
+        this.endNumber = endNumber;
     }
 }
