@@ -1,6 +1,7 @@
 package coderunner.test;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -54,33 +55,18 @@ public class Test {
         // Redirect input and output streams
         String dir = System.getProperty("user.dir") + "\\";
 
-        process.redirectInput(new File(dir + this.inputFilePath));
-        process.redirectOutput(new File(dir + this.outputFilePath));
+        // Construct file paths
+        String inputFilePath = dir + this.inputFilePath;
+        String outputFilePath = dir + this.outputFilePath;
+        String errorFilePath = dir + "error.txt";
+
+        // Redirect output
+        process.redirectInput(new File(inputFilePath));
+        process.redirectOutput(new File(outputFilePath));
+        process.redirectError(new File(errorFilePath));
 
         // Start process execution
         Process executionProcess = process.start();
-
-        System.out.println("HERE 1");
-
-        // Handle runtime exceptions
-        StringBuilder runtimeException = new StringBuilder();
-
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(executionProcess.getErrorStream()))) {
-            int c;
-
-            if (br.ready()) {
-                while ((c = br.read()) != -1) {
-                    runtimeException.append((char) c);
-                }
-            }
-        }
-
-        String stackTrace = runtimeException.toString();
-
-        if (stackTrace.length() != 0) {
-            this.result = new TestResult(TestCode.RUNTIME_ERROR, stackTrace);
-            return;
-        }
 
         // TODO: maybe make this customizable
         // Timeout after 3000 milliseconds
@@ -88,6 +74,24 @@ public class Test {
             executionProcess.destroy();
             this.result = new TestResult(TestCode.TIME_LIMIT_EXCEEDED, null);
             System.out.println("timeout");
+            return;
+        }
+
+        // Handle runtime exceptions
+        StringBuilder runtimeException = new StringBuilder();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(errorFilePath))) {
+            int c;
+
+            while ((c = br.read()) != -1) {
+                runtimeException.append((char) c);
+            }
+        }
+
+        String stackTrace = runtimeException.toString();
+
+        if (stackTrace.length() != 0) {
+            this.result = new TestResult(TestCode.RUNTIME_ERROR, stackTrace);
         }
     }
 

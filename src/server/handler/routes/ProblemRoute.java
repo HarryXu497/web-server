@@ -29,7 +29,6 @@ public class ProblemRoute extends Handler implements Get {
 
         System.out.println(id);
 
-
         // Compile template with data
         String body = this.templateEngine.compile("frontend/templates/problem.th", new Data(
                 ProblemsDB.db.getById(id)

@@ -34,9 +34,37 @@ function buildTests(responseData) {
             completed = true;
         }
 
-        const content = document.createTextNode(`Test ${i + 1}: ${code}`);
+        const content = document.createTextNode(`Test ${i + 1}: `);
+        const span = document.createElement("span");
+
+        const spanContent = document.createTextNode(`${code}`);
+
+        span.append(spanContent);
+        span.classList.add("status-code");
+
+        switch (code) {
+            case "AC":
+                span.classList.add("status-code-green");
+                break;
+
+            case "WA":
+                span.classList.add("status-code-red");
+                break;
+
+            case "TLE":
+            case "OLE":
+            case "MLE":
+                span.classList.add("status-code-gray");
+                break;
+
+            case "RTE":
+            case "IR":
+                span.classList.add("status-code-yellow");
+                break;
+        }
 
         testDiv.appendChild(content);
+        testDiv.appendChild(span)
         testDiv.classList.add("test-case")
 
         testsContainer.append(testDiv);
@@ -68,7 +96,30 @@ function updateTests(responseData) {
             completed = true;
         }
 
-        child.textContent = `Test ${i + 1}: ${code}`;
+        const span = child.lastElementChild;
+
+        span.textContent = `${code}`;
+
+        switch (code) {
+            case "AC":
+                span.classList.add("status-code-green");
+                break;
+
+            case "WA":
+                span.classList.add("status-code-red");
+                break;
+
+            case "TLE":
+            case "OLE":
+            case "MLE":
+                span.classList.add("status-code-gray");
+                break;
+
+            case "RTE":
+            case "IR":
+                span.classList.add("status-code-yellow");
+                break;
+        }
 
         i++;
     }

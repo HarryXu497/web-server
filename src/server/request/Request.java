@@ -141,6 +141,12 @@ public class Request {
             for (String pair : bodyPairs) {
                 String[] splitPair = pair.split("=");
 
+                // Account for empty request body
+                if (splitPair.length == 1) {
+                    body.put(splitPair[0], "");
+                    continue;
+                }
+
                 body.put(splitPair[0], splitPair[1]);
             }
         }

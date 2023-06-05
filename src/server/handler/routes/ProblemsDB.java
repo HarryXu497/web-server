@@ -13,7 +13,7 @@ public class ProblemsDB {
     static {
         db = new ProblemsDB(
             new ProblemsDB.Problem("CCC '23 S1 - Trianglane",
-                    "Tommy feels sleepy during geography class, so he decides to do his math homework. He is shocked when he opened his homework packaged that's assigned my Mr. Choi...\n" +
+             "Tommy feels sleepy during geography class, so he decides to do his math homework. He is shocked when he opened his homework packaged that's assigned my Mr. Choi...\n" +
                     "\n" +
                     "It's too hard for him, a grade 9 student, to solve the problem. So he asked you to help him solve the problem for him.\n" +
                     "\n" +

@@ -57,3 +57,23 @@ section {
     font-family: "Consolas", monospaced;
     width: 100%;
 }
+
+.status-code {
+    font-weight: bold;
+}
+
+.status-code.status-code-green {
+    color: green;
+}
+
+.status-code.status-code-red {
+    color: red;
+}
+
+.status-code.status-code-yellow {
+    color: yellow;
+}
+
+.status-code.status-code-gray {
+    color: gray;
+}

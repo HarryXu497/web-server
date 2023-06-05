@@ -68,8 +68,8 @@ public class Task {
         this.testResults = new TestResult[this.tests.size()];
     }
 
-    private void filter() {
-
+    public boolean filter() {
+        return false;
     }
 
     /**
@@ -79,7 +79,11 @@ public class Task {
      */
     public void write() throws IOException {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(this.sourceFile))) {
-            bw.write(this.sourceCode);
+            if (this.sourceCode.trim().length() == 0) {
+                bw.write("What are you doing?");
+            } else {
+                bw.write(this.sourceCode);
+            }
         }
     }
 

@@ -15,22 +15,27 @@
     {#include frontend/templates/nav.th}
     <main>
         <section class="problem">
-            <h2 class="problem__name">
+            <h1 class="problem__name">
                 {data.name}
-            </h2>
-            <p class="problem__content">
-                {data.content}
-            </p>
+            </h1>
+            <hr>
+            <div>
+                <div>
+                    <p class="problem__content">{data.content}</p>
+                </div>
+            </div>
+        </section>
+        <aside class="sidebar">
             <p class="problem__type">
                 {data.type}
             </p>
             <p class="problem__submissions">
-                {data.submissions}
+                {data.submissions} Submissions
             </p>
             <p class="problem__rate">
-                {data.rate}
+                {data.rate} AC%
             </p>
-        </section>
+        </aside>
     </main>
 </body>
 </html>
