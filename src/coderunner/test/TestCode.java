@@ -1,5 +1,10 @@
 package coderunner.test;
 
+/**
+ * represents the possible test codes for an online judge
+ * @author Harry Xu
+ * @version 1.0 - June 4th 2023
+ */
 public enum TestCode {
     ACCEPTED("AC"),
     WRONG_ANSWER("WA"),
@@ -10,14 +15,23 @@ public enum TestCode {
     TIME_LIMIT_EXCEEDED("TLE"),
     INTERNAL_ERROR("IE");
 
-    private String code;
+    /** The letter code associated with each response */
+    private final String code;
 
+    /**
+     * constructs an enum entry with a test code
+     * @param code the letter code
+     */
     TestCode(String code) {
         this.code = code;
     }
 
-    @Override
-    public String toString() {
+    /**
+     * getCode
+     * gets the letter code associated with each enum value
+     * @return the code as a string
+     */
+    public String getCode() {
         return this.code;
     }
 }

@@ -41,7 +41,8 @@ public class TestsRoute extends Handler implements Get {
 
         Submission currentSubmission = this.codeRunner.getCurrentSubmission();
 
-        boolean isAuthorized = (currentSubmission != null) && (currentSubmission.getRequestId().equals(submissionId));
+        System.out.println((currentSubmission != null) + " && " + ((currentSubmission != null) && (currentSubmission.getSubmissionId().equals(submissionId))));
+        boolean isAuthorized = (currentSubmission != null) && (currentSubmission.getSubmissionId().equals(submissionId));
 
         int totalTests = 0;
 
@@ -65,24 +66,19 @@ public class TestsRoute extends Handler implements Get {
                             content.append(inputLine);
                         }
 
-                        // Primitive JSON parser - no nested objects
-                        Map<String, String> obj = new HashMap<>();
+                        // Primitive JSON parser to get length - the tests will be hydrated by JS
+                        String JSONString = content.toString();
 
-                        String json = content.toString();
+                        if (JSONString.contains("\"tests\"")) {
 
-                        json = json.substring(1, json.length() - 1).trim();
+                            String testsSubstring = JSONString.substring(JSONString.indexOf("[") + 1, JSONString.indexOf("]"));
 
-                        String[] pairs = json.split(",");
-
-                        for (String pair : pairs) {
-                            String[] keyValue = pair.trim().split(":");
-
-                            String key = keyValue[0].trim();
-
-                            obj.put(key.substring(1, key.length() - 1), keyValue[1].trim());
+                            for (char c : testsSubstring.toCharArray()) {
+                                if (c == ',') {
+                                    totalTests++;
+                                }
+                            }
                         }
-
-                        totalTests = Integer.parseInt(obj.get("totalTests"));
                     }
                 }
             } catch (IOException e) {
@@ -107,6 +103,7 @@ public class TestsRoute extends Handler implements Get {
         );
     }
 
+    // TODO document these 2 classes
     public static class Data {
         public IntWrapper[] tests;
         public boolean isAuthorized;
@@ -114,14 +111,15 @@ public class TestsRoute extends Handler implements Get {
         public Data(int totalTests, boolean isAuthorized) {
             this.tests = new IntWrapper[totalTests];
 
-            for (int i = 0; i < this.tests.length; i++) {
-                this.tests[i] = new IntWrapper(i);
+            for (int i = 1; i <= this.tests.length; i++) {
+                this.tests[i - 1] = new IntWrapper(i);
             }
 
             this.isAuthorized = isAuthorized;
         }
     }
 
+    /** Needed for templating :(*/
     public static class IntWrapper {
         public int intValue;
 

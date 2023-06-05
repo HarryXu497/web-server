@@ -1,5 +1,7 @@
 package template;
 
+import java.util.Arrays;
+
 /**
  * represents a directive in the template, which is a special syntax which allows for control flow in HTML
  * <div>
@@ -92,5 +94,15 @@ public class Directive {
      */
     public void setEndNumber(int endNumber) {
         this.endNumber = endNumber;
+    }
+
+    @Override
+    public String toString() {
+        return "Directive{" +
+                "type=" + type +
+                ", startNumber=" + startNumber +
+                ", endNumber=" + endNumber +
+                ", tokens=" + Arrays.toString(tokens) +
+                '}';
     }
 }

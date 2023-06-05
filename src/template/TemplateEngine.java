@@ -188,7 +188,8 @@ public class TemplateEngine {
 
                         // Insert partial
                         String newInput = input = input.substring(0, interpolationStartIndex) + this.compile(directiveTokens[1], namespace.get("data")) + input.substring(interpolationEndIndex + 1);
-                        i += (newInput.length() - input.length());
+                        int shiftBy = newInput.length() - input.length();
+                        i += shiftBy;
                         input = newInput;
 
                     } else {
@@ -245,8 +246,10 @@ public class TemplateEngine {
                             directiveVariables.remove(openingDirTokens[1]);
 
                             // Insert snippet
-                            String newInput = input = input.substring(0, openingDir.getStartNumber()) + newSnippet + input.substring(interpolationEndIndex + 1);
-                            i += (newInput.length() - input.length());
+                            String newInput = input.substring(0, openingDir.getStartNumber()) + newSnippet + input.substring(interpolationEndIndex + 1);
+                            int shiftBy = newInput.length() - input.length();
+                            i += shiftBy;
+
                             input = newInput;
                         } else {
                             throw new TemplateSyntaxException("mismatched directives");
@@ -277,7 +280,9 @@ public class TemplateEngine {
 
                             // Insert snippet
                             String newInput = input.substring(0, openingDir.getStartNumber()) + snippet + input.substring(interpolationEndIndex + 1);
-                            i += (newInput.length() - input.length());
+                            int shiftBy = newInput.length() - input.length();
+                            i += shiftBy;
+
                             input = newInput;
                         } else {
                             throw new TemplateSyntaxException("mismatched directives");
@@ -309,7 +314,9 @@ public class TemplateEngine {
 
                     // Insert snippet
                     String newInput = input.substring(0, interpolationStartIndex) + replacedExpr + input.substring(interpolationEndIndex + 1);
-                    i += (newInput.length() - input.length());
+                    int shiftBy = newInput.length() - input.length();
+                    i += shiftBy;
+
                     input = newInput;
                 }
 
@@ -322,14 +329,6 @@ public class TemplateEngine {
         }
 
         return input;
-    }
-
-    private void shiftPositions(Deque<Directive> queue, int shiftBy) {
-
-        for (Directive dir : queue) {
-            dir.setStartNumber(dir.getStartNumber() + shiftBy);
-            dir.setEndNumber(dir.getEndNumber() + shiftBy);
-        }
     }
 
     /**

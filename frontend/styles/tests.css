@@ -14,7 +14,46 @@ main {
         url("/static/images/bg.jpg");
 }
 
-.tests {
+main {
     color: white;
 }
 
+section {
+    width: clamp(20rem, 60%, 64rem);
+    margin: 0 auto;
+    color: white;
+    height: 100%;
+}
+
+.tests h1 {
+    font-size: 2rem;
+    font-family: "Montserrat", sans-serif;
+    font-weight: bold;
+}
+
+.tests h1.center {
+    width: fit-content;
+    margin: 0 auto;
+}
+
+.tests-display {
+    margin-top: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    align-items: center;
+}
+
+.tests-display .test-case {
+    font-size: 1.25rem;
+    font-family: "Montserrat", sans-serif;
+    font-weight: lighter;
+}
+
+.compilation-error {
+    margin-top: 1.25rem;
+    white-space: pre-wrap;
+    font-size: 1rem;
+    font-family: "Consolas", monospaced;
+    width: 100%;
+}

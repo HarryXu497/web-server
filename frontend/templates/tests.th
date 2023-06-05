@@ -16,11 +16,7 @@
     {#include frontend/templates/nav.th}
     <main>
         <section class="tests">
-            {#for i in data.tests}
-                <div>
-                    Test {i.intValue}
-                </div>
-            {/for}
+            <!-- Dynamically hydrated by JS -->
         </section>
     </main>
 </body>

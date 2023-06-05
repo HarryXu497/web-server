@@ -11,16 +11,11 @@ import server.response.Response;
 import server.response.ResponseCode;
 import template.TemplateEngine;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Responsible for handling the problem submission route ("/problems/:problemId/submit")
@@ -79,28 +74,31 @@ public class SubmitRoute extends Handler implements Get, Post {
                 ""
         );
 
-        // TODO: interpolate the problem id into the file name
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter("problems/problem1/Main.java"))) {
-            bw.write(code);
-        } catch (IOException e) {
-            return errorResponse;
-        }
-
         System.out.println(code);
 
-        // TODO: create better tokens later
-        int submissionId = (int) (Math.random() * 100);
+        String submissionId = UUID.randomUUID().toString();
 
         try {
+            // TODO: interpolate the problem id into the file name
             // TODO: interpolate problem id?? into the requestId
             this.codeRunner.enqueue(new Submission(
                     new Task(
+                            code,
                             "problems/problem1/Main.java",
-                            Collections.singletonList("problems/problem1/tests/test1.txt"),
-                            Collections.singletonList("problems/problem1/output/out1.txt"),
-                            Collections.singletonList("problems/problem1/answers/ans1.txt")
+                            Arrays.asList(
+                                    "problems/problem1/input/input1.txt",
+                                    "problems/problem1/input/input2.txt"
+                            ),
+                            Arrays.asList(
+                                    "problems/problem1/output/out1.txt",
+                                    "problems/problem1/output/out2.txt"
+                            ),
+                            Arrays.asList(
+                                    "problems/problem1/answers/ans1.txt",
+                                    "problems/problem1/answers/ans2.txt"
+                            )
                     ),
-                    Integer.toString(submissionId)
+                    submissionId
             ));
         } catch (IOException e) {
             return errorResponse;
@@ -110,9 +108,6 @@ public class SubmitRoute extends Handler implements Get, Post {
 
         headers.put("Location", "http://localhost:5000/problems/" + problemId + "/tests");
         headers.put("Set-Cookie", "submissionId=" + submissionId);
-
-        System.out.println("Submitted Code Headers");
-        System.out.println(headers);
 
         return new Response(
                 new Response.StatusLine(ResponseCode.SEE_OTHER),
