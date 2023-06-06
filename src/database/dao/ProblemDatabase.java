@@ -26,6 +26,7 @@ public class ProblemDatabase {
                         "DIFFICULTY INT     NOT NULL, " +
                         "TYPE TEXT          NOT NULL, " +
                         "USER_ID     NOT NULL," +
+                        "SOLVES INT NOT NULL," +
                         "FOREIGN KEY (USER_ID)" +
                         "   REFERENCES USERLIST (USER_ID));";
 
