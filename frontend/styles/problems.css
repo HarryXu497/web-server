@@ -58,20 +58,20 @@ h1 {
 
 .problems__problem__name {
     flex-grow: 1;
+    flex-basis: 40%:
 }
 
 .problems__problem__type {
+    flex-basis: 30%;
+    flex-shrink: 0;
+}
+
+.problems__problem__author {
     flex-basis: 20%;
+    flex-shrink: 0;
 }
 
-.problems__problem__submissions {
+.problems__problem__difficulty {
     flex-basis: 10%;
-}
-
-.problems__problem__successful {
-    flex-basis: 10%;
-}
-
-.problems__problem__rate {
-    flex-basis: 10%;
+    flex-shrink: 0;
 }

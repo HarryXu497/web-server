@@ -26,28 +26,28 @@
                     <p class="problems__problem__type">
                         Category
                     </p>
-                    <p class="problems__problem__submissions">
-                        Users
+                    <p class="problems__problem__author">
+                        Author
                     </p>
-                    <p class="problems__problem__rate">
-                        AC %
+                    <p class="problems__problem__difficulty">
+                        Difficulty
                     </p>
                 </div>
                 {#for problem in data.problems}
                     <div class="problems__problem">
                         <h2 class="problems__problem__name">
                             <a href="problems/{problem.id}">
-                                {problem.name}
+                                {problem.title}
                             </a>
                         </h2>
                         <p class="problems__problem__type">
                             {problem.type}
                         </p>
-                        <p class="problems__problem__submissions">
-                            {problem.submissionCount}
+                        <p class="problems__problem__author">
+                            {problem.authorName}
                         </p>
-                        <p class="problems__problem__rate">
-                            {problem.successRateAsString}
+                        <p class="problems__problem__difficulty">
+                            {problem.difficulty}
                         </p>
                     </div>
                 {/for}
