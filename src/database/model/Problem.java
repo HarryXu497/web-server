@@ -1,8 +1,6 @@
 package database.model;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.Date;
 
 public class Problem {
     private int problemID;

@@ -4,7 +4,11 @@ import coderunner.test.Test;
 import coderunner.test.TestCode;
 import coderunner.test.TestResult;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -105,8 +109,8 @@ public class Task {
         StringBuilder successfulOutput = new StringBuilder();
 
         try (
-            BufferedReader compilationIn = new BufferedReader(new InputStreamReader(compilation.getInputStream()));
-            BufferedReader compilationErr = new BufferedReader(new InputStreamReader(compilation.getErrorStream()))
+                BufferedReader compilationIn = new BufferedReader(new InputStreamReader(compilation.getInputStream()));
+                BufferedReader compilationErr = new BufferedReader(new InputStreamReader(compilation.getErrorStream()))
         ) {
             StringBuilder fullErrorText = new StringBuilder();
 

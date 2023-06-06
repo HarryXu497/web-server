@@ -4,7 +4,10 @@ import coderunner.test.TestCode;
 import coderunner.test.TestResult;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A class to run submitted java source code and evaluate the results.

@@ -3,9 +3,12 @@ package database.dao;
 import database.model.Problem;
 import database.statement.SQLStatement;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 
 public class ProblemDatabase {
@@ -45,8 +48,8 @@ public class ProblemDatabase {
                     .toString();
 
             try (
-                Connection c = DriverManager.getConnection("jdbc:sqlite:problem.db");
-                PreparedStatement stm = c.prepareStatement(sql)
+                    Connection c = DriverManager.getConnection("jdbc:sqlite:problem.db");
+                    PreparedStatement stm = c.prepareStatement(sql)
             ) {
                 c.setAutoCommit(false);
 

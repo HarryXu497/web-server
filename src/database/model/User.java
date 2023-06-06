@@ -1,7 +1,5 @@
 package database.model;
 
-import database.model.Role;
-
 public class User {
     private String userName;
     private int userID;

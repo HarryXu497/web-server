@@ -29,15 +29,18 @@
                         Submit
                     </a>
                     <div class="problem__info">
-                        <p class="problem__type">
-                            {data.type}
-                        </p>
-                        <p class="problem__submissions">
-                            {data.submissions} Submissions
-                        </p>
-                        <p class="problem__rate">
-                            {data.rate} AC%
-                        </p>
+                        <div class="problem__type">
+                            <span>Category:</span>
+                            <span>{data.type}</span>
+                        </div>
+                        <div class="problem__submissions">
+                            <span>Difficulty:</span>
+                            <span>{data.difficulty}</span>
+                        </div>
+                        <div class="problem__author">
+                            <span>Author:</span>
+                            <span>{data.authorName}</span>
+                        </div>
                     </div>
                 </aside>
             </div>

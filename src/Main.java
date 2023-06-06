@@ -3,7 +3,14 @@ import coderunner.CodeRunner;
 import database.Database;
 import server.WebServer;
 import server.handler.Handler;
-import server.handler.routes.*;
+import server.handler.routes.HomeRoute;
+import server.handler.routes.LogInRoute;
+import server.handler.routes.ProblemRoute;
+import server.handler.routes.ProblemsRoute;
+import server.handler.routes.SignUpRoute;
+import server.handler.routes.SubmissionPollRoute;
+import server.handler.routes.SubmitRoute;
+import server.handler.routes.TestsRoute;
 import template.TemplateEngine;
 
 import java.util.HashMap;
@@ -26,7 +33,7 @@ public class Main {
 
             routes.put("/", new HomeRoute(templateEngine));
             routes.put("/problems/", new ProblemsRoute(templateEngine, database));
-            routes.put("/problems/:problemId", new ProblemRoute(templateEngine));
+            routes.put("/problems/:problemId", new ProblemRoute(templateEngine, database));
             routes.put("/problems/:problemId/submit", new SubmitRoute(templateEngine, codeRunner));
             routes.put("/problems/:problemId/tests", new TestsRoute(templateEngine, codeRunner));
             routes.put("/problems/:problemId/submissions", new SubmissionPollRoute(codeRunner));

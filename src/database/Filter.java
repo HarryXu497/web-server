@@ -1,3 +1,5 @@
+package database;
+
 public class Filter {
     String sourceCode = null;
     String[] acceptLibrary = {"io.BufferedInputStream", "io.BufferedOutputStream", "util", "lang.Boolean", "math", "lang.Byte", "lang.Character", "lang.Double", "lang.Float", "lang.Integer", "lang.Long", "lang.Math", "lang.Number", "lang.Object", "lang.Short", "lang.String", "lang.StringBuffer", "lang.StringBuilder", "io.BufferedReader", "io.BufferedWriter", "io.ByteArrayInputStream", "io.ByteArrayOutputStream", "io.CharArrayReader", "io.CharArrayWriter", "io.DataInputStream", "io.DataOutputStream", "io.Reader", "io.Writer", "io.StringReader", "io.StringWriter"};
