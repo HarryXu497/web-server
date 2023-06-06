@@ -14,28 +14,34 @@
 <body>
     {#include frontend/templates/nav.th}
     <main>
+        <div class="side"></div>
         <section class="problem">
             <h1 class="problem__name">
                 {data.name}
             </h1>
             <hr>
-            <div>
-                <div>
-                    <p class="problem__content">{data.content}</p>
+            <div class="content">
+                <div class="content--left">
+                    <div><p class="problem__content">{data.content}</p></div>
                 </div>
+                <aside class="content--right">
+                    <a href="/problems/{data.id}/submit" class="submit-button">
+                        Submit
+                    </a>
+                    <div class="problem__info">
+                        <p class="problem__type">
+                            {data.type}
+                        </p>
+                        <p class="problem__submissions">
+                            {data.submissions} Submissions
+                        </p>
+                        <p class="problem__rate">
+                            {data.rate} AC%
+                        </p>
+                    </div>
+                </aside>
             </div>
         </section>
-        <aside class="sidebar">
-            <p class="problem__type">
-                {data.type}
-            </p>
-            <p class="problem__submissions">
-                {data.submissions} Submissions
-            </p>
-            <p class="problem__rate">
-                {data.rate} AC%
-            </p>
-        </aside>
     </main>
 </body>
 </html>

@@ -16,19 +16,26 @@ main {
 }
 
 .problem {
-    width: clamp(20rem, 60%, 64rem);
+    width: clamp(20rem, 70%, 64rem);
     margin: 0 auto;
     color: white;
     height: 100%;
 }
 
-.problem h1 {
+.content {
     display: flex;
     flex-direction: row;
-    justify-content: center;
+    gap: 2rem;
+}
+
+.content--left {
+    width: auto;
+}
+
+.problem h1 {
     font-size: 2rem;
     font-weight: bold;
-    font-family: "Monserrat", sans-serif;
+    font-family: "Montserrat", sans-serif;
     margin: 0 auto;
 }
 
@@ -38,30 +45,47 @@ main {
     background-color: white;
 }
 
+.problem__content {
+    white-space: pre-wrap;
+}
+
 .problem p {
     font-size: 1.125rem;
     line-height: 1.2;
     font-family: "Montserrat", sans-serif;
 }
 
-.sidebar {
-    color: white;
-    position: absolute;
-    padding-top: 2rem;
-    padding-left: 1rem;
-    width: clamp(5rem, 20%, 16rem);
-    top: 0;
-    right: 0;
-    bottom: 0;
+.content--right {
+    flex: 0 0 12em;
+    padding-top: 1rem;
 
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-
-    font-size: 1rem;
-    font-family: "Montserrat", sans-serif;
+    gap: 1rem;
 }
 
-.sidebar p:nth-of-type(1) {
-    font-weight: bold;
+.submit-button {
+    padding: 0.5rem 0.75rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    background-color: hsl(2, 77%, 66%);
+	transition: background-color 100ms ease-in;
+	text-decoration: none;
+    font-size: 1.25rem;
+    font-family: "Montserrat", sans-serif;
+    border-radius: 4px;
+}
+
+.submit-button:hover {
+	cursor: pointer;
+	background-color: hsl(0, 0%, 55%);
+}
+
+.problem__info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }

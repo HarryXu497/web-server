@@ -49,6 +49,7 @@ public class ProblemRoute extends Handler implements Get {
     }
 
     public static class Data {
+        public int id;
         public String name;
         public String content;
         public String type;
@@ -56,6 +57,7 @@ public class ProblemRoute extends Handler implements Get {
         public String rate;
 
         public Data(ProblemsDB.Problem problem) {
+            this.id = problem.id;
             this.name = problem.name;
             this.content = problem.content;
             this.type = problem.type;
