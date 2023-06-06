@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Sign Up</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="/static/css/fonts.css">
+    <link rel="stylesheet" href="/static/css/reset.css">
+    <link rel="stylesheet" href="/static/css/nav.css">
+    <link rel="stylesheet" href="/static/css/sign-up.css">
+    <script defer src="/static/js/nav.js"></script>
+</head>
+<body>
+    {#include frontend/templates/nav.th}
+    <main>
+        <form method="POST" class="sign-up-form">
+            <h1>Sign Up</h1>
+            <div class="input username-input">
+                <label for="username">Username</label>
+                <input type="text" id="username">
+            </div>
+
+            <div class="input password-input">
+                <label for="password">Password</label>
+                <input type="password" id="password">
+            </div>
+
+            <div class="button-group">
+                <button type="submit">
+                    Sign Up
+                </button>
+                <a href="/log-in">
+                    Log In Instead
+                </a>
+            </div>
+        </form>
+    </main>
+</body>
+</html>

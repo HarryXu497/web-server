@@ -7,6 +7,9 @@ import server.handler.methods.Get;
 import server.handler.methods.Post;
 import server.handler.methods.Put;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * The superclass for all route handlers in a web application.
  * Any subclasses of this class should implement at least one of the HTTP method interfaces
@@ -55,5 +58,15 @@ public abstract class Handler {
                 throw new HandlerException("No handler implemented on this route");
             }
         }
+    }
+
+    public static Map<String, String> htmlHeaders() {
+        Map<String, String> headers = new HashMap<>();
+
+        headers.put("Content-Type", "text/html; charset=iso-8859-1");
+        headers.put("Vary", "Accept-Encoding");
+        headers.put("Accept-Ranges", "none");
+
+        return headers;
     }
 }

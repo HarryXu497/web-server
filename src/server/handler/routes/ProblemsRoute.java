@@ -1,5 +1,7 @@
 package server.handler.routes;
 
+import database.Database;
+import database.model.Problem;
 import server.handler.Handler;
 import server.handler.methods.Get;
 import server.request.Request;
@@ -7,6 +9,7 @@ import server.response.Response;
 import server.response.ResponseCode;
 import template.TemplateEngine;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,19 +20,32 @@ public class ProblemsRoute extends Handler implements Get {
     /** The template engine which contains and compiles the templates */
     private final TemplateEngine templateEngine;
 
+    /** The database which contains application state */
+    private final Database database;
+
     /**
      * constructs a ProblemsRoute handler
      * @param templateEngine the template engine which holds and compiles the templates
      */
-    public ProblemsRoute(TemplateEngine templateEngine) {
+    public ProblemsRoute(TemplateEngine templateEngine, Database database) {
         this.templateEngine = templateEngine;
+        this.database = database;
     }
 
     @Override
     public Response get(Request req) {
+        // Get problems from database
+        List<Problem> problems = this.database.problems().getAllProblems();
+
+        List<TemplateProblem> templateProblems = new ArrayList<>();
+
+        for (Problem problem : problems) {
+            templateProblems.add(new TemplateProblem(problem));
+        }
+
         // Compile template with data
         String body = this.templateEngine.compile("frontend/templates/problems.th", new Data(
-                ProblemsDB.db.getAll()
+                templateProblems
         ));
 
         // Headers
@@ -52,10 +68,36 @@ public class ProblemsRoute extends Handler implements Get {
      * @version 1.0 - May 23rd 2023
      */
     public static class Data {
-        public List<ProblemsDB.Problem> problems;
+        public List<TemplateProblem> problems;
 
-        public Data(List<ProblemsDB.Problem> problems) {
+        public Data(List<TemplateProblem> problems) {
             this.problems = problems;
+        }
+    }
+
+    /**
+     * A wrapper of a problem which makes its properties available for templating
+     * @author Harry Xu
+     * @version 1.0 - June 6th 2023
+     */
+    public class TemplateProblem {
+        public String title;
+        public int difficulty;
+        public String content;
+        public String type;
+        public int id;
+        public String authorName;
+
+        public TemplateProblem(Problem problem) {
+            this.title = problem.getTitle();
+            this.difficulty = problem.getDifficulty();
+            this.content = problem.getContent();
+            this.id = problem.getProblemID();
+            this.type = problem.getType();
+            this.authorName = database.users().getUserById(
+                    problem.getAuthorID()
+            ).getUserName();
+
         }
     }
 }
