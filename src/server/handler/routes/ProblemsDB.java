@@ -40,7 +40,7 @@ public class ProblemsDB {
     }
 
     public static class Problem {
-        private static int autoId = 0;
+        private static int autoId = 1;
 
         public int id;
         public String name;
