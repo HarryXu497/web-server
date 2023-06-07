@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ public class ProblemDatabase {
                 Statement stm = c.createStatement()
             ) {
                 String sql = "CREATE TABLE IF NOT EXISTS PROBLEMLIST " +
-                        "(ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                        "(ID INTEGER PRIMARY KEY, " +
                         "TITLE TEXT, " +
                         "CONTENT TEXT, " +
                         "DIFFICULTY INT     NOT NULL, " +
@@ -44,8 +45,8 @@ public class ProblemDatabase {
 
             String sql = SQLStatement.insertStatement()
                     .insertInto("PROBLEMLIST")
-                    .columns("TITLE", "CONTENT", "DIFFICULTY", "TYPE", "USER_ID")
-                    .values("?", "?", "?", "?", "?")
+                    .columns("ID", "TITLE", "CONTENT", "DIFFICULTY", "TYPE", "USER_ID", "SOLVES")
+                    .values("?", "?", "?", "?", "?", "?", "?")
                     .toString();
 
             try (
@@ -54,11 +55,13 @@ public class ProblemDatabase {
             ) {
                 c.setAutoCommit(false);
 
-                stm.setString(1, p.getTitle());
-                stm.setString(2, p.getContent());
-                stm.setInt(3, p.getDifficulty());
-                stm.setString(4, p.getType());
-                stm.setInt(5, p.getAuthorID());
+                stm.setInt(1, p.getProblemID());
+                stm.setString(2, p.getTitle());
+                stm.setString(3, p.getContent());
+                stm.setInt(4, p.getDifficulty());
+                stm.setString(5, p.getType());
+                stm.setInt(6, p.getAuthorID());
+                stm.setInt(7, p.getSolves());
                 stm.executeUpdate();
                 c.commit();
             }
@@ -67,34 +70,36 @@ public class ProblemDatabase {
         }
     }
 
-    public Problem getProblemById(int targetId) {
+    public Problem getProblemById(int targetId) throws SQLException {
         try {
             Class.forName("org.sqlite.JDBC");
-            try (
-                Connection c = DriverManager.getConnection("jdbc:sqlite:problem.db");
-                Statement stm = c.createStatement()
-            ) {
-                c.setAutoCommit(false);
-
-                String sql = SQLStatement.selectStatement()
-                        .select("*")
-                        .from("PROBLEMLIST")
-                        .where("ID = " + targetId)
-                        .toString();
-
-                try (ResultSet rs = stm.executeQuery(sql)) {
-                    int id = rs.getInt("ID");
-                    String title = rs.getString("TITLE");
-                    String content = rs.getString("CONTENT");
-                    int difficulty = rs.getInt("DIFFICULTY");
-                    String type = rs.getString("TYPE");
-                    int authorId = rs.getInt("USER_ID");
-
-                    return new Problem(id, difficulty, title, content, type, LocalDateTime.now(), null, authorId);
-                }
-            }
-        } catch (Exception e) {
+        } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
+        }
+
+        try (
+            Connection c = DriverManager.getConnection("jdbc:sqlite:problem.db");
+            Statement stm = c.createStatement()
+        ) {
+            c.setAutoCommit(false);
+
+            String sql = SQLStatement.selectStatement()
+                    .select("*")
+                    .from("PROBLEMLIST")
+                    .where("ID = " + targetId)
+                    .toString();
+
+            try (ResultSet rs = stm.executeQuery(sql)) {
+                int id = rs.getInt("ID");
+                String title = rs.getString("TITLE");
+                String content = rs.getString("CONTENT");
+                int difficulty = rs.getInt("DIFFICULTY");
+                String type = rs.getString("TYPE");
+                int authorId = rs.getInt("USER_ID");
+                int solves = rs.getInt("SOLVES");
+
+                return new Problem(id, difficulty, title, content, type, LocalDateTime.now(), null, solves, authorId);
+            }
         }
     }
 
@@ -120,8 +125,9 @@ public class ProblemDatabase {
                     int difficulty = rs.getInt("DIFFICULTY");
                     String type = rs.getString("TYPE");
                     int authorId = rs.getInt("USER_ID");
+                    int solves = rs.getInt("SOLVES");
 
-                    return new Problem(id, difficulty, title, content, type, null, null, authorId);
+                    return new Problem(id, difficulty, title, content, type, null, null, solves, authorId);
                 }
             }
         } catch (Exception e) {
@@ -146,8 +152,9 @@ public class ProblemDatabase {
                 int difficulty = rs.getInt("DIFFICULTY");
                 String type = rs.getString("TYPE");
                 int authorId = rs.getInt("USER_ID");
+                int solves = rs.getInt("SOLVES");
 
-                Problem p = new Problem(id, difficulty, title, content, type, null, null, authorId);
+                Problem p = new Problem(id, difficulty, title, content, type, null, null, solves, authorId);
                 ret.add(p);
             }
             rs.close();
@@ -183,8 +190,9 @@ public class ProblemDatabase {
                 int difficulty = rs.getInt("DIFFICULTY");
                 String type = rs.getString("TYPE");
                 int authorId = rs.getInt("USER_ID");
+                int solves = rs.getInt("SOLVES");
 
-                Problem p = new Problem(id, difficulty, title, content, type, null, null, authorId);
+                Problem p = new Problem(id, difficulty, title, content, type, null, null, solves, authorId);
 
                 System.out.println(p);
 

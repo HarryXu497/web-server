@@ -23,6 +23,9 @@
             <div class="content">
                 <div class="content--left">
                     <div><p class="problem__content">{data.content}</p></div>
+                    {#if data.solvedByUser}
+                        YOU HAVE SOLVED THIS ALREADY
+                    {/if}
                 </div>
                 <aside class="content--right">
                     <a href="/problems/{data.id}/submit" class="submit-button">

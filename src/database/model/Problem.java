@@ -11,6 +11,7 @@ public class Problem {
     private LocalDateTime date;
     private Comment comments;
     private int authorID;
+    private int solves;
 
     /**
      * Construct for class database.model.Problem
@@ -23,7 +24,7 @@ public class Problem {
      * @param comments the comments under the problem
      * @param authorID the user who authored the problem
      */
-    public Problem(int problemID, int difficulty, String title, String content, String type, LocalDateTime date, Comment comments, int authorID) {
+    public Problem(int problemID, int difficulty, String title, String content, String type, LocalDateTime date, Comment comments, int solves, int authorID) {
         setProblemID(problemID);
         setDifficulty(difficulty);
         setTitle(title);
@@ -32,6 +33,7 @@ public class Problem {
         setDate(date);
         setComments(comments);
         setAuthorID(authorID);
+        setSolves(solves);
     }
 
     /**
@@ -176,5 +178,14 @@ public class Problem {
      */
     public void setDifficulty(int difficulty) {
         this.difficulty = difficulty;
+    }
+
+    // TODO: document this
+    public int getSolves() {
+        return this.solves;
+    }
+
+    public void setSolves(int solves) {
+        this.solves = solves;
     }
 }

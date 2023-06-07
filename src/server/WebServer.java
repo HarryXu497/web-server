@@ -4,6 +4,7 @@ import assets.AssetEngine;
 import server.handler.Handler;
 import server.handler.HandlerException;
 import server.handler.Handlers;
+import server.handler.NotFoundException;
 import server.handler.routes.FileHandler;
 import server.request.Request;
 import server.response.Response;
@@ -205,7 +206,7 @@ public class WebServer {
             try {
                 Response res = requestHandlers.dispatch(req);
                 this.output.write(res.toBytes());
-            } catch (HandlerException e) {
+            } catch (HandlerException | NotFoundException e) {
                 e.printStackTrace();
                 // No handler/inappropriate handler
                 // Load error page
@@ -216,7 +217,7 @@ public class WebServer {
                             engine.getTemplate("frontend/templates/not-found.th")
                     );
 
-                    this.output.write(notFound.toString().getBytes(StandardCharsets.UTF_8));
+                    this.output.write(notFound.toBytes());
                 } catch (IOException | TemplateNotFoundException ex) {
                     ex.printStackTrace();
                     System.out.println("Cannot render 404 page");
@@ -236,7 +237,7 @@ public class WebServer {
                             engine.getTemplate("frontend/templates/error.th")
                     );
 
-                    this.output.write(serverError.toString().getBytes(StandardCharsets.UTF_8));
+                    this.output.write(serverError.toBytes());
                 } catch (IOException | TemplateNotFoundException ex) {
                     ex.printStackTrace();
                     System.out.println("Cannot render 500 page");

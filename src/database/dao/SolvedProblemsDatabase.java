@@ -34,7 +34,7 @@ public class SolvedProblemsDatabase {
         }
     }
 
-    public void addTransaction(int problemId, int userId) {
+    public void addTransaction(int userId, int problemId) {
         try {
             Class.forName("org.sqlite.JDBC");
 
@@ -52,6 +52,7 @@ public class SolvedProblemsDatabase {
 
                 stm.setInt(1, problemId);
                 stm.setInt(2, userId);
+                stm.executeUpdate();
                 c.commit();
             }
         } catch (Exception e) {
@@ -63,7 +64,7 @@ public class SolvedProblemsDatabase {
         try {
             Class.forName("org.sqlite.JDBC");
             try (
-                    Connection c = DriverManager.getConnection("jdbc:sqlite:problem.db");
+                    Connection c = DriverManager.getConnection("jdbc:sqlite:problem_user.db");
                     Statement stm = c.createStatement()
             ) {
                 c.setAutoCommit(false);
