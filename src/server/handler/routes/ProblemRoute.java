@@ -51,14 +51,25 @@ public class ProblemRoute extends Handler implements Get {
         }
 
         // TODO: make this dynamic later
-        User currentUser = this.database.users().getUserById(1);
+        User currentUser = null;
 
-        List<Integer> userSolved = this.database.solvedProblems().getAllSolvedProblems(currentUser.getUserID());
+        try {
+            currentUser = this.database.users().getUserById(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        boolean showSolved = false;
+
+        if (currentUser != null) {
+            List<Integer> userSolved = this.database.solvedProblems().getAllSolvedProblems(currentUser.getUserID());
+            showSolved = userSolved.contains(problemId);
+        }
 
         // Compile template with data
         String body = this.templateEngine.compile("frontend/templates/problem.th", new Data(
                 problemFromDB,
-                userSolved.contains(problemId)
+                showSolved
         ));
 
         // Headers
@@ -90,9 +101,13 @@ public class ProblemRoute extends Handler implements Get {
             this.content = problem.getContent();
             this.type = problem.getType();
             this.difficulty = problem.getDifficulty();
-            this.authorName = database.users().getUserById(
-                    problem.getAuthorID()
-            ).getUserName();
+            try {
+                this.authorName = database.users().getUserById(
+                        problem.getAuthorID()
+                ).getUserName();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
             this.solvedByUser = solvedByUser;
         }
     }

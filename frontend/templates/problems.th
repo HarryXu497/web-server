@@ -39,6 +39,12 @@
                             <a href="problems/{problem.id}">
                                 {problem.title}
                             </a>
+                            {#if problem.solvedByUser}
+                                Solved
+                            {/if}
+                            {#if problem.notSolvedByUser}
+                                X
+                            {/if}
                         </h2>
                         <p class="problems__problem__type">
                             {problem.type}

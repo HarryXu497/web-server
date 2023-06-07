@@ -77,8 +77,6 @@ public class SubmitRoute extends Handler implements Get, Post {
                 ""
         );
 
-        System.out.println(code);
-
         String submissionId = UUID.randomUUID().toString();
 
         try {

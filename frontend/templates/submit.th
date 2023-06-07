@@ -15,7 +15,7 @@
     {#include frontend/templates/nav.th}
 	<main class="judge">
 		<div class="title">
-			<h1>Submit Code for database.model.Problem <span>Hello</span></h1>
+			<h1>Submit Problem <span>Hello</span></h1>
 		</div>
 		<form method="POST" action="">
             <div id="code-editor">

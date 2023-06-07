@@ -8,143 +8,142 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 
 public class UserDatabase {
     public UserDatabase() {
-        Connection c = null;
-        Statement stm = null;
         try {
             Class.forName("org.sqlite.JDBC");
-            c = DriverManager.getConnection("jdbc:sqlite:user.db");
-            stm = c.createStatement();
-            String sql = "CREATE TABLE IF NOT EXISTS USERLIST " +
-                    "(ID INT PRIMARY KEY NOT NULL, " +
-                    "USERNAME TEXT, " +
-                    "NUMOFPOINT INT     NOT NULL, " +
-                    "NUMOFSOLVE INT     NOT NULL, " +
-                    "NUMOFSUBMIT INT    NOT NULL, " +
-                    "ROLE TEXT, " +
-                    "PASSWORD TEXT);";
-            stm.executeUpdate(sql);
-            stm.close();
-            c.close();
+            try (
+                Connection c = DriverManager.getConnection("jdbc:sqlite:user.db");
+                Statement stm = c.createStatement()
+            ) {
+                String sql = "CREATE TABLE IF NOT EXISTS USERLIST " +
+                        "(ID INTEGER PRIMARY KEY, " +
+                        "USERNAME TEXT, " +
+                        "NUMOFPOINT INT     NOT NULL, " +
+                        "NUMOFSOLVE INT     NOT NULL, " +
+                        "NUMOFSUBMIT INT    NOT NULL, " +
+                        "SALT TEXT NOT NULL," +
+                        "ROLE TEXT, " +
+                        "PASSWORD TEXT);";
+                stm.executeUpdate(sql);
+            }
         } catch (Exception e) {
-            System.err.println(e.getClass().getName() + ": " + e.getMessage());
-            System.exit(0);
+            throw new RuntimeException(e);
         }
     }
 
     public void addUser(User u) {
-        Connection c = null;
-        Statement stm = null;
         try {
             Class.forName("org.sqlite.JDBC");
-            c = DriverManager.getConnection("jdbc:sqlite:user.db");
-            c.setAutoCommit(false);
-            stm = c.createStatement();
-            String sql = "INSERT OR REPLACE INTO USERLIST (ID,USERNAME,NUMOFPOINT,NUMOFSOLVE,NUMOFSUBMIT,ROLE,PASSWORD) " +
-                    "VALUES (" + u.getUserID() + ", '" + u.getUserName() + "', " + u.getNumOfPoint() + ", " + u.getNumOfSolve() + ", " + u.getNumOfSubmit() + ", '" + u.getRole() + "', '" + u.getPassword() + "');";
-            stm.executeUpdate(sql);
-            stm.close();
-            c.commit();
-            c.close();
+
+            String sql = SQLStatement.insertStatement()
+                    .insertInto("USERLIST")
+                    .columns("USERNAME", "NUMOFPOINT", "NUMOFSOLVE", "NUMOFSUBMIT", "ROLE", "PASSWORD", "SALT")
+                    .values("?", "?", "?", "?", "?", "?", "?")
+                    .toString();
+
+            try (
+                    Connection c = DriverManager.getConnection("jdbc:sqlite:user.db");
+                    PreparedStatement stm = c.prepareStatement(sql);
+            ) {
+                c.setAutoCommit(false);
+
+                stm.setString(1, u.getUserName());
+                stm.setInt(2, u.getNumOfPoint());
+                stm.setInt(3, u.getNumOfSolve());
+                stm.setInt(4, u.getNumOfSubmit());
+                stm.setString(5, u.getRole());
+                stm.setString(6, u.getPassword());
+                stm.setString(7, u.getSalt());
+
+                stm.executeUpdate();
+
+                c.commit();
+            }
         } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println(e.getClass().getName() + ": " + e.getMessage());
-            System.exit(0);
+            throw new RuntimeException(e);
         }
     }
 
-    public User getUserById(int targetId) {
-        Connection c = null;
-        Statement stm = null;
+    public User getUserById(int targetId) throws SQLException {
         try {
             Class.forName("org.sqlite.JDBC");
-            c = DriverManager.getConnection("jdbc:sqlite:user.db");
-            c.setAutoCommit(false);
-            stm = c.createStatement();
-            String sql = SQLStatement.selectStatement().select("*").from("USERLIST").where("ID = " + targetId).toString();
-            ResultSet rs = stm.executeQuery( sql);
-            int id = rs.getInt("ID");
-            String userName = rs.getString("USERNAME");
-            int numOfPoint = rs.getInt("NUMOFPOINT");
-            int numOfSolve = rs.getInt("NUMOFSOLVE");
-            int numOfSubmit = rs.getInt("NUMOFSUBMIT");
-            String roleString = rs.getString("ROLE");
-            Role role = null;
-            if(roleString.equals("ADMIN")) {
-                role = Role.ADMIN;
-            } else if(roleString.equals("MODERATOR")) {
-                role = Role.MODERATOR;
-            } else if(roleString.equals("USER")) {
-                role = Role.USER;
-            }
-            User u = new User(userName, id, numOfPoint, numOfSolve, numOfSubmit, role, "pw");
-            if(targetId == u.getUserID()) {
-                return u;
-            }
-            rs.close();
-            stm.close();
-            c.commit();
-            c.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
-            System.exit(0);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
         }
-        return null;
-    }
 
-    public ArrayList<User> getAllUser() {
-        ArrayList<User> ret = new ArrayList<>();
-        Connection c = null;
-        Statement stm = null;
-        try {
-            Class.forName("org.sqlite.JDBC");
-            c = DriverManager.getConnection("jdbc:sqlite:problem.db");
+        try (
+                Connection c = DriverManager.getConnection("jdbc:sqlite:user.db");
+                Statement stm = c.createStatement();
+            ) {
             c.setAutoCommit(false);
-            stm = c.createStatement();
-            String sql = SQLStatement.selectStatement().select("*").from("USERLIST").toString();
-            ResultSet rs = stm.executeQuery(sql);
-            while (rs.next()) {
+            String sql = SQLStatement.selectStatement()
+                    .select("*")
+                    .from("USERLIST")
+                    .where("ID = " + targetId)
+                    .toString();
+
+            try (ResultSet rs = stm.executeQuery(sql)) {
                 int id = rs.getInt("ID");
                 String userName = rs.getString("USERNAME");
+                String password = rs.getString("PASSWORD");
+                String salt = rs.getString("SALT");
+
                 int numOfPoint = rs.getInt("NUMOFPOINT");
                 int numOfSolve = rs.getInt("NUMOFSOLVE");
                 int numOfSubmit = rs.getInt("NUMOFSUBMIT");
+
                 String roleString = rs.getString("ROLE");
-                Role role = null;
-                if(roleString.equals("ADMIN")) {
-                    role = Role.ADMIN;
-                } else if(roleString.equals("MODERATOR")) {
-                    role = Role.MODERATOR;
-                } else if(roleString.equals("USER")) {
-                    role = Role.USER;
-                }
-                User u = new User(userName, id, numOfPoint, numOfSolve, numOfSubmit, role, "pw");
-                ret.add(u);
+                Role role = Role.valueOf(roleString);
+
+                return new User(userName, id, numOfPoint, numOfSolve, numOfSubmit, role, password, salt);
             }
-            rs.close();
-            stm.close();
-            c.close();
-            return ret;
-        } catch (Exception e) {
-            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
-            System.exit(0);
         }
-        return null;
+
+    }
+
+    public User getByUsername(String username) throws SQLException {
+
+        try {
+            Class.forName("org.sqlite.JDBC");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        try (
+            Connection c = DriverManager.getConnection("jdbc:sqlite:user.db");
+            Statement stm = c.createStatement();
+        ) {
+            c.setAutoCommit(false);
+            String sql = SQLStatement.selectStatement()
+                    .select("*")
+                    .from("USERLIST")
+                    .where("USERNAME = " + username)
+                    .toString();
+
+            try (ResultSet resultSet = stm.executeQuery(sql)) {
+                int id = resultSet.getInt("ID");
+                String userName = resultSet.getString("USERNAME");
+                String password = resultSet.getString("PASSWORD");
+                String salt = resultSet.getString("SALT");
+
+                int numOfPoint = resultSet.getInt("NUMOFPOINT");
+                int numOfSolve = resultSet.getInt("NUMOFSOLVE");
+                int numOfSubmit = resultSet.getInt("NUMOFSUBMIT");
+
+                String roleString = resultSet.getString("ROLE");
+                Role role = Role.valueOf(roleString);
+
+                return new User(userName, id, numOfPoint, numOfSolve, numOfSubmit, role, password, salt);
+            }
+        }
     }
 
     public boolean logInMatched(User user, String password) {
-        if(user.getPassword().equals(password)) {
-            return true;
-        }
-        return false;
+        return user.getPassword().equals(password);
     }
 
     public static byte[] getSalt() throws NoSuchAlgorithmException {

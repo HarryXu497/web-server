@@ -6,6 +6,7 @@ public class User {
     private int numOfPoint;
     private int numOfSolve;
     private int numOfSubmit;
+    private String salt;
     private Role role;
     private String password;
 
@@ -18,7 +19,7 @@ public class User {
      * @param numOfSubmit the number of submit that the user have
      * @param role the role of the user
      */
-    public User(String userName, int userID, int numOfPoint, int numOfSolve, int numOfSubmit, Role role, String password) {
+    public User(String userName, int userID, int numOfPoint, int numOfSolve, int numOfSubmit, Role role, String password, String salt) {
         setUserName(userName);
         setUserID(userID);
         setNumOfPoint(numOfPoint);
@@ -26,6 +27,7 @@ public class User {
         setNumOfSubmit(numOfSubmit);
         setRole(role);
         setPassword(password);
+        setSalt(salt);
     }
 
     /**
@@ -34,14 +36,7 @@ public class User {
      * @return the variable role
      */
     public String getRole() {
-        if(role == Role.USER) {
-            return "USER";
-        } else if(role == Role.ADMIN) {
-            return "ADMIN";
-        } else if(role == Role.MODERATOR) {
-            return "MODERATOR";
-        }
-        return null;
+        return this.role.toString();
     }
 
     /**
@@ -159,5 +154,13 @@ public class User {
      */
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getSalt() {
+        return this.salt;
+    }
+
+    public void setSalt(String salt) {
+        this.salt = salt;
     }
 }

@@ -26,16 +26,16 @@ public class Main {
                         "\n" +
                         "Given two numbers A and B, determine the value of A + B.", "Simple Math", LocalDateTime.now(), null, 0, 1);
 
-        User user1 = new User("Tommy_Shan", 1, 1000, 1000, 1000000, Role.ADMIN, "12345");
-        User user2 = new User("Harry_Xu", 2, 1000, 1000, 1000000, Role.ADMIN, "54321");
-        User user3 = new User("Harry_Bad", 3, 0, 0, 100000000, Role.USER, "BAD");
-
-        UserDatabase userDatabase = new UserDatabase();
-        userDatabase.addUser(user1);
-        userDatabase.addUser(user2);
-        userDatabase.addUser(user3);
-        User resuser = userDatabase.getUserById(1);
-        System.out.println("Get database.model.User with ID = " + resuser.getUserID() + " - " + resuser.getUserName());
+//        User user1 = new User("Tommy_Shan", 1, 1000, 1000, 1000000, Role.ADMIN, "12345");
+//        User user2 = new User("Harry_Xu", 2, 1000, 1000, 1000000, Role.ADMIN, "54321");
+//        User user3 = new User("Harry_Bad", 3, 0, 0, 100000000, Role.USER, "BAD");
+//
+//        UserDatabase userDatabase = new UserDatabase();
+//        userDatabase.addUser(user1);
+//        userDatabase.addUser(user2);
+//        userDatabase.addUser(user3);
+//        User resuser = userDatabase.getUserById(1);
+//        System.out.println("Get database.model.User with ID = " + resuser.getUserID() + " - " + resuser.getUserName());
 
         ProblemDatabase problemDatabase = new ProblemDatabase();
         problemDatabase.addProblem(problem1);

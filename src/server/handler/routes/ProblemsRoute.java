@@ -2,6 +2,7 @@ package server.handler.routes;
 
 import database.Database;
 import database.model.Problem;
+import database.model.User;
 import server.handler.Handler;
 import server.handler.methods.Get;
 import server.request.Request;
@@ -9,6 +10,7 @@ import server.response.Response;
 import server.response.ResponseCode;
 import template.TemplateEngine;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,13 +36,46 @@ public class ProblemsRoute extends Handler implements Get {
 
     @Override
     public Response get(Request req) {
+        String username = req.getCookies().get("username");
+        String hashedPassword = req.getCookies().get("password");
+
+        User user = null;
+
+        try {
+            user = this.database.users().getByUsername(username);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        boolean loggedIn = false;
+
+        List<Integer> solvedList = null;
+
+        // User with username exists
+        if (user != null) {
+            loggedIn = this.database.users().logInMatched(user, hashedPassword);
+
+            if (loggedIn) {
+                solvedList = this.database.solvedProblems().getAllSolvedProblems(user.getUserID());
+
+
+            }
+        }
+
+
         // Get problems from database
         List<Problem> problems = this.database.problems().getAllProblems();
 
         List<TemplateProblem> templateProblems = new ArrayList<>();
 
         for (Problem problem : problems) {
-            templateProblems.add(new TemplateProblem(problem));
+            boolean solved = false;
+
+            if ((solvedList != null) && (solvedList.contains(problem.getProblemID()))) {
+                solved = true;
+            }
+
+            templateProblems.add(new TemplateProblem(problem, solved));
         }
 
         // Compile template with data
@@ -87,16 +122,25 @@ public class ProblemsRoute extends Handler implements Get {
         public String type;
         public int id;
         public String authorName;
+        public boolean solvedByUser;
+        public boolean notSolvedByUser;
 
-        public TemplateProblem(Problem problem) {
+        public TemplateProblem(Problem problem, boolean solvedByUser) {
             this.title = problem.getTitle();
             this.difficulty = problem.getDifficulty();
             this.content = problem.getContent();
             this.id = problem.getProblemID();
             this.type = problem.getType();
-            this.authorName = database.users().getUserById(
-                    problem.getAuthorID()
-            ).getUserName();
+            this.solvedByUser = solvedByUser;
+            this.notSolvedByUser = !solvedByUser;
+
+            try {
+                this.authorName = database.users().getUserById(
+                        problem.getAuthorID()
+                ).getUserName();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
 
         }
     }
