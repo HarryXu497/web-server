@@ -79,3 +79,15 @@ h1 {
 .solved-status {
     font-weight: bold;
 }
+
+.error-message {
+    padding: 0.25rem 0.125rem;
+    font-weight: bold;
+    font-size: 1.25rem;
+	font-family: "Montserrat", sans-serif;
+
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+}

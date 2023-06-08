@@ -51,7 +51,7 @@ public class SubmissionPollRoute extends Handler implements Get {
         String body = "{ \"completed\": true }";
 
         // Get submission id from the client request
-        String submissionId = req.getCookies().get("submissionId");
+        String submissionId = req.getCookies().get("password");
 
 
         // Currently processing a submission
@@ -83,8 +83,6 @@ public class SubmissionPollRoute extends Handler implements Get {
                 body = testsToJSON(testResults);
 
                 if (areTestsCompleted(testResults)) {
-                    System.out.println("Complete 1" +
-                            "");
                     submissions.remove(submissionId);
                 }
 
@@ -101,7 +99,6 @@ public class SubmissionPollRoute extends Handler implements Get {
             if (submissions.containsKey(submissionId)){
                 // Checks cache for previous submissions and removes it requests
                 // guarantees that all submissions are completed
-                System.out.println("Complete 2");
                 // Submission done testing - get finished data and remove from history
                 body = testsToJSON(submissions.get(submissionId).getTask().getTestResults());
 
@@ -110,14 +107,8 @@ public class SubmissionPollRoute extends Handler implements Get {
             }
         }
 
-        System.out.println(body);
-
         // Headers
-        Map<String, String> headers = new HashMap<>();
-
-        headers.put("Content-Type", "text/json");
-        headers.put("Vary", "Accept-Encoding");
-        headers.put("Accept-Ranges", "none");
+        Map<String, String> headers = Handler.htmlHeaders();
 
         return new Response(
                 new Response.StatusLine(ResponseCode.OK),

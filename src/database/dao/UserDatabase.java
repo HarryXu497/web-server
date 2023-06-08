@@ -1,16 +1,13 @@
 package database.dao;
 
-import database.model.Role;
 import database.model.User;
 import database.statement.SQLStatement;
 
-import javax.sql.rowset.serial.SerialBlob;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.sql.*;
-import java.util.Arrays;
 
 public class UserDatabase {
     public UserDatabase() {
@@ -21,8 +18,8 @@ public class UserDatabase {
                 Statement stm = c.createStatement()
             ) {
                 String sql = "CREATE TABLE IF NOT EXISTS USERLIST " +
-                        "(ID INTEGER PRIMARY KEY, " +
-                        "USERNAME TEXT, " +
+                        "(ID INTEGER PRIMARY KEY NOT NULL, " +
+                        "USERNAME TEXT UNIQUE, " +
                         "SALT BLOB NOT NULL," +
                         "PASSWORD TEXT);";
                 stm.executeUpdate(sql);
@@ -32,33 +29,34 @@ public class UserDatabase {
         }
     }
 
-    public void addUser(User u) {
+    public void addUser(User u) throws SQLException {
         try {
             Class.forName("org.sqlite.JDBC");
+        } catch (ClassNotFoundException e) {
 
-            String sql = SQLStatement.insertStatement()
-                    .insertInto("USERLIST")
-                    .columns("USERNAME", "PASSWORD", "SALT")
-                    .values("?", "?", "?")
-                    .toString();
-
-            try (
-                    Connection c = DriverManager.getConnection("jdbc:sqlite:user.db");
-                    PreparedStatement stm = c.prepareStatement(sql);
-            ) {
-                c.setAutoCommit(false);
-
-                stm.setString(1, u.getUserName());
-                stm.setString(2, u.getPassword());
-                stm.setBytes(3, u.getSalt());
-
-                stm.executeUpdate();
-
-                c.commit();
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
+
+        String sql = SQLStatement.insertStatement()
+                .insertInto("USERLIST")
+                .columns("USERNAME", "PASSWORD", "SALT")
+                .values("?", "?", "?")
+                .toString();
+
+        try (
+                Connection c = DriverManager.getConnection("jdbc:sqlite:user.db");
+                PreparedStatement stm = c.prepareStatement(sql);
+        ) {
+            c.setAutoCommit(false);
+
+            stm.setString(1, u.getUserName());
+            stm.setString(2, u.getPassword());
+            stm.setBytes(3, u.getSalt());
+
+            stm.executeUpdate();
+
+            c.commit();
+        }
+
     }
 
     public User getUserById(int targetId) throws SQLException {
@@ -121,8 +119,41 @@ public class UserDatabase {
         }
     }
 
-    public boolean authenticate(User user, String password) {
-        return user.getPassword().equals(password);
+    public User authenticate(String username, String hashedPassword) {
+        User requestedUser;
+
+        try {
+            requestedUser = this.getByUsername(username);
+        } catch (SQLException e) {
+            return null;
+        }
+
+        if (requestedUser.getPassword().equals(hashedPassword)) {
+            return requestedUser;
+        }
+
+        return null;
+    }
+
+    public User login(String username, String password) {
+
+        User requestedUser;
+
+        try {
+            requestedUser = this.getByUsername(username);
+        } catch (SQLException e) {
+            return null;
+        }
+
+        byte[] salt = requestedUser.getSalt();
+
+        String newHashedPassword = UserDatabase.hashPassword(password, salt);
+
+        if (requestedUser.getPassword().equals(newHashedPassword)) {
+            return requestedUser;
+        }
+
+        return null;
     }
 
     public static byte[] getSalt() throws NoSuchAlgorithmException {
@@ -133,8 +164,6 @@ public class UserDatabase {
     }
 
     public static String hashPassword(String password, byte[] salt) {
-        System.out.println("PARAMETERS: " + password + " : " + Arrays.toString(salt));
-
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             md.update(salt);
@@ -146,8 +175,6 @@ public class UserDatabase {
             for (byte b : bytes) {
                 hashedPassword.append(Integer.toString((b & 0xff) + 0x100, 16).substring(1));
             }
-
-            System.out.println("HASHED PASS: " + hashedPassword);
 
             return hashedPassword.toString();
 

@@ -51,13 +51,11 @@ public class ProblemRoute extends Handler implements Get {
         }
 
         // TODO: make this dynamic later
-        User currentUser = null;
+        // Authenticate user
+        String username = req.getCookies().get("username");
+        String hashedPassword = req.getCookies().get("password");
 
-        try {
-            currentUser = this.database.users().getUserById(1);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        User currentUser = this.database.users().authenticate(username, hashedPassword);
 
         boolean showSolved = false;
 
@@ -93,7 +91,7 @@ public class ProblemRoute extends Handler implements Get {
         public String type;
         public int difficulty;
         public String authorName;
-        public boolean solvedByUser;
+        public String solvedByUserText;
 
         public Data(Problem problem, boolean solvedByUser) {
             this.id = problem.getProblemID();
@@ -108,7 +106,12 @@ public class ProblemRoute extends Handler implements Get {
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
-            this.solvedByUser = solvedByUser;
+
+            if (solvedByUser) {
+                this.solvedByUserText = "[SOLVED]";
+            } else {
+                this.solvedByUserText = "";
+            }
         }
     }
 

@@ -39,38 +39,35 @@ public class ProblemsRoute extends Handler implements Get {
         String username = req.getCookies().get("username");
         String hashedPassword = req.getCookies().get("password");
 
-        User user = null;
-
-        try {
-            user = this.database.users().getByUsername(username);
-        } catch (SQLException e) {
-            // 0 means no results
-            if (e.getErrorCode() != 0) {
-                e.printStackTrace();
-            }
-        }
+        User authUser = this.database.users().authenticate(username, hashedPassword);
 
         List<Integer> solvedList = null;
 
-        // User with username exists
-        if (user != null) {
-            boolean loggedIn = this.database.users().authenticate(user, hashedPassword);
-
-            if (loggedIn) {
-                solvedList = this.database.solvedProblems().getAllSolvedProblems(user.getUserID());
-            }
+        // User authenticated
+        if (authUser != null) {
+            solvedList = this.database.solvedProblems().getAllSolvedProblems(authUser.getUserID());
         }
 
 
+        List<Problem> problems = null;
+
         // Get problems from database
-        List<Problem> problems = this.database.problems().getAllProblems();
+        try {
+            problems = this.database.problems().getAllProblems();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
-        List<TemplateProblem> templateProblems = new ArrayList<>();
+        List<TemplateProblem> templateProblems = null;
 
-        for (Problem problem : problems) {
-            boolean solved = (solvedList != null) && (solvedList.contains(problem.getProblemID()));
+        if (problems != null) {
+            templateProblems = new ArrayList<>();
 
-            templateProblems.add(new TemplateProblem(problem, solved));
+            for (Problem problem : problems) {
+                boolean solved = (solvedList != null) && (solvedList.contains(problem.getProblemID()));
+
+                templateProblems.add(new TemplateProblem(problem, solved));
+            }
         }
 
         // Compile template with data
@@ -99,8 +96,15 @@ public class ProblemsRoute extends Handler implements Get {
      */
     public static class Data {
         public List<TemplateProblem> problems;
+        public boolean isError;
 
         public Data(List<TemplateProblem> problems) {
+            // If error, create empty iterable and set error flag to true
+            if (problems == null) {
+                this.isError = true;
+                problems = new ArrayList<>();
+            }
+
             this.problems = problems;
         }
     }

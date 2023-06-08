@@ -26,6 +26,8 @@
                 <input type="password" id="password" name="password">
             </div>
 
+            {data.errorMessage}
+
             <div class="button-group">
                 <button type="submit">
                     Sign Up

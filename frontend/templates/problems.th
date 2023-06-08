@@ -33,6 +33,11 @@
                         Difficulty
                     </p>
                 </div>
+                {#if data.isError}
+                    <div class="error-message">
+                        An Error Occured. Please Try Again.
+                    </div>
+                {/if}
                 {#for problem in data.problems}
                     <div class="problems__problem">
                         <h2 class="problems__problem__name">

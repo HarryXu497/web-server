@@ -3,6 +3,9 @@ package server.handler.routes;
 import coderunner.CodeRunner;
 import coderunner.Submission;
 import coderunner.Task;
+import coderunner.Utils;
+import database.Database;
+import database.model.User;
 import server.handler.Handler;
 import server.handler.methods.Get;
 import server.handler.methods.Post;
@@ -29,23 +32,39 @@ public class SubmitRoute extends Handler implements Get, Post {
 
     private final TemplateEngine templateEngine;
     private final CodeRunner codeRunner;
+    private final Database database;
 
-    public SubmitRoute(TemplateEngine templateEngine, CodeRunner codeRunner) {
+    public SubmitRoute(TemplateEngine templateEngine, CodeRunner codeRunner, Database database) {
         this.templateEngine = templateEngine;
         this.codeRunner = codeRunner;
+        this.database = database;
     }
 
     @Override
     public Response get(Request req) {
+        String username = req.getCookies().get("username");
+        String password = req.getCookies().get("password");
+
+        User currentUser = this.database.users().authenticate(username, password);
+
+        // Do not allow access -> redirect to login page
+        if (currentUser == null) {
+            Map<String, String> redirectHeaders = new HashMap<>();
+
+            redirectHeaders.put("Location", "http://localhost:5000/log-in");
+
+            return new Response(
+                    new Response.StatusLine(ResponseCode.FOUND),
+                    redirectHeaders,
+                    ""
+            );
+        }
+
         // Compile template with data
         String body = this.templateEngine.compile("frontend/templates/submit.th", null);
 
         // Headers
-        Map<String, String> headers = new HashMap<>();
-
-        headers.put("Content-Type", "text/html; charset=iso-8859-1");
-        headers.put("Vary", "Accept-Encoding");
-        headers.put("Accept-Ranges", "none");
+        Map<String, String> headers = Handler.htmlHeaders();
 
         return new Response(
                 new Response.StatusLine(ResponseCode.OK),
@@ -77,38 +96,40 @@ public class SubmitRoute extends Handler implements Get, Post {
                 ""
         );
 
-        String submissionId = UUID.randomUUID().toString();
+        // Get user information
+        String username = req.getCookies().get("username");
+        String password = req.getCookies().get("password");
 
-        try {
-            // TODO: interpolate the problem id into the file name
-            // TODO: interpolate problem id?? into the requestId
-            this.codeRunner.enqueue(new Submission(
-                    new Task(
-                            code,
-                            "problems/problem1/Main.java",
-                            Arrays.asList(
-                                    "problems/problem1/input/input1.txt",
-                                    "problems/problem1/input/input2.txt"
-                            ),
-                            Arrays.asList(
-                                    "problems/problem1/output/out1.txt",
-                                    "problems/problem1/output/out2.txt"
-                            ),
-                            Arrays.asList(
-                                    "problems/problem1/answers/ans1.txt",
-                                    "problems/problem1/answers/ans2.txt"
-                            )
-                    ),
-                    submissionId
-            ));
-        } catch (IOException e) {
-            return errorResponse;
+        // Authenticate
+        User currentUser = this.database.users().authenticate(username, password);
+
+        // User authenticated
+        if (currentUser != null) {
+            // Get problem id
+            String problemId = req.getStatusLine().getRouteParams().get("problemId");
+
+            // Queue submission
+            try {
+                this.codeRunner.enqueue(new Submission(
+                        new Task(
+                                code,
+                                "problems/" + problemId + "/Main.java",
+                                Utils.allFilesInDirectory("problems/" + problemId + "/input"),
+                                Utils.allFilesInDirectory("problems/" + problemId + "/output"),
+                                Utils.allFilesInDirectory("problems/" + problemId + "/answers")
+                        ),
+                        password
+                ));
+            } catch (IOException e) {
+                return errorResponse;
+            }
+
+            // Redirect to tests page
+            headers.put("Location", "http://localhost:5000/problems/" + problemId + "/tests");
+        } else {
+            // Redirect to log in if not authenticated
+            headers.put("Location", "http://localhost:5000/log-in?next=" + req.getStatusLine().getLocation());
         }
-
-        String problemId = req.getStatusLine().getRouteParams().get("problemId");
-
-        headers.put("Location", "http://localhost:5000/problems/" + problemId + "/tests");
-        headers.put("Set-Cookie", "submissionId=" + submissionId);
 
         return new Response(
                 new Response.StatusLine(ResponseCode.SEE_OTHER),

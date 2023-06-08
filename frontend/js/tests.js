@@ -161,6 +161,21 @@ function queued(responseData) {
     testsDiv.append(h1);
 }
 
+function notFound() {
+    // Clear div
+    while (testsDiv.lastChild) {
+        testsDiv.removeChild(testsDiv.lastChild);
+    }
+
+    const h1 = document.createElement("h1");
+    const headerText = document.createTextNode("Not Found");
+
+    h1.classList.add("center")
+    h1.append(headerText)
+
+    testsDiv.append(h1);
+}
+
 let build = true;
 
 var interval = setInterval(async () => {
@@ -169,7 +184,6 @@ var interval = setInterval(async () => {
 
 var testHandler = async () => {
     const responseData = await testsHandler();
-    console.log(responseData)
 
     if ("error" in responseData) {
         compilationError(responseData.error);
@@ -187,6 +201,10 @@ var testHandler = async () => {
     }
 
     if (responseData.completed) {
+        if (Object.keys(responseData).length == 1) {
+            notFound();
+        }
+
         clearInterval(interval);
     }
 

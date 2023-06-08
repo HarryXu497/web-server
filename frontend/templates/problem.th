@@ -18,14 +18,12 @@
         <section class="problem">
             <h1 class="problem__name">
                 {data.name}
+                <span class="solved-status">{data.solvedByUserText}</span>
             </h1>
             <hr>
             <div class="content">
                 <div class="content--left">
                     <div><p class="problem__content">{data.content}</p></div>
-                    {#if data.solvedByUser}
-                        YOU HAVE SOLVED THIS ALREADY
-                    {/if}
                 </div>
                 <aside class="content--right">
                     <a href="/problems/{data.id}/submit" class="submit-button">

@@ -20,7 +20,7 @@ public class Filter {
                         break;
                     }
                 }
-                if(accept == false) {
+                if(!accept) {
                     return "Illegal Library Imported (For Example java.lang.invoke, java.awt)";
                 }
             }

@@ -9,65 +9,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class ProblemDatabase {
-    public ProblemDatabase() {
-        try {
-            Class.forName("org.sqlite.JDBC");
-            try (
-                Connection c = DriverManager.getConnection("jdbc:sqlite:problem.db");
-                Statement stm = c.createStatement()
-            ) {
-                String sql = "CREATE TABLE IF NOT EXISTS PROBLEMLIST " +
-                        "(ID INTEGER PRIMARY KEY, " +
-                        "TITLE TEXT, " +
-                        "CONTENT TEXT, " +
-                        "DIFFICULTY INT     NOT NULL, " +
-                        "TYPE TEXT          NOT NULL, " +
-                        "USER_ID     NOT NULL," +
-                        "FOREIGN KEY (USER_ID)" +
-                        "   REFERENCES USERLIST (USER_ID));";
-
-                stm.executeUpdate(sql);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void addProblem(Problem p) {
-        try {
-            Class.forName("org.sqlite.JDBC");
-
-            String sql = SQLStatement.insertStatement()
-                    .insertInto("PROBLEMLIST")
-                    .columns("TITLE", "CONTENT", "DIFFICULTY", "TYPE", "USER_ID")
-                    .values("?", "?", "?", "?", "?")
-                    .toString();
-
-            try (
-                    Connection c = DriverManager.getConnection("jdbc:sqlite:problem.db");
-                    PreparedStatement stm = c.prepareStatement(sql)
-            ) {
-                c.setAutoCommit(false);
-
-                stm.setString(1, p.getTitle());
-                stm.setString(2, p.getContent());
-                stm.setInt(3, p.getDifficulty());
-                stm.setString(4, p.getType());
-                stm.setInt(5, p.getAuthorID());
-                stm.executeUpdate();
-                c.commit();
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public Problem getProblemById(int targetId) throws SQLException {
+    public ProblemDatabase() throws SQLException {
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e) {
@@ -78,15 +23,68 @@ public class ProblemDatabase {
             Connection c = DriverManager.getConnection("jdbc:sqlite:problem.db");
             Statement stm = c.createStatement()
         ) {
-            c.setAutoCommit(false);
+            String sql = "CREATE TABLE IF NOT EXISTS PROBLEMLIST " +
+                    "(ID INTEGER PRIMARY KEY NOT NULL, " +
+                    "TITLE TEXT, " +
+                    "CONTENT TEXT, " +
+                    "DIFFICULTY INT     NOT NULL, " +
+                    "TYPE TEXT          NOT NULL, " +
+                    "USER_ID     NOT NULL," +
+                    "FOREIGN KEY (USER_ID)" +
+                    "   REFERENCES USERLIST (USER_ID));";
 
-            String sql = SQLStatement.selectStatement()
-                    .select("*")
-                    .from("PROBLEMLIST")
-                    .where("ID = " + targetId)
-                    .toString();
+            stm.executeUpdate(sql);
+        }
+    }
 
-            try (ResultSet rs = stm.executeQuery(sql)) {
+    public void addProblem(Problem p) throws SQLException {
+        try {
+            Class.forName("org.sqlite.JDBC");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        String sql = SQLStatement.insertStatement()
+                .insertInto("PROBLEMLIST")
+                .columns("TITLE", "CONTENT", "DIFFICULTY", "TYPE", "USER_ID")
+                .values("?", "?", "?", "?", "?")
+                .toString();
+
+        try (
+                Connection c = DriverManager.getConnection("jdbc:sqlite:problem.db");
+                PreparedStatement stm = c.prepareStatement(sql)
+        ) {
+            stm.setString(1, p.getTitle());
+            stm.setString(2, p.getContent());
+            stm.setInt(3, p.getDifficulty());
+            stm.setString(4, p.getType());
+            stm.setInt(5, p.getAuthorID());
+
+            stm.executeUpdate();
+        }
+    }
+
+    public Problem getProblemById(int targetId) throws SQLException {
+        try {
+            Class.forName("org.sqlite.JDBC");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        String sql = SQLStatement.selectStatement()
+                .select("*")
+                .from("PROBLEMLIST")
+                .where("ID = ?")
+                .toString();
+
+        try (
+            Connection c = DriverManager.getConnection("jdbc:sqlite:problem.db");
+            PreparedStatement stm = c.prepareStatement(sql)
+        ) {
+
+            stm.setInt(1, targetId);
+
+            try (ResultSet rs = stm.executeQuery()) {
                 int id = rs.getInt("ID");
                 String title = rs.getString("TITLE");
                 String content = rs.getString("CONTENT");
@@ -99,22 +97,62 @@ public class ProblemDatabase {
         }
     }
 
-    public Problem getProblemByTitle(String targetTitle) {
+    public Problem getProblemByTitle(String targetTitle) throws SQLException {
         try {
             Class.forName("org.sqlite.JDBC");
-            try (
-                    Connection c = DriverManager.getConnection("jdbc:sqlite:problem.db");
-                    Statement stm = c.createStatement();
-                ) {
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
 
-                c.setAutoCommit(false);
+        String sql = SQLStatement.selectStatement()
+                .select("*")
+                .from("PROBLEMLIST")
+                .where("TITLE = ?")
+                .toString();
 
-                String sql = SQLStatement.selectStatement()
-                        .select("*")
-                        .from("PROBLEMLIST")
-                        .where("TITLE = \"" + targetTitle + "\"")
-                        .toString();
-                try (ResultSet rs = stm.executeQuery(sql)) {
+        try (
+                Connection c = DriverManager.getConnection("jdbc:sqlite:problem.db");
+                PreparedStatement stm = c.prepareStatement(sql)
+            ) {
+
+            stm.setString(1, targetTitle);
+
+            try (ResultSet rs = stm.executeQuery()) {
+                int id = rs.getInt("ID");
+                String title = rs.getString("TITLE");
+                String content = rs.getString("CONTENT");
+                int difficulty = rs.getInt("DIFFICULTY");
+                String type = rs.getString("TYPE");
+                int authorId = rs.getInt("USER_ID");
+
+                return new Problem(id, difficulty, title, content, type, authorId);
+            }
+        }
+    }
+    public ArrayList<Problem> getProblemByType(String targetType) throws SQLException {
+        try {
+            Class.forName("org.sqlite.JDBC");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        String sql = SQLStatement.selectStatement()
+                .select("*")
+                .from("PROBLEMLIST")
+                .where("TYPE = ?")
+                .toString();
+
+        ArrayList<Problem> problems = new ArrayList<>();
+
+        try (
+                Connection c = DriverManager.getConnection("jdbc:sqlite:problem.db");
+                PreparedStatement statement = c.prepareStatement(sql)
+            ) {
+
+            statement.setString(1, targetType);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
                     int id = rs.getInt("ID");
                     String title = rs.getString("TITLE");
                     String content = rs.getString("CONTENT");
@@ -122,84 +160,48 @@ public class ProblemDatabase {
                     String type = rs.getString("TYPE");
                     int authorId = rs.getInt("USER_ID");
 
-                    return new Problem(id, difficulty, title, content, type, authorId);
+                    problems.add(new Problem(id, difficulty, title, content, type, authorId));
                 }
             }
-        } catch (Exception e) {
+        }
+
+        return problems;
+    }
+
+    public ArrayList<Problem> getAllProblems() throws SQLException {
+        try {
+            Class.forName("org.sqlite.JDBC");
+        } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
-    }
-    public ArrayList<Problem> getProblemByType(String targetType) {
-        ArrayList<Problem> ret = new ArrayList<>();
-        Connection c = null;
-        Statement stm = null;
-        try {
-            Class.forName("org.sqlite.JDBC");
-            c = DriverManager.getConnection("jdbc:sqlite:problem.db");
-            c.setAutoCommit(false);
-            stm = c.createStatement();
-            String sql = SQLStatement.selectStatement().select("*").from("PROBLEMLIST").where("TYPE = '" + targetType + "'").toString();
-            ResultSet rs = stm.executeQuery(sql);
-            while (rs.next()) {
-                int id = rs.getInt("ID");
-                String title = rs.getString("TITLE");
-                String content = rs.getString("CONTENT");
-                int difficulty = rs.getInt("DIFFICULTY");
-                String type = rs.getString("TYPE");
-                int authorId = rs.getInt("USER_ID");
 
-                Problem p = new Problem(id, difficulty, title, content, type, authorId);
-                ret.add(p);
-            }
-            rs.close();
-            stm.close();
-            c.close();
-            return ret;
-        } catch (Exception e) {
-            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
-            System.exit(0);
-        }
-        return null;
-    }
+        ArrayList<Problem> problems = new ArrayList<>();
 
-    public ArrayList<Problem> getAllProblems() {
-        ArrayList<Problem> ret = new ArrayList<>();
-        Connection c = null;
-        Statement stm = null;
-        try {
-            Class.forName("org.sqlite.JDBC");
-            c = DriverManager.getConnection("jdbc:sqlite:problem.db");
-            c.setAutoCommit(false);
-            stm = c.createStatement();
+        try (
+                Connection c = DriverManager.getConnection("jdbc:sqlite:problem.db");
+                Statement stm = c.createStatement()
+            ) {
+
+
             String sql = SQLStatement.selectStatement()
                     .select("*")
                     .from("PROBLEMLIST")
                     .toString();
 
-            ResultSet rs = stm.executeQuery(sql);
+            try (ResultSet rs = stm.executeQuery(sql)) {
+                while (rs.next()) {
+                    int id = rs.getInt("ID");
+                    String title = rs.getString("TITLE");
+                    String content = rs.getString("CONTENT");
+                    int difficulty = rs.getInt("DIFFICULTY");
+                    String type = rs.getString("TYPE");
+                    int authorId = rs.getInt("USER_ID");
 
-            while (rs.next()) {
-                int id = rs.getInt("ID");
-                String title = rs.getString("TITLE");
-                String content = rs.getString("CONTENT");
-                int difficulty = rs.getInt("DIFFICULTY");
-                String type = rs.getString("TYPE");
-                int authorId = rs.getInt("USER_ID");
-
-                Problem p = new Problem(id, difficulty, title, content, type, authorId);
-
-                System.out.println(p);
-
-                ret.add(p);
+                    problems.add(new Problem(id, difficulty, title, content, type, authorId));
+                }
             }
-            rs.close();
-            stm.close();
-            c.close();
-            return ret;
-        } catch (Exception e) {
-            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
-            System.exit(0);
         }
-        return null;
+
+        return problems;
     }
 }

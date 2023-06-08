@@ -102,3 +102,7 @@ main {
 .problem__info > div > span:nth-of-type(1) {
     font-weight: bold;
 }
+
+.solved-status {
+    font-weight: bold;
+}

@@ -1,5 +1,6 @@
 import assets.AssetEngine;
 import coderunner.CodeRunner;
+import coderunner.Utils;
 import database.Database;
 import database.dao.UserDatabase;
 import database.model.Problem;
@@ -16,7 +17,6 @@ import server.handler.routes.SubmitRoute;
 import server.handler.routes.TestsRoute;
 import template.TemplateEngine;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -76,7 +76,7 @@ public class Main {
             routes.put("/", new HomeRoute(templateEngine));
             routes.put("/problems/", new ProblemsRoute(templateEngine, database));
             routes.put("/problems/:problemId", new ProblemRoute(templateEngine, database));
-            routes.put("/problems/:problemId/submit", new SubmitRoute(templateEngine, codeRunner));
+            routes.put("/problems/:problemId/submit", new SubmitRoute(templateEngine, codeRunner, database));
             routes.put("/problems/:problemId/tests", new TestsRoute(templateEngine, codeRunner));
             routes.put("/problems/:problemId/submissions", new SubmissionPollRoute(codeRunner));
             routes.put("/sign-up", new SignUpRoute(templateEngine, database));

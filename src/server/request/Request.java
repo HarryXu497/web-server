@@ -45,7 +45,12 @@ public class Request {
         if (rawCookies != null) {
             for (String cookiePair : rawCookies.split(";")) {
                 String[] cookieKeyValue = cookiePair.trim().split("=");
-                this.cookies.put(cookieKeyValue[0], cookieKeyValue[1]);
+
+                if (cookieKeyValue.length == 1) {
+                    this.cookies.put(cookieKeyValue[0], "");
+                } else {
+                    this.cookies.put(cookieKeyValue[0], cookieKeyValue[1]);
+                }
             }
         }
     }
