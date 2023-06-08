@@ -18,10 +18,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * Responsible for handling the problem submission route ("/problems/:problemId/submit")
@@ -51,7 +49,7 @@ public class SubmitRoute extends Handler implements Get, Post {
         if (currentUser == null) {
             Map<String, String> redirectHeaders = new HashMap<>();
 
-            redirectHeaders.put("Location", "http://localhost:5000/log-in");
+            redirectHeaders.put("Location", "http://localhost:5000/log-in?next=" + req.getStatusLine().getLocation());
 
             return new Response(
                     new Response.StatusLine(ResponseCode.FOUND),

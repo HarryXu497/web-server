@@ -53,7 +53,15 @@ public class LogInRoute extends Handler implements Get, Post {
         User authUser = this.database.users().login(username, password);
 
         if (authUser != null) {
-            headers.put("Location", "http://localhost:5000/");
+            // Redirect to `next` query parameter
+            String redirectTo = req.getStatusLine().getQueryParams().get("next");
+
+            // Redirect to home page if no `next` query parameter
+            if (redirectTo == null) {
+                redirectTo = "";
+            }
+
+            headers.put("Location", "http://localhost:5000" + redirectTo);
             headers.put("Set-Cookie", "username=" + username + "; Secure\nSet-Cookie: password=" + authUser.getPassword() + "; Secure");
         } else {
             headers.put("Location", "http://localhost:5000/log-in?error=2");

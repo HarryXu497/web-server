@@ -77,7 +77,7 @@ public class Main {
             routes.put("/problems/", new ProblemsRoute(templateEngine, database));
             routes.put("/problems/:problemId", new ProblemRoute(templateEngine, database));
             routes.put("/problems/:problemId/submit", new SubmitRoute(templateEngine, codeRunner, database));
-            routes.put("/problems/:problemId/tests", new TestsRoute(templateEngine, codeRunner));
+            routes.put("/problems/:problemId/tests", new TestsRoute(templateEngine, database));
             routes.put("/problems/:problemId/submissions", new SubmissionPollRoute(codeRunner));
             routes.put("/sign-up", new SignUpRoute(templateEngine, database));
             routes.put("/log-in", new LogInRoute(templateEngine, database));

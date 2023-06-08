@@ -5,10 +5,9 @@
     <div class="nav__links">
         <ul>
             <li><a href="/problems">Problems</a></li>
-            <li><a href="/contests">Contests</a></li>
             <li><a href="/discussion">Discussion</a></li>
             <li><a href="/about">About</a></li>
-            <li><a href="/log-in">Get Started</a></li>
+            <li><a href="/log-in">Log In</a></li>
         </ul>
         <div class="nav__hamburger">
             <div class="nav__hamburger__line"></div>
