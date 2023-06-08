@@ -33,7 +33,7 @@ public class UserDatabase {
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e) {
-
+            throw new RuntimeException(e);
         }
 
         String sql = SQLStatement.insertStatement()
@@ -46,15 +46,12 @@ public class UserDatabase {
                 Connection c = DriverManager.getConnection("jdbc:sqlite:user.db");
                 PreparedStatement stm = c.prepareStatement(sql);
         ) {
-            c.setAutoCommit(false);
 
             stm.setString(1, u.getUserName());
             stm.setString(2, u.getPassword());
             stm.setBytes(3, u.getSalt());
 
             stm.executeUpdate();
-
-            c.commit();
         }
 
     }
@@ -65,19 +62,21 @@ public class UserDatabase {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
+        String sql = SQLStatement.selectStatement()
+                .select("*")
+                .from("USERLIST")
+                .where("ID = ?")
+                .toString();
+
 
         try (
                 Connection c = DriverManager.getConnection("jdbc:sqlite:user.db");
-                Statement stm = c.createStatement()
+                PreparedStatement statement = c.prepareStatement(sql);
             ) {
-            c.setAutoCommit(false);
-            String sql = SQLStatement.selectStatement()
-                    .select("*")
-                    .from("USERLIST")
-                    .where("ID = " + targetId)
-                    .toString();
 
-            try (ResultSet rs = stm.executeQuery(sql)) {
+            statement.setInt(1, targetId);
+
+            try (ResultSet rs = statement.executeQuery()) {
                 int id = rs.getInt("ID");
                 String userName = rs.getString("USERNAME");
                 String password = rs.getString("PASSWORD");
@@ -97,18 +96,20 @@ public class UserDatabase {
             throw new RuntimeException(e);
         }
 
+        String sql = SQLStatement.selectStatement()
+                .select("*")
+                .from("USERLIST")
+                .where("USERNAME = ?")
+                .toString();
+
         try (
             Connection c = DriverManager.getConnection("jdbc:sqlite:user.db");
-            Statement stm = c.createStatement();
+            PreparedStatement statement = c.prepareStatement(sql);
         ) {
-            c.setAutoCommit(false);
-            String sql = SQLStatement.selectStatement()
-                    .select("*")
-                    .from("USERLIST")
-                    .where("USERNAME = \"" + username + "\"")
-                    .toString();
 
-            try (ResultSet resultSet = stm.executeQuery(sql)) {
+            statement.setString(1, username);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
                 int id = resultSet.getInt("ID");
                 String userName = resultSet.getString("USERNAME");
                 String password = resultSet.getString("PASSWORD");
