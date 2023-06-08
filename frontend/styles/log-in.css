@@ -77,3 +77,13 @@ main {
 	cursor: pointer;
 	background-color: hsl(0, 0%, 55%);
 }
+
+.error-message {
+    font-weight: bold;
+    font-size: 0.875rem;
+    color: red;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}

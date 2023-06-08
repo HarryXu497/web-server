@@ -10,6 +10,7 @@ import server.response.Response;
 import server.response.ResponseCode;
 import template.TemplateEngine;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,7 +31,9 @@ public class LogInRoute extends Handler implements Get, Post {
     public Response get(Request req) {
         Map<String, String> headers = Handler.htmlHeaders();
 
-        String body = this.templateEngine.compile("frontend/templates/log-in.th", null);
+        String errorCode = req.getStatusLine().getQueryParams().get("error");
+
+        String body = this.templateEngine.compile("frontend/templates/log-in.th", new Data(errorCode));
 
         return new Response(
                 new Response.StatusLine(ResponseCode.OK),
@@ -50,9 +53,10 @@ public class LogInRoute extends Handler implements Get, Post {
         String username = body.get("username");
         String password = body.get("password");
 
-        User authUser = this.database.users().login(username, password);
+        // Log in user
+        User currentUser = this.database.users().login(username, password);
 
-        if (authUser != null) {
+        if (currentUser != null) {
             // Redirect to `next` query parameter
             String redirectTo = req.getStatusLine().getQueryParams().get("next");
 
@@ -62,9 +66,10 @@ public class LogInRoute extends Handler implements Get, Post {
             }
 
             headers.put("Location", "http://localhost:5000" + redirectTo);
-            headers.put("Set-Cookie", "username=" + username + "; Secure\nSet-Cookie: password=" + authUser.getPassword() + "; Secure");
+            headers.put("Set-Cookie", "username=" + username + "; Secure\nSet-Cookie: password=" + currentUser.getPassword() + "; Secure");
         } else {
-            headers.put("Location", "http://localhost:5000/log-in?error=2");
+            // Server error
+            headers.put("Location", "http://localhost:5000/log-in?error=1");
         }
 
         return new Response(
@@ -72,5 +77,28 @@ public class LogInRoute extends Handler implements Get, Post {
                 headers,
                 ""
         );
+    }
+
+    /**
+     * Container class for template data
+     * @author Harry Xu
+     * @version 1.0 - June 8th 2023
+     */
+    public static class Data {
+        /** Error message for the sign-up form*/
+        public String errorMessage;
+
+        /**
+         * Constructs a data container object with an error code
+         * @param errorCode the vendor-specific SQLite error code
+         */
+        public Data(String errorCode) {
+            // Username exists already
+            if (errorCode == null) {
+                this.errorMessage = "";
+            } else {
+                this.errorMessage = "<div class=\"error-message\">Something Went Wrong</div>";
+            }
+        }
     }
 }

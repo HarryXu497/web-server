@@ -9,6 +9,7 @@ import server.WebServer;
 import server.handler.Handler;
 import server.handler.routes.HomeRoute;
 import server.handler.routes.LogInRoute;
+import server.handler.routes.LogOutRoute;
 import server.handler.routes.ProblemRoute;
 import server.handler.routes.ProblemsRoute;
 import server.handler.routes.SignUpRoute;
@@ -81,6 +82,7 @@ public class Main {
             routes.put("/problems/:problemId/submissions", new SubmissionPollRoute(codeRunner));
             routes.put("/sign-up", new SignUpRoute(templateEngine, database));
             routes.put("/log-in", new LogInRoute(templateEngine, database));
+            routes.put("/log-out", new LogOutRoute());
             routes.put("/:id", new HomeRoute(templateEngine));
 
             // Assets

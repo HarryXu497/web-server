@@ -121,7 +121,7 @@ public class SignUpRoute extends Handler implements Get, Post {
 
         /**
          * Constructs a data container object with an error code
-         *
+         * @param errorCode the vendor-specific SQLite error code
          */
         public Data(String errorCode) {
             // Username exists already
