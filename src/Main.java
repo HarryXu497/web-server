@@ -1,6 +1,9 @@
 import assets.AssetEngine;
 import coderunner.CodeRunner;
 import database.Database;
+import database.dao.UserDatabase;
+import database.model.Problem;
+import database.model.User;
 import server.WebServer;
 import server.handler.Handler;
 import server.handler.routes.HomeRoute;
@@ -13,6 +16,7 @@ import server.handler.routes.SubmitRoute;
 import server.handler.routes.TestsRoute;
 import template.TemplateEngine;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -28,6 +32,44 @@ public class Main {
 
             Database database = new Database();
 
+            byte[] salt = UserDatabase.getSalt();
+            String password = UserDatabase.hashPassword("cheese", salt);
+
+
+            database.users().addUser(
+                    new User(
+                            -1,
+                            "Tommy_Shan",
+                            password,
+                            salt
+                    )
+            );
+
+            database.problems().addProblem(
+                    new Problem(
+                            -1,
+                            1,
+                            "Trianglane",
+                            "Tommy feels sleepy during geography class, so he decides to do his math homework. He is shocked when he opened his homework packaged that's assigned my Mr. Choi...\n" +
+                            "\n" +
+                            "It's too hard for him, a grade 9 student, to solve the problem. So he asked you to help him solve the problem for him.\n" +
+                            "\n" +
+                            "Given two numbers A and B, determine the value of A + B.",
+                            "Simple Math",
+                            1
+                    )
+            );
+
+            Problem p = database.problems().getProblemByTitle("Trianglane");
+            User u = database.users().getByUsername("Tommy_Shan");
+
+            System.out.println(p.getTitle());
+            System.out.println("\t" + p.getProblemID());
+            System.out.println(u.getUserName());
+            System.out.println("\t" + u.getUserID());
+
+            database.solvedProblems().addTransaction(u.getUserID(), p.getProblemID());
+
             // Routes
             LinkedHashMap<String, Handler> routes = new LinkedHashMap<>();
 
@@ -38,7 +80,7 @@ public class Main {
             routes.put("/problems/:problemId/tests", new TestsRoute(templateEngine, codeRunner));
             routes.put("/problems/:problemId/submissions", new SubmissionPollRoute(codeRunner));
             routes.put("/sign-up", new SignUpRoute(templateEngine, database));
-            routes.put("/log-in", new LogInRoute(templateEngine));
+            routes.put("/log-in", new LogInRoute(templateEngine, database));
             routes.put("/:id", new HomeRoute(templateEngine));
 
             // Assets

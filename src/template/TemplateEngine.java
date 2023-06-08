@@ -274,15 +274,20 @@ public class TemplateEngine {
                             // Evaluate target boolean
                             Object value = parseExpression(openingDirTokens[1], namespace, directiveVariables);
 
-                            // check for boolean
-                            if (value instanceof Boolean) {
-                                boolean showSnippet = (Boolean) value;
+                            // skip if the root is an allowed root
+                            if (!directiveVariables.contains(openingDirTokens[1].split("\\.")[0])) {
+                                // check for boolean
+                                if (value instanceof Boolean) {
+                                    boolean showSnippet = (Boolean) value;
 
-                                if (!showSnippet) {
-                                    snippet = "";
+                                    if (!showSnippet) {
+                                        snippet = "";
+                                    }
                                 }
-                            } else {
-                                throw new TemplateSyntaxException("If condition must be a boolean value");
+                                else {
+                                    System.out.println("VALUE: " + value);
+                                    throw new TemplateSyntaxException("If condition must be a boolean value: " + openingDir);
+                                }
                             }
 
                             // Insert snippet

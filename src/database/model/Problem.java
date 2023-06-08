@@ -1,17 +1,12 @@
 package database.model;
 
-import java.time.LocalDateTime;
-
 public class Problem {
     private int problemID;
     private int difficulty;
     private String title;
     private String content;
     private String type;
-    private LocalDateTime date;
-    private Comment comments;
     private int authorID;
-    private int solves;
 
     /**
      * Construct for class database.model.Problem
@@ -20,20 +15,15 @@ public class Problem {
      * @param title the title of the problem
      * @param content the content of the problem
      * @param type the type of the problem
-     * @param date the date of the problem created
-     * @param comments the comments under the problem
      * @param authorID the user who authored the problem
      */
-    public Problem(int problemID, int difficulty, String title, String content, String type, LocalDateTime date, Comment comments, int solves, int authorID) {
+    public Problem(int problemID, int difficulty, String title, String content, String type, int authorID) {
         setProblemID(problemID);
         setDifficulty(difficulty);
         setTitle(title);
         setContent(content);
         setType(type);
-        setDate(date);
-        setComments(comments);
         setAuthorID(authorID);
-        setSolves(solves);
     }
 
     /**
@@ -109,42 +99,6 @@ public class Problem {
     }
 
     /**
-     * getComments
-     * Getter method for variable comments
-     * @return variable comments
-     */
-    public Comment getComments() {
-        return comments;
-    }
-
-    /**
-     * setComments
-     * Setter method for variable comments
-     * @param comments variable comments
-     */
-    public void setComments(Comment comments) {
-        this.comments = comments;
-    }
-
-    /**
-     * getDate
-     * Getter method for variable date
-     * @return variable date
-     */
-    public LocalDateTime getDate() {
-        return date;
-    }
-
-    /**
-     * setDate
-     * Setter method for variable date
-     * @param date variable date
-     */
-    public void setDate(LocalDateTime date) {
-        this.date = date;
-    }
-
-    /**
      * getType
      * Getter method for variable type
      * @return variable type
@@ -178,14 +132,5 @@ public class Problem {
      */
     public void setDifficulty(int difficulty) {
         this.difficulty = difficulty;
-    }
-
-    // TODO: document this
-    public int getSolves() {
-        return this.solves;
-    }
-
-    public void setSolves(int solves) {
-        this.solves = solves;
     }
 }

@@ -4,12 +4,13 @@ import database.model.Role;
 import database.model.User;
 import database.statement.SQLStatement;
 
+import javax.sql.rowset.serial.SerialBlob;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.sql.*;
-import java.util.ArrayList;
+import java.util.Arrays;
 
 public class UserDatabase {
     public UserDatabase() {
@@ -22,11 +23,7 @@ public class UserDatabase {
                 String sql = "CREATE TABLE IF NOT EXISTS USERLIST " +
                         "(ID INTEGER PRIMARY KEY, " +
                         "USERNAME TEXT, " +
-                        "NUMOFPOINT INT     NOT NULL, " +
-                        "NUMOFSOLVE INT     NOT NULL, " +
-                        "NUMOFSUBMIT INT    NOT NULL, " +
-                        "SALT TEXT NOT NULL," +
-                        "ROLE TEXT, " +
+                        "SALT BLOB NOT NULL," +
                         "PASSWORD TEXT);";
                 stm.executeUpdate(sql);
             }
@@ -41,8 +38,8 @@ public class UserDatabase {
 
             String sql = SQLStatement.insertStatement()
                     .insertInto("USERLIST")
-                    .columns("USERNAME", "NUMOFPOINT", "NUMOFSOLVE", "NUMOFSUBMIT", "ROLE", "PASSWORD", "SALT")
-                    .values("?", "?", "?", "?", "?", "?", "?")
+                    .columns("USERNAME", "PASSWORD", "SALT")
+                    .values("?", "?", "?")
                     .toString();
 
             try (
@@ -52,12 +49,8 @@ public class UserDatabase {
                 c.setAutoCommit(false);
 
                 stm.setString(1, u.getUserName());
-                stm.setInt(2, u.getNumOfPoint());
-                stm.setInt(3, u.getNumOfSolve());
-                stm.setInt(4, u.getNumOfSubmit());
-                stm.setString(5, u.getRole());
-                stm.setString(6, u.getPassword());
-                stm.setString(7, u.getSalt());
+                stm.setString(2, u.getPassword());
+                stm.setBytes(3, u.getSalt());
 
                 stm.executeUpdate();
 
@@ -77,7 +70,7 @@ public class UserDatabase {
 
         try (
                 Connection c = DriverManager.getConnection("jdbc:sqlite:user.db");
-                Statement stm = c.createStatement();
+                Statement stm = c.createStatement()
             ) {
             c.setAutoCommit(false);
             String sql = SQLStatement.selectStatement()
@@ -90,16 +83,9 @@ public class UserDatabase {
                 int id = rs.getInt("ID");
                 String userName = rs.getString("USERNAME");
                 String password = rs.getString("PASSWORD");
-                String salt = rs.getString("SALT");
+                byte[] salt = rs.getBytes("SALT");
 
-                int numOfPoint = rs.getInt("NUMOFPOINT");
-                int numOfSolve = rs.getInt("NUMOFSOLVE");
-                int numOfSubmit = rs.getInt("NUMOFSUBMIT");
-
-                String roleString = rs.getString("ROLE");
-                Role role = Role.valueOf(roleString);
-
-                return new User(userName, id, numOfPoint, numOfSolve, numOfSubmit, role, password, salt);
+                return new User(id, userName, password, salt);
             }
         }
 
@@ -121,28 +107,21 @@ public class UserDatabase {
             String sql = SQLStatement.selectStatement()
                     .select("*")
                     .from("USERLIST")
-                    .where("USERNAME = " + username)
+                    .where("USERNAME = \"" + username + "\"")
                     .toString();
 
             try (ResultSet resultSet = stm.executeQuery(sql)) {
                 int id = resultSet.getInt("ID");
                 String userName = resultSet.getString("USERNAME");
                 String password = resultSet.getString("PASSWORD");
-                String salt = resultSet.getString("SALT");
+                byte[] salt = resultSet.getBytes("SALT");
 
-                int numOfPoint = resultSet.getInt("NUMOFPOINT");
-                int numOfSolve = resultSet.getInt("NUMOFSOLVE");
-                int numOfSubmit = resultSet.getInt("NUMOFSUBMIT");
-
-                String roleString = resultSet.getString("ROLE");
-                Role role = Role.valueOf(roleString);
-
-                return new User(userName, id, numOfPoint, numOfSolve, numOfSubmit, role, password, salt);
+                return new User(id, userName, password, salt);
             }
         }
     }
 
-    public boolean logInMatched(User user, String password) {
+    public boolean authenticate(User user, String password) {
         return user.getPassword().equals(password);
     }
 
@@ -154,20 +133,27 @@ public class UserDatabase {
     }
 
     public static String hashPassword(String password, byte[] salt) {
-        String hashedPassword = null;
+        System.out.println("PARAMETERS: " + password + " : " + Arrays.toString(salt));
+
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             md.update(salt);
+
             byte[] bytes = md.digest(password.getBytes(StandardCharsets.UTF_8));
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < bytes.length; i++) {
-                sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
+
+            StringBuilder hashedPassword = new StringBuilder();
+
+            for (byte b : bytes) {
+                hashedPassword.append(Integer.toString((b & 0xff) + 0x100, 16).substring(1));
             }
-            hashedPassword = sb.toString();
+
+            System.out.println("HASHED PASS: " + hashedPassword);
+
+            return hashedPassword.toString();
+
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
-        return hashedPassword;
     }
 }

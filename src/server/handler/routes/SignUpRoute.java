@@ -45,7 +45,6 @@ public class SignUpRoute extends Handler implements Get, Post {
 
     @Override
     public Response post(Request req) {
-
         Map<String, String> body = req.getBody();
 
         String username = body.get("username");
@@ -61,21 +60,11 @@ public class SignUpRoute extends Handler implements Get, Post {
             throw new RuntimeException(e);
         }
 
-        StringBuilder saltAsString = new StringBuilder();
-
-        for (byte b : salt) {
-            saltAsString.append(b);
-        }
-
         this.database.users().addUser(new User(
-                username,
                 -1, // User id does not matter for insert
-                0,
-                0,
-                0,
-                Role.USER,
+                username,
                 hashedPassword,
-                saltAsString.toString()
+                salt
         ));
 
         Map<String, String> headers = new HashMap<>();

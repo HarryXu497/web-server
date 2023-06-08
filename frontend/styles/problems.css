@@ -75,3 +75,7 @@ h1 {
     flex-basis: 10%;
     flex-shrink: 0;
 }
+
+.solved-status {
+    font-weight: bold;
+}

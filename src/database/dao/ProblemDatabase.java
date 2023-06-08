@@ -27,7 +27,6 @@ public class ProblemDatabase {
                         "DIFFICULTY INT     NOT NULL, " +
                         "TYPE TEXT          NOT NULL, " +
                         "USER_ID     NOT NULL," +
-                        "SOLVES INT NOT NULL," +
                         "FOREIGN KEY (USER_ID)" +
                         "   REFERENCES USERLIST (USER_ID));";
 
@@ -45,8 +44,8 @@ public class ProblemDatabase {
 
             String sql = SQLStatement.insertStatement()
                     .insertInto("PROBLEMLIST")
-                    .columns("ID", "TITLE", "CONTENT", "DIFFICULTY", "TYPE", "USER_ID", "SOLVES")
-                    .values("?", "?", "?", "?", "?", "?", "?")
+                    .columns("TITLE", "CONTENT", "DIFFICULTY", "TYPE", "USER_ID")
+                    .values("?", "?", "?", "?", "?")
                     .toString();
 
             try (
@@ -55,13 +54,11 @@ public class ProblemDatabase {
             ) {
                 c.setAutoCommit(false);
 
-                stm.setInt(1, p.getProblemID());
-                stm.setString(2, p.getTitle());
-                stm.setString(3, p.getContent());
-                stm.setInt(4, p.getDifficulty());
-                stm.setString(5, p.getType());
-                stm.setInt(6, p.getAuthorID());
-                stm.setInt(7, p.getSolves());
+                stm.setString(1, p.getTitle());
+                stm.setString(2, p.getContent());
+                stm.setInt(3, p.getDifficulty());
+                stm.setString(4, p.getType());
+                stm.setInt(5, p.getAuthorID());
                 stm.executeUpdate();
                 c.commit();
             }
@@ -96,9 +93,8 @@ public class ProblemDatabase {
                 int difficulty = rs.getInt("DIFFICULTY");
                 String type = rs.getString("TYPE");
                 int authorId = rs.getInt("USER_ID");
-                int solves = rs.getInt("SOLVES");
 
-                return new Problem(id, difficulty, title, content, type, LocalDateTime.now(), null, solves, authorId);
+                return new Problem(id, difficulty, title, content, type, authorId);
             }
         }
     }
@@ -116,7 +112,7 @@ public class ProblemDatabase {
                 String sql = SQLStatement.selectStatement()
                         .select("*")
                         .from("PROBLEMLIST")
-                        .where("TITLE = " + targetTitle)
+                        .where("TITLE = \"" + targetTitle + "\"")
                         .toString();
                 try (ResultSet rs = stm.executeQuery(sql)) {
                     int id = rs.getInt("ID");
@@ -125,9 +121,8 @@ public class ProblemDatabase {
                     int difficulty = rs.getInt("DIFFICULTY");
                     String type = rs.getString("TYPE");
                     int authorId = rs.getInt("USER_ID");
-                    int solves = rs.getInt("SOLVES");
 
-                    return new Problem(id, difficulty, title, content, type, null, null, solves, authorId);
+                    return new Problem(id, difficulty, title, content, type, authorId);
                 }
             }
         } catch (Exception e) {
@@ -152,9 +147,8 @@ public class ProblemDatabase {
                 int difficulty = rs.getInt("DIFFICULTY");
                 String type = rs.getString("TYPE");
                 int authorId = rs.getInt("USER_ID");
-                int solves = rs.getInt("SOLVES");
 
-                Problem p = new Problem(id, difficulty, title, content, type, null, null, solves, authorId);
+                Problem p = new Problem(id, difficulty, title, content, type, authorId);
                 ret.add(p);
             }
             rs.close();
@@ -181,8 +175,9 @@ public class ProblemDatabase {
                     .select("*")
                     .from("PROBLEMLIST")
                     .toString();
-            System.out.println(sql);
+
             ResultSet rs = stm.executeQuery(sql);
+
             while (rs.next()) {
                 int id = rs.getInt("ID");
                 String title = rs.getString("TITLE");
@@ -190,9 +185,8 @@ public class ProblemDatabase {
                 int difficulty = rs.getInt("DIFFICULTY");
                 String type = rs.getString("TYPE");
                 int authorId = rs.getInt("USER_ID");
-                int solves = rs.getInt("SOLVES");
 
-                Problem p = new Problem(id, difficulty, title, content, type, null, null, solves, authorId);
+                Problem p = new Problem(id, difficulty, title, content, type, authorId);
 
                 System.out.println(p);
 

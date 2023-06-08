@@ -44,21 +44,20 @@ public class ProblemsRoute extends Handler implements Get {
         try {
             user = this.database.users().getByUsername(username);
         } catch (SQLException e) {
-            e.printStackTrace();
+            // 0 means no results
+            if (e.getErrorCode() != 0) {
+                e.printStackTrace();
+            }
         }
-
-        boolean loggedIn = false;
 
         List<Integer> solvedList = null;
 
         // User with username exists
         if (user != null) {
-            loggedIn = this.database.users().logInMatched(user, hashedPassword);
+            boolean loggedIn = this.database.users().authenticate(user, hashedPassword);
 
             if (loggedIn) {
                 solvedList = this.database.solvedProblems().getAllSolvedProblems(user.getUserID());
-
-
             }
         }
 
@@ -69,11 +68,7 @@ public class ProblemsRoute extends Handler implements Get {
         List<TemplateProblem> templateProblems = new ArrayList<>();
 
         for (Problem problem : problems) {
-            boolean solved = false;
-
-            if ((solvedList != null) && (solvedList.contains(problem.getProblemID()))) {
-                solved = true;
-            }
+            boolean solved = (solvedList != null) && (solvedList.contains(problem.getProblemID()));
 
             templateProblems.add(new TemplateProblem(problem, solved));
         }
@@ -122,8 +117,7 @@ public class ProblemsRoute extends Handler implements Get {
         public String type;
         public int id;
         public String authorName;
-        public boolean solvedByUser;
-        public boolean notSolvedByUser;
+        public String solvedStatus;
 
         public TemplateProblem(Problem problem, boolean solvedByUser) {
             this.title = problem.getTitle();
@@ -131,8 +125,12 @@ public class ProblemsRoute extends Handler implements Get {
             this.content = problem.getContent();
             this.id = problem.getProblemID();
             this.type = problem.getType();
-            this.solvedByUser = solvedByUser;
-            this.notSolvedByUser = !solvedByUser;
+
+            if (solvedByUser) {
+                this.solvedStatus = " [Solved]";
+            } else {
+                this.solvedStatus = "";
+            }
 
             try {
                 this.authorName = database.users().getUserById(
