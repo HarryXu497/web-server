@@ -21,11 +21,22 @@ public class LogInRoute extends Handler implements Get, Post {
     /** The database used to create and store users */
     private final Database database;
 
+    /**
+     * Constructs a LogInRoute handler with its dependencies
+     * @param templateEngine the template engine used to compile templates
+     * @param database the database to authenticate and login users with
+     * */
     public LogInRoute(TemplateEngine templateEngine, Database database) {
         this.templateEngine = templateEngine;
         this.database = database;
     }
 
+    /**
+     * get
+     * handles the GET request on the request's url
+     * @param req the HTTP request to handle
+     * @return the server HTTP response
+     */
     @Override
     public Response get(Request req) {
         // Headers
@@ -34,8 +45,10 @@ public class LogInRoute extends Handler implements Get, Post {
         // Get error code
         String errorCode = req.getStatusLine().getQueryParams().get("error");
 
+        // Authenticate user
         User currentUser = this.database.users().getCurrentUserFromRequest(req);
 
+        // Compile template with data
         String body = this.templateEngine.compile("frontend/templates/log-in.th", new Data(errorCode, currentUser != null));
 
         return new Response(
@@ -45,6 +58,12 @@ public class LogInRoute extends Handler implements Get, Post {
         );
     }
 
+    /**
+     * post
+     * Handles the POST request on the request's url
+     * @param req the HTTP request to handle
+     * @return the server HTTP response
+     */
     @Override
     public Response post(Request req) {
         // Get request body

@@ -10,6 +10,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class LogOutRoute extends Handler implements Post {
+    /**
+     * post
+     * Handles the POST request on the request's url
+     * @param req the HTTP request to handle
+     * @return the server HTTP response
+     */
     @Override
     public Response post(Request req) {
 
