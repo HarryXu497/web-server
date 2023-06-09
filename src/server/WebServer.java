@@ -54,7 +54,7 @@ public class WebServer {
      * @param engine the templating engine used to compile .th files to html
      * @param assetMap maps the assets in a directory to a URL on which to host them
      * */
-    public WebServer(TemplateEngine engine, AssetEngine assets, LinkedHashMap<String, Handler> routes, Map<String, String> assetMap) {
+    public WebServer(TemplateEngine engine, AssetEngine assets, LinkedHashMap<String, Handler> routes, Map<String, String> assetMap, Handler notFoundRoute) {
         this.requestHandlers = new Handlers();
 
         this.engine = engine;
@@ -79,6 +79,10 @@ public class WebServer {
             Handler handler = route.getValue();
 
             this.requestHandlers.register(url, handler);
+        }
+
+        if (notFoundRoute != null) {
+            this.requestHandlers.registerNotFoundHandler(notFoundRoute);
         }
     }
 
@@ -209,12 +213,12 @@ public class WebServer {
             } catch (HandlerException | NotFoundException e) {
                 e.printStackTrace();
                 // No handler/inappropriate handler
-                // Load error page
+                // Load not found page
                 try {
                     Response notFound = new Response(
                             new Response.StatusLine(ResponseCode.NOT_FOUND),
                             new HashMap<>(),
-                            engine.getTemplate("frontend/templates/not-found.th")
+                            engine.compile("frontend/templates/not-found.th", null)
                     );
 
                     this.output.write(notFound.toBytes());

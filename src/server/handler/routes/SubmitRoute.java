@@ -6,6 +6,7 @@ import coderunner.Task;
 import coderunner.Utils;
 import database.Database;
 import database.model.User;
+import filter.Filter;
 import server.handler.Handler;
 import server.handler.NotFoundException;
 import server.handler.methods.Get;
@@ -58,7 +59,7 @@ public class SubmitRoute extends Handler implements Get, Post {
         }
 
         // Compile template with data
-        String body = this.templateEngine.compile("frontend/templates/submit.th", new Data(true));
+        String body = this.templateEngine.compile("frontend/templates/submit.th", new Data(currentUser));
 
         // Headers
         Map<String, String> headers = Handler.htmlHeaders();
@@ -146,12 +147,21 @@ public class SubmitRoute extends Handler implements Get, Post {
         /** if the user is authenticated */
         public boolean loggedIn;
 
+        /** the points that the authenticated user has or -1 if there is no logged-in user*/
+        public int points;
+
         /**
          * Constructs this container class
-         * @param loggedIn if the user is authenticated
+         * @param currentUser the current user if authenticated or null otherwise
          */
-        public Data(boolean loggedIn) {
-            this.loggedIn = loggedIn;
+        public Data(User currentUser) {
+            this.loggedIn = currentUser != null;
+
+            if (this.loggedIn) {
+                this.points = currentUser.getPoints();
+            } else {
+                this.points = -1;
+            }
         }
     }
 }

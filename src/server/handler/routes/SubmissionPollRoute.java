@@ -7,6 +7,7 @@ import coderunner.TaskResult;
 import coderunner.test.TestCode;
 import coderunner.test.TestResult;
 import database.Database;
+import database.model.Problem;
 import database.model.User;
 import server.handler.Handler;
 import server.handler.methods.Get;
@@ -15,7 +16,7 @@ import server.response.Response;
 import server.response.ResponseCode;
 
 import java.sql.SQLException;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -93,11 +94,53 @@ public class SubmissionPollRoute extends Handler implements Get {
                 body = testsToJSON(testResults);
 
                 if (areTestsCompleted(testResults)) {
-                    // Mark this problem as solved by the user
-                    this.addUserTransaction(username);
+                    try {
+                        // Get user
+                        User currentUser = this.database.users().getByUsername(username);
+
+                        List<Integer> solvedProblems = this.database.solvedProblems().getAllSolvedProblems(currentUser.getUserID());
+
+                        boolean alreadySolved = solvedProblems.contains(submission.getProblemId());
+
+                        if (!alreadySolved) {
+
+                            // Get user id
+                            int userId = currentUser.getUserID();
+
+                            // Get user information
+                            int oldPoints = currentUser.getPoints();
+                            int problemDifficulty = this.database.problems()
+                                    .getProblemById(submission.getProblemId())
+                                    .getDifficulty();
+                            int problemsSolved = this.database.solvedProblems().getAllSolvedProblems(userId).size();
+
+                            // Increment if problem solved is one to avoid denominator of 0
+                            if (problemsSolved <= 2) {
+                                problemsSolved = 2;
+                            }
+
+                            // Calculate new points
+                            double denominator = Math.log(problemsSolved) / Math.log(2);
+                            int newPoints = oldPoints + (int) Math.floor((problemDifficulty * 100) / (denominator));
+
+                            // Add points
+                            this.database.users().updatePoints(userId, newPoints);
+                        }
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+
+                    try {
+                        // Mark this problem as solved by the user
+                        this.addUserTransaction(username);
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+
 
                     // Remove submission
                     submissions.remove(submissionId);
+
                 }
 
             } else if (queuedPosition != -1) {
@@ -114,10 +157,52 @@ public class SubmissionPollRoute extends Handler implements Get {
                 // Checks cache for previous submissions and removes it requests
                 // guarantees that all submissions are completed
                 // Submission done testing - get finished data and remove from history
-                body = testsToJSON(submissions.get(submissionId).getTask().getTestResults());
+                Submission requestedSubmission = submissions.get(submissionId);
 
-                // Mark this problem as solved by the user
-                this.addUserTransaction(username);
+                body = testsToJSON(requestedSubmission.getTask().getTestResults());
+
+                try {
+                    // Get user
+                    User currentUser = this.database.users().getByUsername(username);
+
+                    List<Integer> solvedProblems = this.database.solvedProblems().getAllSolvedProblems(currentUser.getUserID());
+
+                    boolean alreadySolved = solvedProblems.contains(requestedSubmission.getProblemId());
+
+                    if (!alreadySolved) {
+
+                        // Get user id
+                        int userId = currentUser.getUserID();
+
+                        // Get user information
+                        int oldPoints = currentUser.getPoints();
+                        int problemDifficulty = this.database.problems()
+                                .getProblemById(requestedSubmission.getProblemId())
+                                .getDifficulty();
+                        int problemsSolved = this.database.solvedProblems().getAllSolvedProblems(userId).size();
+
+                        // Increment if problem solved is one to avoid denominator of 0
+                        if (problemsSolved <= 2) {
+                            problemsSolved = 2;
+                        }
+
+                        // Calculate new points
+                        double denominator = Math.log(problemsSolved) / Math.log(2);
+                        int newPoints = oldPoints + (int) Math.floor((problemDifficulty * 100) / (denominator));
+
+                        // Add points
+                        this.database.users().updatePoints(userId, newPoints);
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+                try {
+                    // Mark this problem as solved by the user
+                    this.addUserTransaction(username);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
 
                 // Remove submission (i.e. end polling)
                 submissions.remove(submissionId);
@@ -134,7 +219,7 @@ public class SubmissionPollRoute extends Handler implements Get {
         );
     }
 
-    private void addUserTransaction(String username) {
+    private void addUserTransaction(String username) throws SQLException {
         User currentUser;
 
         try {

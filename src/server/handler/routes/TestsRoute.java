@@ -1,7 +1,5 @@
 package server.handler.routes;
 
-import coderunner.CodeRunner;
-import coderunner.Submission;
 import database.Database;
 import database.model.User;
 import server.handler.Handler;
@@ -11,11 +9,6 @@ import server.response.Response;
 import server.response.ResponseCode;
 import template.TemplateEngine;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,7 +48,7 @@ public class TestsRoute extends Handler implements Get {
         }
 
         // Compile template with data
-        String body = this.templateEngine.compile("frontend/templates/tests.th", new Data(true));
+        String body = this.templateEngine.compile("frontend/templates/tests.th", new Data(currentUser));
 
         // Headers
         Map<String, String> headers = Handler.htmlHeaders();
@@ -76,12 +69,21 @@ public class TestsRoute extends Handler implements Get {
         /** if the user is authenticated */
         public boolean loggedIn;
 
+        /** the points that the authenticated user has or -1 if there is no logged-in user*/
+        public int points;
+
         /**
          * Constructs this container class
-         * @param loggedIn if the user is authenticated
+         * @param currentUser the current user if authenticated or null otherwise
          */
-        public Data(boolean loggedIn) {
-            this.loggedIn = loggedIn;
+        public Data(User currentUser) {
+            this.loggedIn = currentUser != null;
+
+            if (this.loggedIn) {
+                this.points = currentUser.getPoints();
+            } else {
+                this.points = -1;
+            }
         }
     }
 }

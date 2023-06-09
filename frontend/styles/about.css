@@ -1,0 +1,42 @@
+body {
+	background-color: black;
+}
+
+main {
+    padding-top: 2rem;
+	height: calc(100vh - 7rem);
+    object-fit: contain;
+    background:
+        linear-gradient(
+              rgba(0, 0, 0, 0.7),
+              rgba(0, 0, 0, 0.7)
+        ),
+        url("/static/images/bg.jpg");
+}
+
+main {
+    color: white;
+}
+
+h1 {
+    font-weight: bold;
+    font-family: "Montserrat", sans-serif;
+    font-size: 3rem;
+
+    margin: 0 auto;
+    margin-top: 2rem;
+
+    width: fit-content;
+}
+
+.content {
+    width: clamp(20rem, 60%, 64rem);
+    margin: 0 auto;
+    color: white;
+    height: 100%;
+
+    white-space: pre-wrap;
+
+    font-family: "Montserrat", sans-serif;
+    font-size: 1.25rem;
+}

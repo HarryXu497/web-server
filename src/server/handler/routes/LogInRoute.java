@@ -49,7 +49,7 @@ public class LogInRoute extends Handler implements Get, Post {
         User currentUser = this.database.users().getCurrentUserFromRequest(req);
 
         // Compile template with data
-        String body = this.templateEngine.compile("frontend/templates/log-in.th", new Data(errorCode, currentUser != null));
+        String body = this.templateEngine.compile("frontend/templates/log-in.th", new Data(errorCode, currentUser));
 
         return new Response(
                 new Response.StatusLine(ResponseCode.OK),
@@ -116,12 +116,15 @@ public class LogInRoute extends Handler implements Get, Post {
         /** Change navbar based on authentication status */
         public boolean loggedIn;
 
+        /** The points the user has */
+        public int points;
+
         /**
          * Constructs a data container object with an error code
          * @param errorCode the vendor-specific SQLite error code
-         * @param loggedIn if the user is logged in, which would necessitate a different navbar
+         * @param currentUser the logged-in user, or null if not logged-in
          */
-        public Data(String errorCode, boolean loggedIn) {
+        public Data(String errorCode, User currentUser) {
             // Username exists already
             if (errorCode == null) {
                 this.errorMessage = "";
@@ -129,7 +132,13 @@ public class LogInRoute extends Handler implements Get, Post {
                 this.errorMessage = "<div class=\"error-message\">Something Went Wrong</div>";
             }
 
-            this.loggedIn = loggedIn;
+            this.loggedIn = currentUser != null;
+
+            if (this.loggedIn) {
+                this.points = currentUser.getPoints();
+            } else {
+                this.points = -1;
+            }
         }
     }
 }

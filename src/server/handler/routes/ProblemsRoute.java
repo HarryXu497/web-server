@@ -12,7 +12,6 @@ import template.TemplateEngine;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -72,7 +71,7 @@ public class ProblemsRoute extends Handler implements Get {
         // Compile template with data
         String body = this.templateEngine.compile("frontend/templates/problems.th", new Data(
                 templateProblems,
-                currentUser != null
+                currentUser
         ));
 
         // Headers
@@ -94,8 +93,9 @@ public class ProblemsRoute extends Handler implements Get {
         public List<TemplateProblem> problems;
         public boolean isError;
         public boolean loggedIn;
+        public int points;
 
-        public Data(List<TemplateProblem> problems, boolean loggedIn) {
+        public Data(List<TemplateProblem> problems, User currentUser) {
             // If error, create empty iterable and set error flag to true
             if (problems == null) {
                 this.isError = true;
@@ -103,7 +103,14 @@ public class ProblemsRoute extends Handler implements Get {
             }
 
             this.problems = problems;
-            this.loggedIn = loggedIn;
+
+            this.loggedIn = currentUser != null;
+
+            if (this.loggedIn) {
+                this.points = currentUser.getPoints();
+            } else {
+                this.points = -1;
+            }
         }
     }
 

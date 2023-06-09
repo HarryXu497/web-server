@@ -16,11 +16,15 @@ public class Handlers {
     /** mapping of URL patterns to handlers */
     private final LinkedHashMap<URL, Handler> registry;
 
+    /** handler for the not found page */
+    private Handler notFoundHandler;
+
     /**
      * constructs a Handlers class with an empty registry
      */
     public Handlers() {
         this.registry = new LinkedHashMap<>();
+        this.notFoundHandler = null;
     }
 
     /**
@@ -31,6 +35,15 @@ public class Handlers {
      */
     public void register(URL route, Handler handler) {
         this.registry.put(route, handler);
+    }
+
+    /**
+     * registerNotFoundHandler
+     * Registers a handler to be invoked when a resource cannot be found
+     * @param handler the route handler
+     */
+    public void registerNotFoundHandler(Handler handler) {
+        this.notFoundHandler = handler;
     }
 
     /**
@@ -63,8 +76,22 @@ public class Handlers {
                 System.out.println(req.getStatusLine());
 
                 // Dispatch the handle method
-                return entry.getValue().handle(req);
+                try {
+                    return entry.getValue().handle(req);
+                } catch (NotFoundException e) {
+                    // Dispatch not found handler if it exists
+                    if (this.notFoundHandler != null) {
+                        return this.notFoundHandler.handle(req);
+                    }
+
+                    throw e;
+                }
             }
+        }
+
+        // Dispatch not found handler if it exists
+        if (this.notFoundHandler != null) {
+            return this.notFoundHandler.handle(req);
         }
 
         throw new HandlerException("No handler can handle the request " + req.getStatusLine());

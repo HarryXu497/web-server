@@ -3,12 +3,9 @@ package coderunner;
 import coderunner.test.Test;
 import coderunner.test.TestCode;
 import coderunner.test.TestResult;
+import filter.Filter;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -72,10 +69,6 @@ public class Task {
         this.testResults = new TestResult[this.tests.size()];
     }
 
-    public boolean filter() {
-        return false;
-    }
-
     /**
      * write
      * opens and writes the source code to the specified source code file
@@ -97,6 +90,26 @@ public class Task {
      * @throws IOException if an IO error occurs while reading to the file
      */
     public TaskResult compile() throws IOException, InterruptedException {
+        // Filter code for illegal imports
+        StringBuilder sourceCode = new StringBuilder();
+
+        try (BufferedReader file = new BufferedReader(new FileReader(this.sourceFile))) {
+            int currentChar = file.read();
+
+            while (currentChar != -1) {
+                sourceCode.append((char) currentChar);
+                currentChar = file.read();
+            }
+        }
+
+        String errorMessage = Filter.filter(sourceCode.toString());
+
+        // Return error message
+        if (errorMessage != null) {
+            this.compilationResult = new TaskResult(TaskCode.COMPILE_ERROR, errorMessage);
+            return this.compilationResult;
+        }
+
         // Get working directory
         String workingDirectory = System.getProperty("user.dir");
 

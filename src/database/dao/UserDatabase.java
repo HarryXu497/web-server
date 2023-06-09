@@ -23,7 +23,8 @@ public class UserDatabase {
                         "(ID INTEGER PRIMARY KEY NOT NULL, " +
                         "USERNAME TEXT UNIQUE, " +
                         "SALT BLOB NOT NULL," +
-                        "PASSWORD TEXT);";
+                        "PASSWORD TEXT NOT NULL," +
+                        "POINTS INT NOT NULL);";
                 stm.executeUpdate(sql);
             }
         } catch (Exception e) {
@@ -31,7 +32,7 @@ public class UserDatabase {
         }
     }
 
-    public void addUser(User u) throws SQLException {
+    public void addUser(User user) throws SQLException {
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e) {
@@ -40,20 +41,21 @@ public class UserDatabase {
 
         String sql = SQLStatement.insertStatement()
                 .insertInto("USERLIST")
-                .columns("USERNAME", "PASSWORD", "SALT")
-                .values("?", "?", "?")
+                .columns("USERNAME", "PASSWORD", "SALT", "POINTS")
+                .values("?", "?", "?", "?")
                 .toString();
 
         try (
-                Connection c = DriverManager.getConnection("jdbc:sqlite:user.db");
-                PreparedStatement stm = c.prepareStatement(sql);
+                Connection conn = DriverManager.getConnection("jdbc:sqlite:user.db");
+                PreparedStatement statement = conn.prepareStatement(sql);
         ) {
 
-            stm.setString(1, u.getUserName());
-            stm.setString(2, u.getPassword());
-            stm.setBytes(3, u.getSalt());
+            statement.setString(1, user.getUserName());
+            statement.setString(2, user.getPassword());
+            statement.setBytes(3, user.getSalt());
+            statement.setInt(4, user.getPoints());
 
-            stm.executeUpdate();
+            statement.executeUpdate();
         }
 
     }
@@ -78,20 +80,20 @@ public class UserDatabase {
 
             statement.setInt(1, targetId);
 
-            try (ResultSet rs = statement.executeQuery()) {
-                int id = rs.getInt("ID");
-                String userName = rs.getString("USERNAME");
-                String password = rs.getString("PASSWORD");
-                byte[] salt = rs.getBytes("SALT");
+            try (ResultSet results = statement.executeQuery()) {
+                int id = results.getInt("ID");
+                String userName = results.getString("USERNAME");
+                String password = results.getString("PASSWORD");
+                byte[] salt = results.getBytes("SALT");
+                int points = results.getInt("POINTS");
 
-                return new User(id, userName, password, salt);
+                return new User(id, userName, password, salt, points);
             }
         }
 
     }
 
     public User getByUsername(String username) throws SQLException {
-
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e) {
@@ -111,14 +113,41 @@ public class UserDatabase {
 
             statement.setString(1, username);
 
-            try (ResultSet resultSet = statement.executeQuery()) {
-                int id = resultSet.getInt("ID");
-                String userName = resultSet.getString("USERNAME");
-                String password = resultSet.getString("PASSWORD");
-                byte[] salt = resultSet.getBytes("SALT");
+            try (ResultSet results = statement.executeQuery()) {
+                int id = results.getInt("ID");
+                String userName = results.getString("USERNAME");
+                String password = results.getString("PASSWORD");
+                byte[] salt = results.getBytes("SALT");
+                int points = results.getInt("POINTS");
 
-                return new User(id, userName, password, salt);
+                return new User(id, userName, password, salt, points);
             }
+        }
+    }
+
+    public void updatePoints(int userId, int newPoints) throws SQLException {
+        try {
+            Class.forName("org.sqlite.JDBC");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        String sql = SQLStatement.updateStatement()
+                .update("USERLIST")
+                .columns("POINTS")
+                .values("?")
+                .where("ID = ?")
+                .toString();
+
+        try (
+                Connection conn = DriverManager.getConnection("jdbc:sqlite:user.db");
+                PreparedStatement statement = conn.prepareStatement(sql);
+        ) {
+
+            statement.setInt(1, newPoints);
+            statement.setInt(2, userId);
+
+            statement.executeUpdate();
         }
     }
 
@@ -157,34 +186,6 @@ public class UserDatabase {
         }
 
         return null;
-    }
-
-    public static byte[] getSalt() throws NoSuchAlgorithmException {
-        SecureRandom random = new SecureRandom();
-        byte[] salt = new byte[16];
-        random.nextBytes(salt);
-        return salt;
-    }
-
-    public static String hashPassword(String password, byte[] salt) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            md.update(salt);
-
-            byte[] bytes = md.digest(password.getBytes(StandardCharsets.UTF_8));
-
-            StringBuilder hashedPassword = new StringBuilder();
-
-            for (byte b : bytes) {
-                hashedPassword.append(Integer.toString((b & 0xff) + 0x100, 16).substring(1));
-            }
-
-            return hashedPassword.toString();
-
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
     }
 
     /**
@@ -226,8 +227,8 @@ public class UserDatabase {
         String sql = SQLStatement.insertStatement()
                 .insertInto("USERLIST")
                 .orReplace()
-                .columns("ID", "USERNAME", "PASSWORD", "SALT")
-                .values("?", "?", "?", "?")
+                .columns("ID", "USERNAME", "PASSWORD", "SALT", "POINTS")
+                .values("?", "?", "?", "?", "?")
                 .toString();
 
         try (
@@ -240,8 +241,37 @@ public class UserDatabase {
             stm.setString(2, username);
             stm.setString(3, hashedPassword);
             stm.setBytes(4, salt);
+            stm.setInt(5, 0);
 
             stm.executeUpdate();
+        }
+    }
+
+    public static byte[] getSalt() throws NoSuchAlgorithmException {
+        SecureRandom random = new SecureRandom();
+        byte[] salt = new byte[16];
+        random.nextBytes(salt);
+        return salt;
+    }
+
+    public static String hashPassword(String password, byte[] salt) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            md.update(salt);
+
+            byte[] bytes = md.digest(password.getBytes(StandardCharsets.UTF_8));
+
+            StringBuilder hashedPassword = new StringBuilder();
+
+            for (byte b : bytes) {
+                hashedPassword.append(Integer.toString((b & 0xff) + 0x100, 16).substring(1));
+            }
+
+            return hashedPassword.toString();
+
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 }

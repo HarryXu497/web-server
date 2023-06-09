@@ -1,22 +1,10 @@
 import assets.AssetEngine;
 import coderunner.CodeRunner;
-import coderunner.Utils;
 import database.Database;
-import database.dao.UserDatabase;
-import database.model.Problem;
 import database.model.User;
-import database.statement.SQLStatement;
 import server.WebServer;
 import server.handler.Handler;
-import server.handler.routes.HomeRoute;
-import server.handler.routes.LogInRoute;
-import server.handler.routes.LogOutRoute;
-import server.handler.routes.ProblemRoute;
-import server.handler.routes.ProblemsRoute;
-import server.handler.routes.SignUpRoute;
-import server.handler.routes.SubmissionPollRoute;
-import server.handler.routes.SubmitRoute;
-import server.handler.routes.TestsRoute;
+import server.handler.routes.*;
 import template.TemplateEngine;
 
 import java.util.HashMap;
@@ -53,9 +41,13 @@ public class Main {
             routes.put("/problems/:problemId/submit", new SubmitRoute(templateEngine, codeRunner, database));
             routes.put("/problems/:problemId/tests", new TestsRoute(templateEngine, database));
             routes.put("/problems/:problemId/submissions", new SubmissionPollRoute(codeRunner, database));
+            routes.put("/about", new AboutRoute(templateEngine, database));
             routes.put("/sign-up", new SignUpRoute(templateEngine, database));
             routes.put("/log-in", new LogInRoute(templateEngine, database));
             routes.put("/log-out", new LogOutRoute());
+
+            // Not found handler
+            Handler notFoundHandler = new NotFoundRoute(templateEngine, database);
 
             // Assets
             Map<String, String> assets = new HashMap<>();
@@ -63,7 +55,7 @@ public class Main {
             assets.put("frontend/images/", "/static/images/");
             assets.put("frontend/js/", "/static/js/");
 
-            WebServer server = new WebServer(templateEngine, assetEngine, routes, assets);
+            WebServer server = new WebServer(templateEngine, assetEngine, routes, assets, notFoundHandler);
 
             server.serve(5000);
         } catch (Exception e) {

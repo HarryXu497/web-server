@@ -34,7 +34,16 @@ public class ProblemRoute extends Handler implements Get {
 
     @Override
     public Response get(Request req) {
-        int problemId = Integer.parseInt(req.getStatusLine().getRouteParams().get("problemId"));
+        // Get problem id
+        String problemIdRaw = req.getStatusLine().getRouteParams().get("problemId");
+
+        int problemId;
+
+        try {
+            problemId = Integer.parseInt(problemIdRaw);
+        } catch (NumberFormatException e) {
+            throw new NotFoundException("problem with id " + problemIdRaw + " cannot be found");
+        }
 
         Problem problemFromDB;
 
@@ -64,7 +73,7 @@ public class ProblemRoute extends Handler implements Get {
         String body = this.templateEngine.compile("frontend/templates/problem.th", new Data(
                 problemFromDB,
                 showSolved,
-                currentUser != null
+                currentUser
         ));
 
         // Headers
@@ -86,8 +95,9 @@ public class ProblemRoute extends Handler implements Get {
         public String authorName;
         public String solvedByUserText;
         public boolean loggedIn;
+        public int points;
 
-        public Data(Problem problem, boolean solvedByUser, boolean loggedIn) {
+        public Data(Problem problem, boolean solvedByUser, User currentUser) {
             this.id = problem.getProblemID();
             this.name = problem.getTitle();
             this.content = problem.getContent();
@@ -109,7 +119,13 @@ public class ProblemRoute extends Handler implements Get {
                 this.solvedByUserText = "";
             }
 
-            this.loggedIn = loggedIn;
+            this.loggedIn = currentUser != null;
+
+            if (this.loggedIn) {
+                this.points = currentUser.getPoints();
+            } else {
+                this.points = -1;
+            }
         }
     }
 

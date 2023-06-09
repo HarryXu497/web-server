@@ -55,7 +55,7 @@ public abstract class Handler {
                 throw new HandlerException("DELETE handler not implemented on this route");
             }
             default: {
-                throw new HandlerException("No handler implemented on this route");
+                throw new HandlerException("No handler can handle the request " + req.getStatusLine());
             }
         }
     }

@@ -38,7 +38,7 @@ public class SignUpRoute extends Handler implements Get, Post {
         // Authenticate user
         User currentUser = this.database.users().getCurrentUserFromRequest(req);
 
-        String body = this.templateEngine.compile("frontend/templates/sign-up.th", new Data(errorCode, currentUser != null));
+        String body = this.templateEngine.compile("frontend/templates/sign-up.th", new Data(errorCode, currentUser));
 
         // Headers
         Map<String, String> headers = Handler.htmlHeaders();
@@ -89,7 +89,8 @@ public class SignUpRoute extends Handler implements Get, Post {
                     -1, // User id does not matter for insert
                     username,
                     hashedPassword,
-                    salt
+                    salt,
+                    0
             ));
         } catch (SQLException e) {
             // Username exists
@@ -130,12 +131,15 @@ public class SignUpRoute extends Handler implements Get, Post {
         /** if the user is authenticated */
         public boolean loggedIn;
 
+        /** the points that the authenticated user has or -1 if there is no logged-in user*/
+        public int points;
+
         /**
          * Constructs a data container object with an error code
          * @param errorCode the vendor-specific SQLite error code
-         * @param loggedIn if the user is authenticated, which would necessitate changes to the web page
+         * @param currentUser the current user if the user is authenticated or null otherwise
          */
-        public Data(String errorCode, boolean loggedIn) {
+        public Data(String errorCode, User currentUser) {
             // Username exists already
             if (errorCode == null) {
                 this.errorMessage = "";
@@ -155,7 +159,13 @@ public class SignUpRoute extends Handler implements Get, Post {
                 }
             }
 
-            this.loggedIn = loggedIn;
+            this.loggedIn = currentUser != null;
+
+            if (this.loggedIn) {
+                this.points = currentUser.getPoints();
+            } else {
+                this.points = -1;
+            }
         }
     }
 }

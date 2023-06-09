@@ -5,11 +5,7 @@ import database.model.User;
 import database.model.UserProblem;
 import database.statement.SQLStatement;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,30 +31,28 @@ public class SolvedProblemsDatabase {
         }
     }
 
-    public void addTransaction(int userId, int problemId) {
+    public void addTransaction(int userId, int problemId) throws SQLException {
         try {
             Class.forName("org.sqlite.JDBC");
-
-            String sql = SQLStatement.insertStatement()
-                    .insertInto("PROBLEM_USER")
-                    .orReplace()
-                    .columns("PROBLEM_ID", "USER_ID")
-                    .values("?", "?")
-                    .toString();
-
-            try (
-                    Connection c = DriverManager.getConnection("jdbc:sqlite:problem_user.db");
-                    PreparedStatement stm = c.prepareStatement(sql)
-            ) {
-                c.setAutoCommit(false);
-
-                stm.setInt(1, problemId);
-                stm.setInt(2, userId);
-                stm.executeUpdate();
-                c.commit();
-            }
-        } catch (Exception e) {
+        } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
+        }
+
+        String sql = SQLStatement.insertStatement()
+                .insertInto("PROBLEM_USER")
+                .orReplace()
+                .columns("PROBLEM_ID", "USER_ID")
+                .values("?", "?")
+                .toString();
+
+        try (
+                Connection c = DriverManager.getConnection("jdbc:sqlite:problem_user.db");
+                PreparedStatement stm = c.prepareStatement(sql)
+        ) {
+            stm.setInt(1, problemId);
+            stm.setInt(2, userId);
+
+            stm.executeUpdate();
         }
     }
 
@@ -94,7 +88,7 @@ public class SolvedProblemsDatabase {
         }
     }
 
-    public void initializeTransactions(User owner, List<Problem> problems) {
+    public void initializeTransactions(User owner, List<Problem> problems) throws SQLException {
         for (Problem problem : problems) {
             this.addTransaction(owner.getUserID(), problem.getProblemID());
         }

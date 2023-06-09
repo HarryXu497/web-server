@@ -2,10 +2,8 @@ import java.util.Scanner;
 
 class Main {
     public static void main(String[] args) {
-        Scanner input = new Scanner(System.in);
-        
-        System.out.println(input.nextLine());
-        
-        input.close();
+        Scanner sc = new Scanner(System.in);
+        System.out.println(sc.nextLine());
+        sc.close();
     }
 }

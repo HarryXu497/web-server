@@ -31,10 +31,14 @@
     justify-content: space-between;
 }
 
-.nav__links a {
+.nav__links a, .nav__links li {
     color: white;
     text-decoration: none;
     font-size: 1rem;
+}
+
+.nav__links li.points {
+    font-weight: bold;
 }
 
 .hidden {

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Welcome!</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="/static/css/fonts.css">
+    <link rel="stylesheet" href="/static/css/reset.css">
+    <link rel="stylesheet" href="/static/css/nav.css">
+    <link rel="stylesheet" href="/static/css/about.css">
+    <script defer src="/static/js/nav.js"></script>
+</head>
+<body>
+    {#include frontend/templates/nav.th}
+    <main>
+        <h1>About</h1>
+        <section class="content">
+The THOJ stands for Tommy Harry Online Judge. It is a contest platform for students, teachers, and clubs in RHHS community made by Tommy Shan and Harry Xu. Everybody in RHHS are welcome to register and use it! It supports admin to upload problems and host contests.
+
+In addition, users can leave comment under problems to discuss the problem-related topics. It uses a unique formula to calculate the points obtained. The points gained by solving a problem is related to both difficulty of the problem and the number of problems that the user has already solved.
+
+Users can change password of their account, host contest on the THOJ, or propose ideas for new problems by contact any of the admins.
+        </section>
+    </main>
+</body>
+</html>
