@@ -21,18 +21,6 @@
                 Learn More
             </button>
         </a>
-
-        {#if data.isSignedIn}
-        <div>
-            <h3>You are logged in!!</h3>
-        </div>
-        {/if}
-
-        {#if data.idExists}
-        <div>
-            <h3>{data.id}</h3>
-        </div>
-        {/if}
     </main>
 </body>
 </html>

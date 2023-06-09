@@ -12,7 +12,6 @@ import server.response.ResponseCode;
 import template.TemplateEngine;
 
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -50,13 +49,10 @@ public class ProblemRoute extends Handler implements Get {
             throw new RuntimeException(e);
         }
 
-        // TODO: make this dynamic later
         // Authenticate user
-        String username = req.getCookies().get("username");
-        String hashedPassword = req.getCookies().get("password");
+        User currentUser = this.database.users().getCurrentUserFromRequest(req);
 
-        User currentUser = this.database.users().authenticate(username, hashedPassword);
-
+        // Whether to show the solved text
         boolean showSolved = false;
 
         if (currentUser != null) {
@@ -67,15 +63,12 @@ public class ProblemRoute extends Handler implements Get {
         // Compile template with data
         String body = this.templateEngine.compile("frontend/templates/problem.th", new Data(
                 problemFromDB,
-                showSolved
+                showSolved,
+                currentUser != null
         ));
 
         // Headers
-        Map<String, String> headers = new HashMap<>();
-
-        headers.put("Content-Type", "text/html; charset=iso-8859-1");
-        headers.put("Vary", "Accept-Encoding");
-        headers.put("Accept-Ranges", "none");
+        Map<String, String> headers = Handler.htmlHeaders();
 
         return new Response(
                 new Response.StatusLine(ResponseCode.OK),
@@ -92,13 +85,16 @@ public class ProblemRoute extends Handler implements Get {
         public int difficulty;
         public String authorName;
         public String solvedByUserText;
+        public boolean loggedIn;
 
-        public Data(Problem problem, boolean solvedByUser) {
+        public Data(Problem problem, boolean solvedByUser, boolean loggedIn) {
             this.id = problem.getProblemID();
             this.name = problem.getTitle();
             this.content = problem.getContent();
             this.type = problem.getType();
             this.difficulty = problem.getDifficulty();
+
+            // Fetch author name
             try {
                 this.authorName = database.users().getUserById(
                         problem.getAuthorID()
@@ -112,6 +108,8 @@ public class ProblemRoute extends Handler implements Get {
             } else {
                 this.solvedByUserText = "";
             }
+
+            this.loggedIn = loggedIn;
         }
     }
 

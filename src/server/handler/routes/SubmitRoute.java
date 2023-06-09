@@ -7,6 +7,7 @@ import coderunner.Utils;
 import database.Database;
 import database.model.User;
 import server.handler.Handler;
+import server.handler.NotFoundException;
 import server.handler.methods.Get;
 import server.handler.methods.Post;
 import server.request.Request;
@@ -40,10 +41,8 @@ public class SubmitRoute extends Handler implements Get, Post {
 
     @Override
     public Response get(Request req) {
-        String username = req.getCookies().get("username");
-        String password = req.getCookies().get("password");
-
-        User currentUser = this.database.users().authenticate(username, password);
+        // Authenticate user
+        User currentUser = this.database.users().getCurrentUserFromRequest(req);
 
         // Do not allow access -> redirect to login page
         if (currentUser == null) {
@@ -59,7 +58,7 @@ public class SubmitRoute extends Handler implements Get, Post {
         }
 
         // Compile template with data
-        String body = this.templateEngine.compile("frontend/templates/submit.th", null);
+        String body = this.templateEngine.compile("frontend/templates/submit.th", new Data(true));
 
         // Headers
         Map<String, String> headers = Handler.htmlHeaders();
@@ -94,12 +93,11 @@ public class SubmitRoute extends Handler implements Get, Post {
                 ""
         );
 
-        // Get user information
-        String username = req.getCookies().get("username");
+        // Get user hashed password
         String password = req.getCookies().get("password");
 
         // Authenticate
-        User currentUser = this.database.users().authenticate(username, password);
+        User currentUser = this.database.users().getCurrentUserFromRequest(req);
 
         // User authenticated
         if (currentUser != null) {
@@ -116,13 +114,16 @@ public class SubmitRoute extends Handler implements Get, Post {
                                 Utils.allFilesInDirectory("problems/" + problemId + "/output"),
                                 Utils.allFilesInDirectory("problems/" + problemId + "/answers")
                         ),
-                        password
+                        password,
+                        Integer.parseInt(problemId)
                 ));
             } catch (IOException e) {
                 return errorResponse;
+            } catch (NumberFormatException e) {
+                throw new NotFoundException("Problem with id " + problemId + " not found");
             }
 
-            // Redirect to tests page
+            // Redirect to the tests page
             headers.put("Location", "http://localhost:5000/problems/" + problemId + "/tests");
         } else {
             // Redirect to log in if not authenticated
@@ -134,5 +135,23 @@ public class SubmitRoute extends Handler implements Get, Post {
                 headers,
                 ""
         );
+    }
+
+    /**
+     * Container class for template data
+     * @author Harry Xu
+     * @version 1.0 - June 8th 2023
+     */
+    public static class Data {
+        /** if the user is authenticated */
+        public boolean loggedIn;
+
+        /**
+         * Constructs this container class
+         * @param loggedIn if the user is authenticated
+         */
+        public Data(boolean loggedIn) {
+            this.loggedIn = loggedIn;
+        }
     }
 }

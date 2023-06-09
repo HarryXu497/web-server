@@ -36,16 +36,14 @@ public class ProblemsRoute extends Handler implements Get {
 
     @Override
     public Response get(Request req) {
-        String username = req.getCookies().get("username");
-        String hashedPassword = req.getCookies().get("password");
-
-        User authUser = this.database.users().authenticate(username, hashedPassword);
+        // Authenticate user
+        User currentUser = this.database.users().getCurrentUserFromRequest(req);
 
         List<Integer> solvedList = null;
 
         // User authenticated
-        if (authUser != null) {
-            solvedList = this.database.solvedProblems().getAllSolvedProblems(authUser.getUserID());
+        if (currentUser != null) {
+            solvedList = this.database.solvedProblems().getAllSolvedProblems(currentUser.getUserID());
         }
 
 
@@ -58,6 +56,7 @@ public class ProblemsRoute extends Handler implements Get {
             e.printStackTrace();
         }
 
+        // Transform problems for templating
         List<TemplateProblem> templateProblems = null;
 
         if (problems != null) {
@@ -72,15 +71,12 @@ public class ProblemsRoute extends Handler implements Get {
 
         // Compile template with data
         String body = this.templateEngine.compile("frontend/templates/problems.th", new Data(
-                templateProblems
+                templateProblems,
+                currentUser != null
         ));
 
         // Headers
-        Map<String, String> headers = new HashMap<>();
-
-        headers.put("Content-Type", "text/html; charset=iso-8859-1");
-        headers.put("Vary", "Accept-Encoding");
-        headers.put("Accept-Ranges", "none");
+        Map<String, String> headers = Handler.htmlHeaders();
 
         return new Response(
                 new Response.StatusLine(ResponseCode.OK),
@@ -97,8 +93,9 @@ public class ProblemsRoute extends Handler implements Get {
     public static class Data {
         public List<TemplateProblem> problems;
         public boolean isError;
+        public boolean loggedIn;
 
-        public Data(List<TemplateProblem> problems) {
+        public Data(List<TemplateProblem> problems, boolean loggedIn) {
             // If error, create empty iterable and set error flag to true
             if (problems == null) {
                 this.isError = true;
@@ -106,6 +103,7 @@ public class ProblemsRoute extends Handler implements Get {
             }
 
             this.problems = problems;
+            this.loggedIn = loggedIn;
         }
     }
 

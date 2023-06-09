@@ -6,12 +6,15 @@ import coderunner.TaskCode;
 import coderunner.TaskResult;
 import coderunner.test.TestCode;
 import coderunner.test.TestResult;
+import database.Database;
+import database.model.User;
 import server.handler.Handler;
 import server.handler.methods.Get;
 import server.request.Request;
 import server.response.Response;
 import server.response.ResponseCode;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,11 +29,15 @@ public class SubmissionPollRoute extends Handler implements Get {
     /** The code runner instance running the submitted code */
     private final CodeRunner codeRunner;
 
+    /** The database used to authenticate and manage users */
+    private final Database database;
+
     /**
      * constructs a SubmissionPollRoute with its dependencies
      */
-    public SubmissionPollRoute(CodeRunner codeRunner) {
+    public SubmissionPollRoute(CodeRunner codeRunner, Database database) {
         this.codeRunner = codeRunner;
+        this.database = database;
     }
 
     /**
@@ -52,6 +59,9 @@ public class SubmissionPollRoute extends Handler implements Get {
 
         // Get submission id from the client request
         String submissionId = req.getCookies().get("password");
+
+        // Username
+        String username = req.getCookies().get("username");
 
 
         // Currently processing a submission
@@ -83,6 +93,10 @@ public class SubmissionPollRoute extends Handler implements Get {
                 body = testsToJSON(testResults);
 
                 if (areTestsCompleted(testResults)) {
+                    // Mark this problem as solved by the user
+                    this.addUserTransaction(username);
+
+                    // Remove submission
                     submissions.remove(submissionId);
                 }
 
@@ -102,6 +116,9 @@ public class SubmissionPollRoute extends Handler implements Get {
                 // Submission done testing - get finished data and remove from history
                 body = testsToJSON(submissions.get(submissionId).getTask().getTestResults());
 
+                // Mark this problem as solved by the user
+                this.addUserTransaction(username);
+
                 // Remove submission (i.e. end polling)
                 submissions.remove(submissionId);
             }
@@ -115,6 +132,19 @@ public class SubmissionPollRoute extends Handler implements Get {
                 headers,
                 body
         );
+    }
+
+    private void addUserTransaction(String username) {
+        User currentUser;
+
+        try {
+            currentUser = this.database.users().getByUsername(username);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        this.database.solvedProblems().addTransaction(currentUser.getUserID(), this.codeRunner.getCurrentSubmission().getProblemId());
     }
 
     private static String testsToJSON(TestResult[] testResults) {

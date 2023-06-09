@@ -2,12 +2,14 @@ package database.dao;
 
 import database.model.User;
 import database.statement.SQLStatement;
+import server.request.Request;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.sql.*;
+import java.util.Map;
 
 public class UserDatabase {
     public UserDatabase() {
@@ -183,5 +185,22 @@ public class UserDatabase {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * getCurrentUser
+     * gets the current user with information from a {@link Request}
+     * @param req the request with user authentication information
+     * @return the current {@link User} or null if there is no user logged in
+     */
+    public User getCurrentUserFromRequest(Request req) {
+        // Get request body
+        Map<String, String> cookies = req.getCookies();
+
+        // Get username and password
+        String username = cookies.get("username");
+        String password = cookies.get("password");
+
+        return this.authenticate(username, password);
     }
 }

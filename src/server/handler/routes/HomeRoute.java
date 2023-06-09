@@ -1,5 +1,7 @@
 package server.handler.routes;
 
+import database.Database;
+import database.model.User;
 import server.request.Request;
 import server.response.Response;
 import server.handler.Handler;
@@ -20,12 +22,16 @@ public class HomeRoute extends Handler implements Get {
     /** The template engine which contains and compiles the templates */
     private final TemplateEngine templateEngine;
 
+    /** The database used to create and store users */
+    private final Database database;
+
     /**
      * constructs a HomeRoute handler
      * @param templateEngine the template engine which holds and compiles the templates
      */
-    public HomeRoute(TemplateEngine templateEngine) {
+    public HomeRoute(TemplateEngine templateEngine, Database database) {
         this.templateEngine = templateEngine;
+        this.database = database;
     }
 
     /**
@@ -36,16 +42,11 @@ public class HomeRoute extends Handler implements Get {
      */
     @Override
     public Response get(Request req) {
-        // TODO: remove this -> just for demonstration of query and route params
-        // Extract data from URL
-        // Query Params
-        boolean isSignedIn = req.getStatusLine().getQueryParams().containsKey("isSignedIn");
 
-        // Route Params
-        String id = req.getStatusLine().getRouteParams().get("id");
+        User currentUser = this.database.users().getCurrentUserFromRequest(req);
 
         // Compile template with data
-        String body = this.templateEngine.compile("frontend/templates/index.th", new Data(isSignedIn, id));
+        String body = this.templateEngine.compile("frontend/templates/index.th", new Data(currentUser != null));
 
         // Headers
         Map<String, String> headers = new HashMap<>();
@@ -67,19 +68,14 @@ public class HomeRoute extends Handler implements Get {
      * @version 1.0 - May 23rd 2023
      */
     public static class Data {
-        public boolean isSignedIn;
-        public boolean idExists;
-        public String id;
+        public boolean loggedIn;
 
         /**
          * constructs this data container class
-         * @param isSignedIn whether the user is signed in
-         * @param id the id route param
+         * @param loggedIn whether the user is signed in
          */
-        public Data(boolean isSignedIn, String id) {
-            this.isSignedIn = isSignedIn;
-            this.id = id;
-            this.idExists = id != null;
+        public Data(boolean loggedIn) {
+            this.loggedIn = loggedIn;
         }
     }
 }

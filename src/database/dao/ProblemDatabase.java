@@ -25,7 +25,7 @@ public class ProblemDatabase {
         ) {
             String sql = "CREATE TABLE IF NOT EXISTS PROBLEMLIST " +
                     "(ID INTEGER PRIMARY KEY NOT NULL, " +
-                    "TITLE TEXT, " +
+                    "TITLE TEXT UNIQUE, " +
                     "CONTENT TEXT, " +
                     "DIFFICULTY INT     NOT NULL, " +
                     "TYPE TEXT          NOT NULL, " +

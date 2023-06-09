@@ -38,11 +38,10 @@ public class TestsRoute extends Handler implements Get {
 
     @Override
     public Response get(Request req) {
-        String username = req.getCookies().get("username");
-        String hashedPassword = req.getCookies().get("password");
+        // Authenticate user
+        User currentUser = this.database.users().getCurrentUserFromRequest(req);
 
-        User currentUser = this.database.users().authenticate(username, hashedPassword);
-
+        // User not authenticated -> redirect to login page
         if (currentUser == null) {
             Map<String, String> redirectHeaders = new HashMap<>();
 
@@ -56,7 +55,7 @@ public class TestsRoute extends Handler implements Get {
         }
 
         // Compile template with data
-        String body = this.templateEngine.compile("frontend/templates/tests.th", null);
+        String body = this.templateEngine.compile("frontend/templates/tests.th", new Data(true));
 
         // Headers
         Map<String, String> headers = Handler.htmlHeaders();
@@ -66,5 +65,23 @@ public class TestsRoute extends Handler implements Get {
                 headers,
                 body
         );
+    }
+
+    /**
+     * Container class for template data
+     * @author Harry Xu
+     * @version 1.0 - June 8th 2023
+     */
+    public static class Data {
+        /** if the user is authenticated */
+        public boolean loggedIn;
+
+        /**
+         * Constructs this container class
+         * @param loggedIn if the user is authenticated
+         */
+        public Data(boolean loggedIn) {
+            this.loggedIn = loggedIn;
+        }
     }
 }

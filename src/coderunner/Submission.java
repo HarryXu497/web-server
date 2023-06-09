@@ -12,14 +12,18 @@ public class Submission {
     /** the submission id */
     private final String submissionId;
 
+    /** The id of the problem being submitted to */
+    private final int problemId;
+
     /**
      * constructs a submission with a task and submission id
      * @param task the submission task
      * @param submissionId the unique id identifier
      */
-    public Submission(Task task, String submissionId) {
+    public Submission(Task task, String submissionId, int problemId) {
         this.task = task;
         this.submissionId = submissionId;
+        this.problemId = problemId;
     }
 
     /**
@@ -38,5 +42,14 @@ public class Submission {
      */
     public String getSubmissionId() {
         return this.submissionId;
+    }
+
+    /**
+     * getProblemId
+     * gets the submission's problem id
+     * @return the submission problem id
+     */
+    public int getProblemId() {
+        return this.problemId;
     }
 }

@@ -10,7 +10,6 @@ import server.response.Response;
 import server.response.ResponseCode;
 import template.TemplateEngine;
 
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,11 +28,15 @@ public class LogInRoute extends Handler implements Get, Post {
 
     @Override
     public Response get(Request req) {
+        // Headers
         Map<String, String> headers = Handler.htmlHeaders();
 
+        // Get error code
         String errorCode = req.getStatusLine().getQueryParams().get("error");
 
-        String body = this.templateEngine.compile("frontend/templates/log-in.th", new Data(errorCode));
+        User currentUser = this.database.users().getCurrentUserFromRequest(req);
+
+        String body = this.templateEngine.compile("frontend/templates/log-in.th", new Data(errorCode, currentUser != null));
 
         return new Response(
                 new Response.StatusLine(ResponseCode.OK),
@@ -44,10 +47,8 @@ public class LogInRoute extends Handler implements Get, Post {
 
     @Override
     public Response post(Request req) {
+        // Get request body
         Map<String, String> body = req.getBody();
-
-        // Headers
-        Map<String, String> headers = new HashMap<>();
 
         // Get username and password
         String username = body.get("username");
@@ -56,6 +57,10 @@ public class LogInRoute extends Handler implements Get, Post {
         // Log in user
         User currentUser = this.database.users().login(username, password);
 
+        // Headers
+        Map<String, String> headers = new HashMap<>();
+
+        // User is authenticated
         if (currentUser != null) {
             // Redirect to `next` query parameter
             String redirectTo = req.getStatusLine().getQueryParams().get("next");
@@ -68,7 +73,8 @@ public class LogInRoute extends Handler implements Get, Post {
             headers.put("Location", "http://localhost:5000" + redirectTo);
             headers.put("Set-Cookie", "username=" + username + "; Secure\nSet-Cookie: password=" + currentUser.getPassword() + "; Secure");
         } else {
-            // Server error
+            // User cannot be authenticated
+            // Show error message
             headers.put("Location", "http://localhost:5000/log-in?error=1");
         }
 
@@ -85,20 +91,26 @@ public class LogInRoute extends Handler implements Get, Post {
      * @version 1.0 - June 8th 2023
      */
     public static class Data {
-        /** Error message for the sign-up form*/
+        /** Error message for the sign-up form */
         public String errorMessage;
+
+        /** Change navbar based on authentication status */
+        public boolean loggedIn;
 
         /**
          * Constructs a data container object with an error code
          * @param errorCode the vendor-specific SQLite error code
+         * @param loggedIn if the user is logged in, which would necessitate a different navbar
          */
-        public Data(String errorCode) {
+        public Data(String errorCode, boolean loggedIn) {
             // Username exists already
             if (errorCode == null) {
                 this.errorMessage = "";
             } else {
                 this.errorMessage = "<div class=\"error-message\">Something Went Wrong</div>";
             }
+
+            this.loggedIn = loggedIn;
         }
     }
 }

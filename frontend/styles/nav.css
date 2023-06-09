@@ -34,8 +34,25 @@
 .nav__links a {
     color: white;
     text-decoration: none;
+    font-size: 1rem;
 }
 
 .hidden {
     display: none;
+}
+
+nav button[type="submit"] {
+    background: none;
+    border: none;
+    padding: 0;
+    unset: all;
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1rem;
+
+    margin-top: -0.125rem;
+}
+
+nav button[type="submit"]:hover {
+    cursor: pointer;
 }

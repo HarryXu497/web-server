@@ -32,14 +32,16 @@ public class SignUpRoute extends Handler implements Get, Post {
 
     @Override
     public Response get(Request req) {
+        // Get error code from query parameters
+        String errorCode = req.getStatusLine().getQueryParams().get("error");
+
+        // Authenticate user
+        User currentUser = this.database.users().getCurrentUserFromRequest(req);
+
+        String body = this.templateEngine.compile("frontend/templates/sign-up.th", new Data(errorCode, currentUser != null));
+
+        // Headers
         Map<String, String> headers = Handler.htmlHeaders();
-
-        String errorCode = req.getStatusLine()
-                .getQueryParams()
-                .get("error");
-
-        String body = this.templateEngine.compile("frontend/templates/sign-up.th", new Data(errorCode));
-
 
         return new Response(
                 new Response.StatusLine(ResponseCode.OK),
@@ -50,13 +52,16 @@ public class SignUpRoute extends Handler implements Get, Post {
 
     @Override
     public Response post(Request req) {
+        // Get form data
         Map<String, String> body = req.getBody();
 
         String username = body.get("username");
         String password = body.get("password");
 
+        // Headers
         Map<String, String> headers = new HashMap<>();
 
+        // Empty username or password -> Redirect
         if ((username.length() == 0) || (password.length() == 0)) {
             headers.put("Location", "http://localhost:5000/sign-up?error=3");
 
@@ -67,6 +72,7 @@ public class SignUpRoute extends Handler implements Get, Post {
             );
         }
 
+        // Hash password
         String hashedPassword;
         byte[] salt;
 
@@ -77,6 +83,7 @@ public class SignUpRoute extends Handler implements Get, Post {
             throw new RuntimeException(e);
         }
 
+        // Add user with hash and salt
         try {
             this.database.users().addUser(new User(
                     -1, // User id does not matter for insert
@@ -100,6 +107,7 @@ public class SignUpRoute extends Handler implements Get, Post {
             );
         }
 
+        // Redirect to home page
         headers.put("Location", "http://localhost:5000/");
         headers.put("Set-Cookie", "username=" + username +"; Secure\nSet-Cookie: password=" + hashedPassword + "; Secure");
 
@@ -116,14 +124,18 @@ public class SignUpRoute extends Handler implements Get, Post {
      * @version 1.0 - June 8th 2023
      */
     public static class Data {
-        /** Error message for the sign-up form*/
+        /** Error message for the sign-up form */
         public String errorMessage;
+
+        /** if the user is authenticated */
+        public boolean loggedIn;
 
         /**
          * Constructs a data container object with an error code
          * @param errorCode the vendor-specific SQLite error code
+         * @param loggedIn if the user is authenticated, which would necessitate changes to the web page
          */
-        public Data(String errorCode) {
+        public Data(String errorCode, boolean loggedIn) {
             // Username exists already
             if (errorCode == null) {
                 this.errorMessage = "";
@@ -142,6 +154,8 @@ public class SignUpRoute extends Handler implements Get, Post {
                         break;
                 }
             }
+
+            this.loggedIn = loggedIn;
         }
     }
 }
