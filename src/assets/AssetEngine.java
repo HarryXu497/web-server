@@ -2,7 +2,6 @@ package assets;
 
 import template.TemplateNotFoundException;
 
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -17,8 +16,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Responsible for managing all static assets in the web application
+ * @author Harry Xu
+ * @version 1.0 - June 8th 2023
+ */
 public class AssetEngine {
-
     /** Content Types */
     private final static Set<String> TEXT_EXTENSIONS = new HashSet<>();
     private final static Set<String> IMAGE_EXTENSIONS = new HashSet<>();
@@ -153,16 +156,13 @@ public class AssetEngine {
         return buffer;
     }
 
-    public static boolean isText(String extension) {
-        return TEXT_EXTENSIONS.contains(extension);
-    }
-
-    public static boolean isImage(String extension) {
-        return IMAGE_EXTENSIONS.contains(extension);
-    }
-
+    /**
+     * toString
+     * returns a string representation of this object
+     * @return the string representation
+     */
     @Override
     public String toString() {
-        return "AssetEngine{" + assets + "}";
+        return "AssetEngine{" + this.assets + "}";
     }
 }
