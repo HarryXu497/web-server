@@ -3,6 +3,10 @@ package database.dao;
 import database.model.Problem;
 import database.statement.SQLStatement;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -203,5 +207,69 @@ public class ProblemDatabase {
         }
 
         return problems;
+    }
+
+    public void populateFromDirectory(String baseDirectory) throws IOException, SQLException {
+        File dir = new File(baseDirectory);
+
+        File[] problemFolders = dir.listFiles();
+
+        String sql = SQLStatement.insertStatement()
+                .insertInto("PROBLEMLIST")
+                .orReplace()
+                .columns("ID", "TITLE", "CONTENT", "DIFFICULTY", "TYPE", "USER_ID")
+                .values("?", "?", "?", "?", "?", "?")
+                .toString();
+
+        if (problemFolders != null) {
+            for (File problemDirectory : problemFolders) {
+                // "1", "2", ...
+                String problemId = problemDirectory.getPath().split("\\\\")[1];
+
+                // Read file containing metadata
+                File metadataFile = new File(problemDirectory, "problem.txt");
+
+                // Read file information
+                String[] problemMetadata = new String[4];
+                StringBuilder problemContent = new StringBuilder();
+
+                try (BufferedReader file = new BufferedReader(new FileReader(metadataFile))) {
+                    // Read problem metadata
+                    for (int i = 0; i < problemMetadata.length; i++) {
+                        problemMetadata[i] = file.readLine();
+                    }
+
+                    // Read problem content
+                    int currentChar;
+
+                    while ((currentChar = file.read()) != -1) {
+                        problemContent.append((char) currentChar);
+                    }
+                }
+
+                // Load JDBC driver
+                try {
+                    Class.forName("org.sqlite.JDBC");
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+
+                try (
+                        Connection conn = DriverManager.getConnection("jdbc:sqlite:problem.db");
+                        PreparedStatement statement = conn.prepareStatement(sql)
+                ) {
+                    // Set parameters
+                    statement.setInt(1, Integer.parseInt(problemId));
+                    statement.setString(2, problemMetadata[0]);
+                    statement.setString(3, problemContent.toString());
+                    statement.setInt(4, Integer.parseInt(problemMetadata[2]));
+                    statement.setString(5, problemMetadata[1]);
+                    statement.setInt(6, Integer.parseInt(problemMetadata[3]));
+
+                    // Execute update
+                    statement.executeUpdate();
+                }
+            }
+        }
     }
 }

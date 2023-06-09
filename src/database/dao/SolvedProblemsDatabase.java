@@ -1,6 +1,7 @@
 package database.dao;
 
 import database.model.Problem;
+import database.model.User;
 import database.model.UserProblem;
 import database.statement.SQLStatement;
 
@@ -40,6 +41,7 @@ public class SolvedProblemsDatabase {
 
             String sql = SQLStatement.insertStatement()
                     .insertInto("PROBLEM_USER")
+                    .orReplace()
                     .columns("PROBLEM_ID", "USER_ID")
                     .values("?", "?")
                     .toString();
@@ -89,6 +91,12 @@ public class SolvedProblemsDatabase {
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public void initializeTransactions(User owner, List<Problem> problems) {
+        for (Problem problem : problems) {
+            this.addTransaction(owner.getUserID(), problem.getProblemID());
         }
     }
 }

@@ -3,6 +3,7 @@ package database.statement.insert;
 public class InsertSQLStatement {
     private String[] columns;
     private String table;
+    private boolean replace;
     private String[] value;
 
     public InsertSQLStatement columns(String... columns) {
@@ -21,6 +22,11 @@ public class InsertSQLStatement {
         return this;
     }
 
+    public InsertSQLStatement orReplace() {
+        this.replace = true;
+        return this;
+    }
+
     public InsertSQLStatement values(String... value) {
         if (this.table == null) {
             throw new IllegalStateException("table should be selected before inserting values");
@@ -31,29 +37,47 @@ public class InsertSQLStatement {
         if (columns.length != value.length) {
             throw new IllegalArgumentException("The amount of columns and the amount of values must match");
         }
+
         this.value = value;
         return this;
     }
 
+    @Override
     public String toString() {
-        if (value == null) {
-            throw new IllegalStateException("The value should not be null.");
+        if (this.value == null) {
+            throw new IllegalStateException("The statement insert values should not be null");
         }
-        StringBuilder ret = new StringBuilder("INSERT INTO " + table + "(");
+
+        // Insert or replace
+        String replace = "";
+
+        if (this.replace) {
+            replace = " OR REPLACE";
+        }
+
+        StringBuilder statement = new StringBuilder("INSERT" + replace + " INTO " + table + "(");
+
+        // Build columns
         for(int i = 0; i < columns.length; i++) {
-            ret.append(columns[i]);
-            if(i < columns.length - 1) {
-                ret.append(", ");
+            statement.append(columns[i]);
+
+            if (i < columns.length - 1) {
+                statement.append(", ");
             }
         }
-        ret.append(") VALUES (");
+
+        // Biild values
+        statement.append(") VALUES (");
+
         for(int i = 0; i < value.length; i++) {
-            ret.append(value[i]);
+            statement.append(value[i]);
             if(i < value.length - 1) {
-                ret.append(", ");
+                statement.append(", ");
             }
         }
-        ret.append(");");
-        return ret.toString();
+
+        statement.append(");");
+
+        return statement.toString();
     }
 }

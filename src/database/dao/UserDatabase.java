@@ -203,4 +203,45 @@ public class UserDatabase {
 
         return this.authenticate(username, password);
     }
+
+    /**
+     * createAdminUser
+     * Creates an admin user with a username and password.
+     * All problems on the judge may to attributed to this user
+     * @param username the username of the admin
+     * @param password the plaintext password of the admin
+     */
+    public void createAdminUser(String username, String password) throws NoSuchAlgorithmException, SQLException {
+        byte[] salt = UserDatabase.getSalt();
+        String hashedPassword = UserDatabase.hashPassword(password, salt);
+
+        // Load JDBC driver
+        try {
+            Class.forName("org.sqlite.JDBC");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        // Insert with custom id of 1
+        String sql = SQLStatement.insertStatement()
+                .insertInto("USERLIST")
+                .orReplace()
+                .columns("ID", "USERNAME", "PASSWORD", "SALT")
+                .values("?", "?", "?", "?")
+                .toString();
+
+        try (
+                Connection c = DriverManager.getConnection("jdbc:sqlite:user.db");
+                PreparedStatement stm = c.prepareStatement(sql);
+        ) {
+            // Set parameters
+            // Custom id
+            stm.setInt(1, 1);
+            stm.setString(2, username);
+            stm.setString(3, hashedPassword);
+            stm.setBytes(4, salt);
+
+            stm.executeUpdate();
+        }
+    }
 }
