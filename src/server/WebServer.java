@@ -227,7 +227,7 @@ public class WebServer {
                     System.out.println("Cannot render 404 page");
                 }
 
-            } catch (TemplateSyntaxException | TemplateNotFoundException e) {
+            } catch (RuntimeException e) {
                 e.printStackTrace();
                 // Handler cannot load template
 

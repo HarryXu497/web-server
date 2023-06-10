@@ -5,6 +5,7 @@ import coderunner.Submission;
 import coderunner.Task;
 import coderunner.Utils;
 import database.Database;
+import database.model.Problem;
 import database.model.User;
 import server.handler.Handler;
 import server.handler.NotFoundException;
@@ -19,6 +20,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -75,8 +77,32 @@ public class SubmitRoute extends Handler implements Get, Post {
             );
         }
 
+        // Get problem id
+        String problemIdRaw = req.getStatusLine().getRouteParams().get("problemId");
+
+        int problemId;
+
+        try {
+            problemId = Integer.parseInt(problemIdRaw);
+        } catch (NumberFormatException e) {
+            throw new NotFoundException("Problem with id " + problemIdRaw + " not found");
+        }
+
+        // Fetch problem
+        Problem problem;
+
+        try {
+            problem = this.database.problems().getProblemById(problemId);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        if (problem == null) {
+            throw new NotFoundException("Problem with id " + problemId + " not found");
+        }
+
         // Compile template with data
-        String body = this.templateEngine.compile("frontend/templates/submit.th", new Data(currentUser));
+        String body = this.templateEngine.compile("frontend/templates/submit.th", new Data(currentUser, problem.getTitle()));
 
         // Headers
         Map<String, String> headers = Handler.htmlHeaders();
@@ -175,11 +201,18 @@ public class SubmitRoute extends Handler implements Get, Post {
         /** the points that the authenticated user has or -1 if there is no logged-in user */
         public int points;
 
+        /** The name of the problem being submitted to */
+        public String problemName;
+
         /**
          * Constructs this container class
          * @param currentUser the current user if authenticated or null otherwise
+         * @param problemName the name of the problem
          */
-        public Data(User currentUser) {
+        public Data(User currentUser, String problemName) {
+            this.problemName = problemName;
+
+            // User auth status related fields
             this.loggedIn = currentUser != null;
 
             if (this.loggedIn) {

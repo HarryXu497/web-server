@@ -192,6 +192,8 @@ public class ProblemsRoute extends Handler implements Get {
                 ).getUserName();
             } catch (SQLException e) {
                 throw new RuntimeException(e);
+            } catch (NullPointerException e) {
+                throw new RuntimeException("User with author id " + problem.getAuthorID() + " cannot be found");
             }
 
             // Create solved text
