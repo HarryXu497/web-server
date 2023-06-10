@@ -50,7 +50,7 @@ public class WebServer {
     private final AssetEngine assets;
 
     /**
-     * constructs a web server with a templating engine and the directory of styles
+     * Constructs a web server with a templating engine and the directory of styles
      * @param engine the templating engine used to compile .th files to html
      * @param assetMap maps the assets in a directory to a URL on which to host them
      * */
@@ -127,7 +127,7 @@ public class WebServer {
         private final BufferedReader input;
 
         /**
-         * constructs a connection handler with a client socket to read to and write from
+         * Constructs a connection handler with a client socket to read to and write from
          * @param clientSocket the socket to communicate with
          * @throws IOException if an exception occurs while working with the input or output streams of the client
          * */
@@ -159,7 +159,7 @@ public class WebServer {
 
         /**
          * handleRequest
-         * handles parsing of the request, dispatch of the request handler, and response creating and sending
+         * Handles parsing of the request, dispatch of the request handler, and response creating and sending
          */
         public void handleRequest() {
             // End execution if input stream is not read

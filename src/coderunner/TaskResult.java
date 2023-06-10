@@ -14,7 +14,7 @@ public class TaskResult {
     private final String data;
 
     /**
-     * constructs a TaskResult with a Task code and a message
+     * Constructs a TaskResult with a Task code and a message
      * @param taskCode the task code
      * @param data the task data
      * */

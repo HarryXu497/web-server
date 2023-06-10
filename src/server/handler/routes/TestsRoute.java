@@ -12,6 +12,12 @@ import template.TemplateEngine;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Responsible for handling the `/problems/:problemId/tests` route
+ * Returns an empty shell which is populated by a JavaScript file
+ * @author Harry Xu
+ * @version 1.0 - June 9th 2023
+ */
 public class TestsRoute extends Handler implements Get {
 
     /** The template engine which contains and compiles the templates */
@@ -21,14 +27,22 @@ public class TestsRoute extends Handler implements Get {
     private final Database database;
 
     /**
-     * constructs a TestsRoute handler
+     * Constructs a TestsRoute handler
      * @param templateEngine the template engine which holds and compiles the templates
+     * @param database the database which holds persisted application state
      */
     public TestsRoute(TemplateEngine templateEngine, Database database) {
         this.templateEngine = templateEngine;
         this.database = database;
     }
 
+    /**
+     * get
+     * Handles the GET request on the request's url.
+     * Serves the `tests.th` template file.
+     * @param req the HTTP request to handle
+     * @return the server HTTP response
+     */
     @Override
     public Response get(Request req) {
         // Authenticate user

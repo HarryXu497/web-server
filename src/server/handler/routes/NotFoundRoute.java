@@ -11,6 +11,11 @@ import template.TemplateEngine;
 
 import java.util.Map;
 
+/**
+ * Responsible for handling any routes that are not mapped to any routes
+ * @author Harry Xu
+ * @version 1.0 - June 9th 2023
+ */
 public class NotFoundRoute extends Handler implements Get {
 
     /** The template engine which contains and compiles the templates */
@@ -20,8 +25,9 @@ public class NotFoundRoute extends Handler implements Get {
     private final Database database;
 
     /**
-     * constructs a HomeRoute handler
+     * Constructs a HomeRoute handler
      * @param templateEngine the template engine which holds and compiles the templates
+     * @param database the database which holds persisted application state
      */
     public NotFoundRoute(TemplateEngine templateEngine, Database database) {
         this.templateEngine = templateEngine;
@@ -30,7 +36,8 @@ public class NotFoundRoute extends Handler implements Get {
 
     /**
      * get
-     * handles the GET request on the request's url
+     * Handles the GET request on the request's url.
+     * Serves the `not-found.th` template file.
      * @param req the HTTP request to handle
      * @return the server HTTP response
      */
@@ -53,16 +60,20 @@ public class NotFoundRoute extends Handler implements Get {
     }
 
     /**
-     * container for the template data
+     * Container class for template data
+     * Exposes data as public properties for reflection
      * @author Harry Xu
-     * @version 1.0 - May 23rd 2023
+     * @version 1.0 - June 8th 2023
      */
     public static class Data {
+        /** Change navbar based on authentication status */
         public boolean loggedIn;
+
+        /** The points the user has */
         public int points;
 
         /**
-         * constructs this data container class
+         * Constructs this data container class
          * @param currentUser the logged-in user or null if no user logged-in
          */
         public Data(User currentUser) {

@@ -21,7 +21,7 @@ public class Response {
     private final byte[] body;
 
     /**
-     * constructs a response with a status line, headers, and a body
+     * Constructs a response with a status line, headers, and a body
      * @param statusLine the HTTP response status line
      * @param headers a map of the HTTP response headers
      * @param body the HTTP response body
@@ -31,7 +31,7 @@ public class Response {
     }
 
     /**
-     * constructs a response with a status line, headers, and a body
+     * Constructs a response with a status line, headers, and a body
      * @param statusLine the HTTP response status line
      * @param headers a map of the HTTP response headers
      * @param body the HTTP response body

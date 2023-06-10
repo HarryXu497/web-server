@@ -6,7 +6,6 @@ import coderunner.Task;
 import coderunner.Utils;
 import database.Database;
 import database.model.User;
-import filter.Filter;
 import server.handler.Handler;
 import server.handler.NotFoundException;
 import server.handler.methods.Get;
@@ -30,16 +29,34 @@ import java.util.Map;
  */
 public class SubmitRoute extends Handler implements Get, Post {
 
+    /** The template engine which holds all templates */
     private final TemplateEngine templateEngine;
+
+    /** The code runner instance running the submitted code */
     private final CodeRunner codeRunner;
+
+    /** The database used to authenticate and manage users */
     private final Database database;
 
+    /**
+     * Constructs a SubmitRoute with its dependencies
+     * @param templateEngine the template engine which holds and compiles the templates
+     * @param codeRunner the object responsible for compiling, executing, and testing submitted code
+     * @param database the database which holds persisted application state
+     */
     public SubmitRoute(TemplateEngine templateEngine, CodeRunner codeRunner, Database database) {
         this.templateEngine = templateEngine;
         this.codeRunner = codeRunner;
         this.database = database;
     }
 
+    /**
+     * get
+     * Handles the GET request on the request's url.
+     * Serves the `submit.th` template file.
+     * @param req the HTTP request to handle
+     * @return the server HTTP response
+     */
     @Override
     public Response get(Request req) {
         // Authenticate user
@@ -71,6 +88,13 @@ public class SubmitRoute extends Handler implements Get, Post {
         );
     }
 
+    /**
+     * post
+     * Handles the POST request on the request's url
+     * Submits code to the code runner to be compiled, run, and tested.
+     * @param req the HTTP request to handle
+     * @return the server HTTP response
+     */
     @Override
     public Response post(Request req) {
         // Get code from request
@@ -140,6 +164,7 @@ public class SubmitRoute extends Handler implements Get, Post {
 
     /**
      * Container class for template data
+     * Exposes data as public properties for reflection
      * @author Harry Xu
      * @version 1.0 - June 8th 2023
      */
@@ -147,7 +172,7 @@ public class SubmitRoute extends Handler implements Get, Post {
         /** if the user is authenticated */
         public boolean loggedIn;
 
-        /** the points that the authenticated user has or -1 if there is no logged-in user*/
+        /** the points that the authenticated user has or -1 if there is no logged-in user */
         public int points;
 
         /**

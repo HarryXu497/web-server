@@ -16,7 +16,7 @@ public class Submission {
     private final int problemId;
 
     /**
-     * constructs a submission with a task and submission id
+     * Constructs a submission with a task and submission id
      * @param task the submission task
      * @param submissionId the unique id identifier
      */

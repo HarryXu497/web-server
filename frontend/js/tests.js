@@ -27,7 +27,7 @@ function buildTests(responseData) {
         let code = responseData.tests[i];
 
         if (completed) {
-            code = "Done"
+            code = "Skipped"
         }
 
         if ((code !== "AC") && (code !== "Pending")) {
@@ -89,7 +89,7 @@ function updateTests(responseData) {
         let code = responseData.tests[i];
 
         if (completed) {
-            code = "Done"
+            code = "Skipped"
         }
 
         if ((code !== "AC") && (code !== "Pending")) {

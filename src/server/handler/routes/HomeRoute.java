@@ -9,7 +9,6 @@ import server.handler.methods.Get;
 import server.response.ResponseCode;
 import template.TemplateEngine;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -26,7 +25,7 @@ public class HomeRoute extends Handler implements Get {
     private final Database database;
 
     /**
-     * constructs a HomeRoute handler
+     * Constructs a HomeRoute handler
      * @param templateEngine the template engine which holds and compiles the templates
      * @param database the data which holds application state, including the authenticated user
      */
@@ -37,24 +36,21 @@ public class HomeRoute extends Handler implements Get {
 
     /**
      * get
-     * handles the GET request on the request's url
+     * Handles the GET request on the request's url.
+     * Serves the `index.th` template file.
      * @param req the HTTP request to handle
      * @return the server HTTP response
      */
     @Override
     public Response get(Request req) {
-
+        // Authenticate user
         User currentUser = this.database.users().getCurrentUserFromRequest(req);
 
         // Compile template with data
         String body = this.templateEngine.compile("frontend/templates/index.th", new Data(currentUser));
 
         // Headers
-        Map<String, String> headers = new HashMap<>();
-
-        headers.put("Content-Type", "text/html; charset=iso-8859-1");
-        headers.put("Vary", "Accept-Encoding");
-        headers.put("Accept-Ranges", "none");
+        Map<String, String> headers = Handler.htmlHeaders();
 
         return new Response(
                 new Response.StatusLine(ResponseCode.OK),
@@ -64,17 +60,21 @@ public class HomeRoute extends Handler implements Get {
     }
 
     /**
-     * container for the template data
+     * Container for template data.
+     * Exposes data as public properties for reflection
      * @author Harry Xu
      * @version 1.0 - May 23rd 2023
      */
     public static class Data {
+        /** Whether the user is logged in */
         public boolean loggedIn;
+
+        /** The points of the logged-in user or -1 if there is no user */
         public int points;
 
         /**
-         * constructs this data container class
-         * @param currentUser the logged-in user or null if no user logged-in
+         * Constructs this data container class
+         * @param currentUser the logged-in user or null if there is no user logged-in
          */
         public Data(User currentUser) {
             this.loggedIn = currentUser != null;

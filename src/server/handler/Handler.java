@@ -60,6 +60,11 @@ public abstract class Handler {
         }
     }
 
+    /**
+     * htmlHeaders
+     * static method which generics generic headers for an HTTP response with HTML
+     * @return generic HTML headers
+     */
     public static Map<String, String> htmlHeaders() {
         Map<String, String> headers = new HashMap<>();
 

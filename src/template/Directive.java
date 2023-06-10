@@ -29,7 +29,7 @@ public class Directive {
     private final String[] tokens;
 
     /**
-     * constructs a Directive with a type, start and end number, and tokens
+     * Constructs a Directive with a type, start and end number, and tokens
      * @param type the directive type
      * @param startNumber the start of the interpolation braces
      * @param endNumber the end of the interpolation braces

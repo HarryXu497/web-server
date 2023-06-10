@@ -23,7 +23,7 @@ public enum ResponseCode {
     private final String message;
 
     /**
-     * constructs an enum value with a code and message
+     * Constructs an enum value with a code and message
      * @param code the response code
      * @param message the response message
      */

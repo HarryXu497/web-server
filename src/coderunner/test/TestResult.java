@@ -13,7 +13,7 @@ public class TestResult {
     private final String message;
 
     /**
-     * constructs a test result with a status code and message
+     * Constructs a test result with a status code and message
      * @param statusCode the result status code
      * @param message the result message
      */

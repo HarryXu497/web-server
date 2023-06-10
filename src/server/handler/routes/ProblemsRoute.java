@@ -15,7 +15,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-
+/**
+ * Responsible for handling the `/problems` route.
+ * Displays a list of all problems
+ * @author Harry Xu
+ * @version 1.0 - June 9th 2023
+ */
 public class ProblemsRoute extends Handler implements Get {
 
     /** The template engine which contains and compiles the templates */
@@ -25,14 +30,22 @@ public class ProblemsRoute extends Handler implements Get {
     private final Database database;
 
     /**
-     * constructs a ProblemsRoute handler
+     * Constructs a ProblemsRoute handler
      * @param templateEngine the template engine which holds and compiles the templates
+     * @param database the database which holds persisted application state
      */
     public ProblemsRoute(TemplateEngine templateEngine, Database database) {
         this.templateEngine = templateEngine;
         this.database = database;
     }
 
+    /**
+     * get
+     * Handles the GET request on the request's url.
+     * Serves the `problems.th` template file.
+     * @param req the HTTP request to handle
+     * @return the server HTTP response
+     */
     @Override
     public Response get(Request req) {
         // Authenticate user
@@ -85,16 +98,29 @@ public class ProblemsRoute extends Handler implements Get {
     }
 
     /**
-     * container for the template data
+     * Container class for template data
+     * Exposes data as public properties for reflection
      * @author Harry Xu
-     * @version 1.0 - May 23rd 2023
+     * @version 1.0 - June 8th 2023
      */
     public static class Data {
+        /** List of problems for iteration in the template */
         public List<TemplateProblem> problems;
+
+        /** If there is an error when loading the problems */
         public boolean isError;
+
+        /** Change navbar based on authentication status */
         public boolean loggedIn;
+
+        /** The points the user has */
         public int points;
 
+        /**
+         * Constructs this data container class.
+         * @param problems the problems from the data
+         * @param currentUser the logged-in user or null if no user logged-in
+         */
         public Data(List<TemplateProblem> problems, User currentUser) {
             // If error, create empty iterable and set error flag to true
             if (problems == null) {
@@ -104,6 +130,7 @@ public class ProblemsRoute extends Handler implements Get {
 
             this.problems = problems;
 
+            // User auth status related fields
             this.loggedIn = currentUser != null;
 
             if (this.loggedIn) {
@@ -115,38 +142,59 @@ public class ProblemsRoute extends Handler implements Get {
     }
 
     /**
-     * A wrapper of a problem which makes its properties available for templating
+     * A wrapper of a problem which makes its properties available for templating via reflection
      * @author Harry Xu
      * @version 1.0 - June 6th 2023
      */
     public class TemplateProblem {
-        public String title;
-        public int difficulty;
-        public String content;
-        public String type;
+        /** Problem id */
         public int id;
+
+        /** Problem title */
+        public String title;
+
+        /** Problem content */
+        public String content;
+
+        /** Problem type */
+        public String type;
+
+        /** Problem difficulty from 1 to 10 inclusive */
+        public int difficulty;
+
+        /** Name of the problem's author */
         public String authorName;
+
+        /** The text to display if the user has solved the problem before*/
         public String solvedStatus;
 
+        /**
+         * Constructs this problem data container class.
+         * @param problem the problem represented by this URL
+         * @param solvedByUser whether this problem has been solved by the user before
+         */
         public TemplateProblem(Problem problem, boolean solvedByUser) {
-            this.title = problem.getTitle();
-            this.difficulty = problem.getDifficulty();
-            this.content = problem.getContent();
+            // Problem data
             this.id = problem.getProblemID();
+            this.title = problem.getTitle();
+            this.content = problem.getContent();
             this.type = problem.getType();
+            this.difficulty = problem.getDifficulty();
 
-            if (solvedByUser) {
-                this.solvedStatus = " [Solved]";
-            } else {
-                this.solvedStatus = "";
-            }
-
+            // Fetch author name
             try {
                 this.authorName = database.users().getUserById(
                         problem.getAuthorID()
                 ).getUserName();
             } catch (SQLException e) {
                 throw new RuntimeException(e);
+            }
+
+            // Create solved text
+            if (solvedByUser) {
+                this.solvedStatus = " [Solved]";
+            } else {
+                this.solvedStatus = "";
             }
 
         }

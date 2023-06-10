@@ -13,6 +13,12 @@ import template.TemplateEngine;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Responsible for handling the `/log-in` route
+ * Handles both the get and post requests to this route
+ * @author Harry Xu
+ * @version 1.0 - June 9th 2023
+ */
 public class LogInRoute extends Handler implements Get, Post {
 
     /** The template engine which holds all templates */
@@ -33,7 +39,8 @@ public class LogInRoute extends Handler implements Get, Post {
 
     /**
      * get
-     * handles the GET request on the request's url
+     * Handles the GET request on the request's url.
+     * Serves the `log-in.th` template file.
      * @param req the HTTP request to handle
      * @return the server HTTP response
      */
@@ -60,7 +67,8 @@ public class LogInRoute extends Handler implements Get, Post {
 
     /**
      * post
-     * Handles the POST request on the request's url
+     * Handles the POST request on the request's url.
+     * Logs in the user to the application.
      * @param req the HTTP request to handle
      * @return the server HTTP response
      */
@@ -106,6 +114,7 @@ public class LogInRoute extends Handler implements Get, Post {
 
     /**
      * Container class for template data
+     * Exposes data as public properties for reflection
      * @author Harry Xu
      * @version 1.0 - June 8th 2023
      */
@@ -132,6 +141,7 @@ public class LogInRoute extends Handler implements Get, Post {
                 this.errorMessage = "<div class=\"error-message\">Something Went Wrong</div>";
             }
 
+            // User auth status related fields
             this.loggedIn = currentUser != null;
 
             if (this.loggedIn) {

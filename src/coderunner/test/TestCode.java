@@ -19,7 +19,7 @@ public enum TestCode {
     private final String code;
 
     /**
-     * constructs an enum entry with a test code
+     * Constructs an enum entry with a test code
      * @param code the letter code
      */
     TestCode(String code) {

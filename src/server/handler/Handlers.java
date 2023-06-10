@@ -20,7 +20,7 @@ public class Handlers {
     private Handler notFoundHandler;
 
     /**
-     * constructs a Handlers class with an empty registry
+     * Constructs a Handlers class with an empty registry
      */
     public Handlers() {
         this.registry = new LinkedHashMap<>();

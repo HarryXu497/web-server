@@ -15,6 +15,12 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Responsible for handling the `/problem/:problemId` route.
+ * Displays the information for one problem
+ * @author Harry Xu
+ * @version 1.0 - June 9th 2023
+ */
 public class ProblemRoute extends Handler implements Get {
 
     /** The template engine which contains and compiles the templates */
@@ -24,14 +30,22 @@ public class ProblemRoute extends Handler implements Get {
     private final Database database;
 
     /**
-     * constructs a ProblemRoute handler
+     * Constructs a ProblemRoute handler
      * @param templateEngine the template engine which holds and compiles the templates
+     * @param database the database which holds persisted application state
      */
     public ProblemRoute(TemplateEngine templateEngine, Database database) {
         this.templateEngine = templateEngine;
         this.database = database;
     }
 
+    /**
+     * get
+     * Handles the GET request on the request's url.
+     * Serves the `problem.th` template file.
+     * @param req the HTTP request to handle
+     * @return the server HTTP response
+     */
     @Override
     public Response get(Request req) {
         // Get problem id
@@ -45,6 +59,7 @@ public class ProblemRoute extends Handler implements Get {
             throw new NotFoundException("problem with id " + problemIdRaw + " cannot be found");
         }
 
+        // Fetch problem from id
         Problem problemFromDB;
 
         try {
@@ -86,18 +101,48 @@ public class ProblemRoute extends Handler implements Get {
         );
     }
 
+    /**
+     * Container class for template data
+     * Exposes data as public properties for reflection
+     * @author Harry Xu
+     * @version 1.0 - June 8th 2023
+     */
     public class Data {
+        /** Problem id */
         public int id;
+
+        /** Problem title */
         public String name;
+
+        /** Problem content */
         public String content;
+
+        /** Problem type */
         public String type;
+
+        /** Problem difficulty from 1 to 10 inclusive */
         public int difficulty;
+
+        /** Name of the problem's author */
         public String authorName;
+
+        /** The text to display if the user has solved the problem before */
         public String solvedByUserText;
+
+        /** Change navbar based on authentication status */
         public boolean loggedIn;
+
+        /** The points the user has */
         public int points;
 
+        /**
+         * Constructs this data container class.
+         * @param problem the problem represented by this URL
+         * @param solvedByUser whether this problem has been solved by the user before
+         * @param currentUser the logged-in user or null if no user logged-in
+         */
         public Data(Problem problem, boolean solvedByUser, User currentUser) {
+            // Problem data
             this.id = problem.getProblemID();
             this.name = problem.getTitle();
             this.content = problem.getContent();
@@ -113,12 +158,14 @@ public class ProblemRoute extends Handler implements Get {
                 throw new RuntimeException(e);
             }
 
+            // Create solved text
             if (solvedByUser) {
                 this.solvedByUserText = "[SOLVED]";
             } else {
                 this.solvedByUserText = "";
             }
 
+            // User auth status related fields
             this.loggedIn = currentUser != null;
 
             if (this.loggedIn) {

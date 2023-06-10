@@ -7,7 +7,6 @@ import coderunner.TaskResult;
 import coderunner.test.TestCode;
 import coderunner.test.TestResult;
 import database.Database;
-import database.model.Problem;
 import database.model.User;
 import server.handler.Handler;
 import server.handler.methods.Get;
@@ -20,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A handler for the /problems/:problemId/submissions url, where the /problems/:problemId/tests page
+ * Responsible for handling the /problems/:problemId/submissions url, where the /problems/:problemId/tests page
  * polls for data about the problem submissions to update the webpage programmatically
  * @author Harry Xu
  * @version 1.0 - June 4th 2023
@@ -34,7 +33,9 @@ public class SubmissionPollRoute extends Handler implements Get {
     private final Database database;
 
     /**
-     * constructs a SubmissionPollRoute with its dependencies
+     * Constructs a SubmissionPollRoute with its dependencies
+     * @param codeRunner the object responsible for compiling, executing, and testing submitted code
+     * @param database the database which holds persisted application state
      */
     public SubmissionPollRoute(CodeRunner codeRunner, Database database) {
         this.codeRunner = codeRunner;
@@ -42,7 +43,8 @@ public class SubmissionPollRoute extends Handler implements Get {
     }
 
     /**
-     * handles the get request to this route
+     * Handles the get request to this route
+     * Returns JSON containing information about the current {@link CodeRunner} submission
      * @param req the HTTP request to handle
      * @return the HTTP response to the request
      */
@@ -64,7 +66,6 @@ public class SubmissionPollRoute extends Handler implements Get {
         // Username
         String username = req.getCookies().get("username");
 
-
         // Currently processing a submission
         if (submission != null) {
             // Get compilation result of current
@@ -74,6 +75,7 @@ public class SubmissionPollRoute extends Handler implements Get {
 
             if ((compilationResult != null) && (compilationResult.getTaskCode() == TaskCode.COMPILE_ERROR)) {
 
+                // Escapes compilation text
                 String escapedData = compilationResult.getData()
                         .replace("\\", "\\\\")
                         .replace("\t", "\\t")
@@ -83,6 +85,7 @@ public class SubmissionPollRoute extends Handler implements Get {
                         .replace("\f", "\\f")
                         .replace("\"", "\\\"");
 
+                // Removes file path except for file name
                 escapedData = escapedData.substring(escapedData.lastIndexOf("\\\\") + 2);
 
                 // Compilation error
@@ -94,13 +97,90 @@ public class SubmissionPollRoute extends Handler implements Get {
                 body = testsToJSON(testResults);
 
                 if (areTestsCompleted(testResults)) {
+                    // Add points to user if all tests passed
+                    TestResult lastResult = testResults[testResults.length - 1];
+
+                    if ((lastResult != null) && (lastResult.getStatusCode() == TestCode.ACCEPTED)) {
+                        try {
+                            // Get user
+                            User currentUser = this.database.users().getByUsername(username);
+
+                            List<Integer> solvedProblems = this.database.solvedProblems().getAllSolvedProblems(currentUser.getUserID());
+
+                            boolean alreadySolved = solvedProblems.contains(submission.getProblemId());
+
+                            if (!alreadySolved) {
+
+                                // Get user id
+                                int userId = currentUser.getUserID();
+
+                                // Get user information
+                                int oldPoints = currentUser.getPoints();
+                                int problemDifficulty = this.database.problems()
+                                        .getProblemById(submission.getProblemId())
+                                        .getDifficulty();
+                                int problemsSolved = this.database.solvedProblems().getAllSolvedProblems(userId).size();
+
+                                // Increment if problem solved is one to avoid denominator of 0
+                                if (problemsSolved <= 2) {
+                                    problemsSolved = 2;
+                                }
+
+                                // Calculate new points
+                                double denominator = Math.log(problemsSolved) / Math.log(2);
+                                int newPoints = oldPoints + (int) Math.floor((problemDifficulty * 100) / (denominator));
+
+                                // Add points
+                                this.database.users().updatePoints(userId, newPoints);
+                            }
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+
+                        try {
+                            // Mark this problem as solved by the user
+                            this.addUserTransaction(username);
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+
+                    // Remove submission
+                    submissions.remove(submissionId);
+
+                }
+
+            } else if (queuedPosition != -1) {
+                // Your submission is queued
+                body = "{ \"queued\": true, \"position\": " + queuedPosition + " }";
+            } else {
+                // Current submission is not yours
+                body = "{}";
+            }
+        }
+
+        if ((submission == null) || (!submission.getSubmissionId().equals(submissionId))) {
+            if (submissions.containsKey(submissionId)){
+                // Checks cache for previous submissions and removes it requests
+                // guarantees that all submissions are completed
+                // Submission done testing - get finished data and remove from history
+                Submission requestedSubmission = submissions.get(submissionId);
+
+                TestResult[] testResults = requestedSubmission.getTask().getTestResults();
+
+                body = testsToJSON(testResults);
+
+                // Add points to user if all tests passed
+                TestResult lastResult = testResults[testResults.length - 1];
+
+                if ((lastResult != null) && (lastResult.getStatusCode() == TestCode.ACCEPTED)) {
                     try {
                         // Get user
                         User currentUser = this.database.users().getByUsername(username);
 
                         List<Integer> solvedProblems = this.database.solvedProblems().getAllSolvedProblems(currentUser.getUserID());
 
-                        boolean alreadySolved = solvedProblems.contains(submission.getProblemId());
+                        boolean alreadySolved = solvedProblems.contains(requestedSubmission.getProblemId());
 
                         if (!alreadySolved) {
 
@@ -110,7 +190,7 @@ public class SubmissionPollRoute extends Handler implements Get {
                             // Get user information
                             int oldPoints = currentUser.getPoints();
                             int problemDifficulty = this.database.problems()
-                                    .getProblemById(submission.getProblemId())
+                                    .getProblemById(requestedSubmission.getProblemId())
                                     .getDifficulty();
                             int problemsSolved = this.database.solvedProblems().getAllSolvedProblems(userId).size();
 
@@ -136,72 +216,6 @@ public class SubmissionPollRoute extends Handler implements Get {
                     } catch (SQLException e) {
                         throw new RuntimeException(e);
                     }
-
-
-                    // Remove submission
-                    submissions.remove(submissionId);
-
-                }
-
-            } else if (queuedPosition != -1) {
-                // Your submission is queued
-                body = "{ \"queued\": true, \"position\": " + queuedPosition + " }";
-            } else {
-                // Current submission is not yours
-                body = "{}";
-            }
-        }
-
-        if ((submission == null) || (!submission.getSubmissionId().equals(submissionId))) {
-            if (submissions.containsKey(submissionId)){
-                // Checks cache for previous submissions and removes it requests
-                // guarantees that all submissions are completed
-                // Submission done testing - get finished data and remove from history
-                Submission requestedSubmission = submissions.get(submissionId);
-
-                body = testsToJSON(requestedSubmission.getTask().getTestResults());
-
-                try {
-                    // Get user
-                    User currentUser = this.database.users().getByUsername(username);
-
-                    List<Integer> solvedProblems = this.database.solvedProblems().getAllSolvedProblems(currentUser.getUserID());
-
-                    boolean alreadySolved = solvedProblems.contains(requestedSubmission.getProblemId());
-
-                    if (!alreadySolved) {
-
-                        // Get user id
-                        int userId = currentUser.getUserID();
-
-                        // Get user information
-                        int oldPoints = currentUser.getPoints();
-                        int problemDifficulty = this.database.problems()
-                                .getProblemById(requestedSubmission.getProblemId())
-                                .getDifficulty();
-                        int problemsSolved = this.database.solvedProblems().getAllSolvedProblems(userId).size();
-
-                        // Increment if problem solved is one to avoid denominator of 0
-                        if (problemsSolved <= 2) {
-                            problemsSolved = 2;
-                        }
-
-                        // Calculate new points
-                        double denominator = Math.log(problemsSolved) / Math.log(2);
-                        int newPoints = oldPoints + (int) Math.floor((problemDifficulty * 100) / (denominator));
-
-                        // Add points
-                        this.database.users().updatePoints(userId, newPoints);
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-
-                try {
-                    // Mark this problem as solved by the user
-                    this.addUserTransaction(username);
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
                 }
 
                 // Remove submission (i.e. end polling)
@@ -212,6 +226,9 @@ public class SubmissionPollRoute extends Handler implements Get {
         // Headers
         Map<String, String> headers = Handler.htmlHeaders();
 
+        // Change content type to JSON
+        headers.put("Content-Type", "text/json");
+
         return new Response(
                 new Response.StatusLine(ResponseCode.OK),
                 headers,
@@ -219,7 +236,13 @@ public class SubmissionPollRoute extends Handler implements Get {
         );
     }
 
+    /**
+     * addUserTransaction
+     * Marks the submission's problem as completed by the user with the specified username
+     * @param username the username of the user who completed the problem
+     */
     private void addUserTransaction(String username) throws SQLException {
+        // Get current user
         User currentUser;
 
         try {
@@ -229,12 +252,20 @@ public class SubmissionPollRoute extends Handler implements Get {
             return;
         }
 
+        // Mark as complete
         this.database.solvedProblems().addTransaction(currentUser.getUserID(), this.codeRunner.getCurrentSubmission().getProblemId());
     }
 
+    /**
+     * testsToJSON
+     * converts an array of test results into a JSON string which can be parsed by the client
+     * @param testResults the test results to convert into JSON
+     * @return the JSON string
+     */
     private static String testsToJSON(TestResult[] testResults) {
         StringBuilder body = new StringBuilder("{ ");
 
+        // Tests results array
         body.append("\"tests\": [");
 
         for (int i = 0; i < testResults.length - 1; i++) {
@@ -249,6 +280,7 @@ public class SubmissionPollRoute extends Handler implements Get {
             body.append(resCode).append(", ");
         }
 
+        // Last test result
         if (testResults[testResults.length - 1] == null) {
             body.append("\"Pending\"");
         } else {
@@ -268,16 +300,24 @@ public class SubmissionPollRoute extends Handler implements Get {
         return body.toString();
     }
 
+    /**
+     * areTestsCompleted
+     * Determines if the tests are done running and the client connection can be terminated
+     * @param testResults the test results to check
+     * @return if the tests are completed
+     */
     private static boolean areTestsCompleted(TestResult[] testResults) {
         boolean completed = false;
 
         for (int i = 0; i < testResults.length; i++) {
             TestResult testResult = testResults[i];
 
+            // If any of the tests are not pending or correct
             if ((testResult != null) && (testResult.getStatusCode() != TestCode.ACCEPTED)) {
                 completed = true;
             }
 
+            // If the test is done running
             if ((i == testResults.length - 1) && (testResults[i] != null)) {
                 completed = true;
             }

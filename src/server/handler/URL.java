@@ -14,7 +14,7 @@ public class URL {
     private final String[] pathSegments;
 
     /**
-     * constructs a URL pattern with a path
+     * Constructs a URL pattern with a path
      * @param path the URL pattern
      */
     public URL(String path) {

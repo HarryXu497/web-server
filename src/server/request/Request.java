@@ -27,7 +27,7 @@ public class Request {
     private final Map<String, String> cookies;
 
     /**
-     * constructs an HTTP request with a status line, headers, and body
+     * Constructs an HTTP request with a status line, headers, and body
      * @param statusLine the HTTP requests status line
      * @param headers a map of the request headers
      * @param body a map of the request body
@@ -107,7 +107,7 @@ public class Request {
 
     /**
      * parse
-     * parses and constructs an HTTP request from an HTTP request string.
+     * parses and Constructs an HTTP request from an HTTP request string.
      * @param lines a list of all lines in the request
      * @return the parsed request as a {@link Request}
      */
@@ -186,7 +186,7 @@ public class Request {
         private Map<String, String> routeParams;
 
         /**
-         * constructs a status line with a method, url, and protocol
+         * Constructs a status line with a method, url, and protocol
          * @param method the request method
          * @param url the full url of the request
          * @param protocol the protocol of the request

@@ -24,7 +24,7 @@ public class FileHandler extends Handler implements Get {
     private final String directory;
 
     /**
-     * constructs a File Handler which is used to handle static file assets
+     * Constructs a File Handler which is used to handle static file assets
      * @param assets the asset engine which holds the static asset
      * @param directory the url on which to host the file
      */
@@ -35,7 +35,8 @@ public class FileHandler extends Handler implements Get {
 
     /**
      * get
-     * handles the GET request on the request's url
+     * Handles the GET request on the request's url.
+     * Serves the requested static asset file.
      * @param req the HTTP request to handle
      * @return the server HTTP response
      */

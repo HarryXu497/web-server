@@ -17,6 +17,12 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Responsible for handling the `/sign-up` route.
+ * Signs up a user with valid credentials
+ * @author Harry Xu
+ * @version 1.0 - June 9th 2023
+ */
 public class SignUpRoute extends Handler implements Get, Post {
 
     /** The template engine which holds all templates */
@@ -25,11 +31,23 @@ public class SignUpRoute extends Handler implements Get, Post {
     /** The database used to create and store users */
     private final Database database;
 
+    /**
+     * Constructs a SignUpRoute handler
+     * @param templateEngine the template engine which holds and compiles the templates
+     * @param database the database which holds persisted application state
+     */
     public SignUpRoute(TemplateEngine templateEngine, Database database) {
         this.templateEngine = templateEngine;
         this.database = database;
     }
 
+    /**
+     * get
+     * Handles the GET request on the request's url.
+     * Serves the `sign-up.th` template file.
+     * @param req the HTTP request to handle
+     * @return the server HTTP response
+     */
     @Override
     public Response get(Request req) {
         // Get error code from query parameters
@@ -38,6 +56,7 @@ public class SignUpRoute extends Handler implements Get, Post {
         // Authenticate user
         User currentUser = this.database.users().getCurrentUserFromRequest(req);
 
+        // Compile template with data
         String body = this.templateEngine.compile("frontend/templates/sign-up.th", new Data(errorCode, currentUser));
 
         // Headers
@@ -50,11 +69,19 @@ public class SignUpRoute extends Handler implements Get, Post {
         );
     }
 
+    /**
+     * post
+     * Handles the POST request on the request's url
+     * Creates the user and logs the user in
+     * @param req the HTTP request to handle
+     * @return the server HTTP response
+     */
     @Override
     public Response post(Request req) {
         // Get form data
         Map<String, String> body = req.getBody();
 
+        // Get credentials
         String username = body.get("username");
         String password = body.get("password");
 
@@ -121,6 +148,7 @@ public class SignUpRoute extends Handler implements Get, Post {
 
     /**
      * Container class for template data
+     * Exposes data as public properties for reflection
      * @author Harry Xu
      * @version 1.0 - June 8th 2023
      */
@@ -144,6 +172,7 @@ public class SignUpRoute extends Handler implements Get, Post {
             if (errorCode == null) {
                 this.errorMessage = "";
             } else {
+                // Map error code to error message
                 switch (errorCode) {
                     case "3":
                         this.errorMessage = "<div class=\"error-message\">Username or Password cannot be empty</div>";
@@ -159,6 +188,7 @@ public class SignUpRoute extends Handler implements Get, Post {
                 }
             }
 
+            // User auth status related fields
             this.loggedIn = currentUser != null;
 
             if (this.loggedIn) {

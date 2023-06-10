@@ -28,7 +28,7 @@ public class CodeRunner {
     private final Object syncObject;
 
     /**
-     * constructs a CodeRunner and starts the processing thread.
+     * Constructs a CodeRunner and starts the processing thread.
      */
     public CodeRunner() {
         this.submissionQueue = new ArrayDeque<>();

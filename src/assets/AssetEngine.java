@@ -38,7 +38,7 @@ public class AssetEngine {
         IMAGE_EXTENSIONS.add("png");
     }
 
-    /** the registry for templates*/
+    /** the registry for templates */
     private final Map<String, byte[]> assets;
 
     /**
@@ -136,14 +136,17 @@ public class AssetEngine {
      */
     private byte[] readImage(String inputFile) throws IOException {
         File imageFile = new File(inputFile);
+
+        // Initial buffer size
         List<Byte> bytes = new ArrayList<>(10000);
 
         try (InputStream stream = Files.newInputStream(imageFile.toPath())) {
 
-            int c;
+            int currentChar = stream.read();
 
-            while ((c = stream.read()) != -1) {
-                bytes.add((byte) c);
+            while (currentChar != -1) {
+                bytes.add((byte) currentChar);
+                currentChar = stream.read();
             }
         }
 
