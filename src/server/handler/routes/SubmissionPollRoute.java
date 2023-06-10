@@ -103,7 +103,7 @@ public class SubmissionPollRoute extends Handler implements Get {
                     if ((lastResult != null) && (lastResult.getStatusCode() == TestCode.ACCEPTED)) {
                         try {
                             // Get user
-                            User currentUser = this.database.users().getByUsername(username);
+                            User currentUser = this.database.users().getUserByUsername(username);
 
                             List<Integer> solvedProblems = this.database.solvedProblems().getAllSolvedProblems(currentUser.getUserID());
 
@@ -176,7 +176,7 @@ public class SubmissionPollRoute extends Handler implements Get {
                 if ((lastResult != null) && (lastResult.getStatusCode() == TestCode.ACCEPTED)) {
                     try {
                         // Get user
-                        User currentUser = this.database.users().getByUsername(username);
+                        User currentUser = this.database.users().getUserByUsername(username);
 
                         List<Integer> solvedProblems = this.database.solvedProblems().getAllSolvedProblems(currentUser.getUserID());
 
@@ -246,7 +246,7 @@ public class SubmissionPollRoute extends Handler implements Get {
         User currentUser;
 
         try {
-            currentUser = this.database.users().getByUsername(username);
+            currentUser = this.database.users().getUserByUsername(username);
         } catch (SQLException e) {
             e.printStackTrace();
             return;

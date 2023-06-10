@@ -28,7 +28,7 @@ public class Main {
             database.problems().populateFromDirectory("problems");
             database.users().createAdminUser(username, "cheese");
 
-            User admin = database.users().getByUsername(username);
+            User admin = database.users().getUserByUsername(username);
 
             database.solvedProblems().initializeTransactions(admin, database.problems().getAllProblems());
 

@@ -1,6 +1,12 @@
 package filter;
 
+/**
+ * Reads Java source code and scans it for illegal and potentially malicious imports
+ * @author Tommy Shan
+ * @version 1.0 - June 8th 2023
+ */
 public class Filter {
+    /** Allowed imports in source code */
     private static final String[] allowedImports = {
             "io.BufferedInputStream",
             "io.BufferedOutputStream",
@@ -36,7 +42,7 @@ public class Filter {
 
     /**
      * filter
-     * filters source code for malicious imports
+     * scans source code for malicious imports
      * @param sourceCode the source code to filter
      * @return a string error message or null if the code passes
      */
@@ -56,6 +62,7 @@ public class Filter {
 
                 boolean accepted = false;
 
+                // Check for legality of import
                 for (String s : allowedImports) {
                     if ((sourceCode.length() >= importStart + s.length() + 5) && (sourceCode.startsWith(s, importStart + 5))) {
                         accepted = true;
@@ -63,12 +70,14 @@ public class Filter {
                     }
                 }
 
+                // Return error message
                 if (!accepted) {
                     return "Illegal Library Imported: " + sourceCode.substring(i, sourceCode.indexOf(";", endIndex) + 1);
                 }
             }
         }
 
+        // Return null if valid
         return null;
     }
 }

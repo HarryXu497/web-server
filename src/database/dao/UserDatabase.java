@@ -11,76 +11,112 @@ import java.security.SecureRandom;
 import java.sql.*;
 import java.util.Map;
 
+/**
+ * Wraps raw SQL connections to the database in a more friendly API
+ * @author Tommy Shan
+ * @version - June 6th 2023
+ * */
 public class UserDatabase {
-    public UserDatabase() {
-        try {
-            Class.forName("org.sqlite.JDBC");
-            try (
-                Connection c = DriverManager.getConnection("jdbc:sqlite:user.db");
-                Statement stm = c.createStatement()
-            ) {
-                String sql = "CREATE TABLE IF NOT EXISTS USERLIST " +
-                        "(ID INTEGER PRIMARY KEY NOT NULL, " +
-                        "USERNAME TEXT UNIQUE, " +
-                        "SALT BLOB NOT NULL," +
-                        "PASSWORD TEXT NOT NULL," +
-                        "POINTS INT NOT NULL);";
-                stm.executeUpdate(sql);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void addUser(User user) throws SQLException {
+    /**
+     * Constructs the object and initializes its data.
+     * Creates a users table if it does not exist
+     */
+    public UserDatabase() throws SQLException {
+        // Loads the JDBC driver
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
 
+        // Create SQL statement
+        String sql = "CREATE TABLE IF NOT EXISTS USERLIST " +
+                "(ID INTEGER PRIMARY KEY NOT NULL, " +
+                "USERNAME TEXT UNIQUE, " +
+                "SALT BLOB NOT NULL," +
+                "PASSWORD TEXT NOT NULL," +
+                "POINTS INT NOT NULL);";
+
+        // Create and execute statement
+        try (
+            Connection conn = DriverManager.getConnection("jdbc:sqlite:user.db");
+            Statement statement = conn.createStatement()
+        ) {
+            statement.executeUpdate(sql);
+        }
+    }
+
+    /**
+     * addUser
+     * Attempts to add a {@link User} to the database
+     * @param user the user to insert into the database
+     * @throws SQLException the error thrown when the class does not exist
+     */
+    public void addUser(User user) throws SQLException {
+        // Loads the JDBC driver
+        try {
+            Class.forName("org.sqlite.JDBC");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        // Create SQL statement
         String sql = SQLStatement.insertStatement()
                 .insertInto("USERLIST")
                 .columns("USERNAME", "PASSWORD", "SALT", "POINTS")
                 .values("?", "?", "?", "?")
                 .toString();
 
+        // Prepare and execute statement
         try (
                 Connection conn = DriverManager.getConnection("jdbc:sqlite:user.db");
                 PreparedStatement statement = conn.prepareStatement(sql);
         ) {
-
+            // Set parameters
             statement.setString(1, user.getUserName());
             statement.setString(2, user.getPassword());
             statement.setBytes(3, user.getSalt());
             statement.setInt(4, user.getPoints());
 
+            // Execute update
             statement.executeUpdate();
         }
 
     }
 
+    /**
+     * getUserById
+     * Attempts to get a {@link User} by its id
+     * @param targetId the id of user to get
+     * @return the user with the specified id
+     * @throws SQLException if an error occurs while using SQL
+     */
     public User getUserById(int targetId) throws SQLException {
+        // Load JDBC driver
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
+
+        // Create SQL statement
         String sql = SQLStatement.selectStatement()
                 .select("*")
                 .from("USERLIST")
                 .where("ID = ?")
                 .toString();
 
-
+        // Prepare and execute statement
         try (
                 Connection c = DriverManager.getConnection("jdbc:sqlite:user.db");
                 PreparedStatement statement = c.prepareStatement(sql);
-            ) {
-
+        ) {
+            // Set parameters
             statement.setInt(1, targetId);
 
+            // Execute and get results
             try (ResultSet results = statement.executeQuery()) {
+                // Get result fields
                 int id = results.getInt("ID");
                 String userName = results.getString("USERNAME");
                 String password = results.getString("PASSWORD");
@@ -90,30 +126,41 @@ public class UserDatabase {
                 return new User(id, userName, password, salt, points);
             }
         }
-
     }
 
-    public User getByUsername(String username) throws SQLException {
+    /**
+     * getByUsername
+     * Attempts to retrieve a user with a specified username
+     * @param username the username to search for
+     * @return the found user
+     * @throws SQLException if an error occurs while using SQL
+     */
+    public User getUserByUsername(String username) throws SQLException {
+        // Load JDBC driver
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
 
+        // Create SQL statement
         String sql = SQLStatement.selectStatement()
                 .select("*")
                 .from("USERLIST")
                 .where("USERNAME = ?")
                 .toString();
 
+        // Prepare and execute statement
         try (
             Connection c = DriverManager.getConnection("jdbc:sqlite:user.db");
             PreparedStatement statement = c.prepareStatement(sql);
         ) {
-
+            // Set parameters
             statement.setString(1, username);
 
+            // Execute and get results
             try (ResultSet results = statement.executeQuery()) {
+                // Get result fields
                 int id = results.getInt("ID");
                 String userName = results.getString("USERNAME");
                 String password = results.getString("PASSWORD");
@@ -125,13 +172,21 @@ public class UserDatabase {
         }
     }
 
+    /**
+     * updatePoints
+     * Attempts to update the points that a user has
+     * @param userId the username to search for
+     * @throws SQLException if an error occurs while using SQL
+     */
     public void updatePoints(int userId, int newPoints) throws SQLException {
+        // Load JDBC driver
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
 
+        // Create SQL statement
         String sql = SQLStatement.updateStatement()
                 .update("USERLIST")
                 .columns("POINTS")
@@ -139,14 +194,16 @@ public class UserDatabase {
                 .where("ID = ?")
                 .toString();
 
+        // Prepare and execute statement
         try (
                 Connection conn = DriverManager.getConnection("jdbc:sqlite:user.db");
                 PreparedStatement statement = conn.prepareStatement(sql);
         ) {
-
+            // Set parameters
             statement.setInt(1, newPoints);
             statement.setInt(2, userId);
 
+            // Execute update
             statement.executeUpdate();
         }
     }
@@ -155,7 +212,7 @@ public class UserDatabase {
         User requestedUser;
 
         try {
-            requestedUser = this.getByUsername(username);
+            requestedUser = this.getUserByUsername(username);
         } catch (SQLException e) {
             return null;
         }
@@ -172,7 +229,7 @@ public class UserDatabase {
         User requestedUser;
 
         try {
-            requestedUser = this.getByUsername(username);
+            requestedUser = this.getUserByUsername(username);
         } catch (SQLException e) {
             return null;
         }

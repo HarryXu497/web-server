@@ -5,32 +5,15 @@ import database.model.Problem;
 import java.util.ArrayList;
 
 public class ProblemRecommender {
-    private ArrayList<Problem> problems;
+    private final ArrayList<Problem> problems;
 
     /**
-     * recommendation.ProblemRecommender
-     * Empty constructor of recommendation.ProblemRecommender
-     */
-    public ProblemRecommender() {
-
-    }
-
-    /**
-     * recommendation.ProblemRecommender
-     * Constructor for recommendation.ProblemRecommender
+     * ProblemRecommender
+     * Constructor for ProblemRecommender
      * @param problems the ArrayList of problems that we want to select similar problem from
      */
     public ProblemRecommender(ArrayList<Problem> problems) {
         this.problems = problems;
-    }
-
-    /**
-     * addProblem
-     * add function to the source list
-     * @param problem the problem we wish to add in to the possible recommend list
-     */
-    public void addProblem(Problem problem) {
-        problems.add(problem);
     }
 
     /**
@@ -42,7 +25,7 @@ public class ProblemRecommender {
      */
     public ArrayList<Problem> getProblems(Problem curProblem, int numOfProblem) {
         ArrayList<Problem> ret = new ArrayList<Problem>();
-        int relativity[] = new int[problems.size()];
+        int[] relativity = new int[problems.size()];
         for(int i = 0; i < problems.size(); i++) {
             relativity[i] = 0;
             // If the different between two problems' difficulty is equals to 0, the problem earn 10 relativity points. As the difference increased by 1, the relativity point decreased by 1, until 0.
