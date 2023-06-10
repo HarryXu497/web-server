@@ -77,7 +77,7 @@ public class UserDatabase {
                 PreparedStatement statement = conn.prepareStatement(sql);
         ) {
             // Set parameters
-            statement.setString(1, user.getUserName());
+            statement.setString(1, user.getUsername());
             statement.setString(2, user.getPassword());
             statement.setBytes(3, user.getSalt());
             statement.setInt(4, user.getPoints());
@@ -127,12 +127,12 @@ public class UserDatabase {
 
                 // Get result fields
                 int id = resultSet.getInt("ID");
-                String userName = resultSet.getString("USERNAME");
+                String username = resultSet.getString("USERNAME");
                 String password = resultSet.getString("PASSWORD");
                 byte[] salt = resultSet.getBytes("SALT");
                 int points = resultSet.getInt("POINTS");
 
-                return new User(id, userName, password, salt, points);
+                return new User(id, username, password, salt, points);
             }
         }
     }
@@ -140,11 +140,11 @@ public class UserDatabase {
     /**
      * getByUsername
      * Attempts to retrieve a user with a specified username
-     * @param username the username to search for
+     * @param targetUsername the username to search for
      * @return the found user or null if not found
      * @throws SQLException if an error occurs while using SQL
      */
-    public User getUserByUsername(String username) throws SQLException {
+    public User getUserByUsername(String targetUsername) throws SQLException {
         // Load JDBC driver
         try {
             Class.forName("org.sqlite.JDBC");
@@ -165,7 +165,7 @@ public class UserDatabase {
             PreparedStatement statement = conn.prepareStatement(sql);
         ) {
             // Set parameters
-            statement.setString(1, username);
+            statement.setString(1, targetUsername);
 
             // Execute and get results
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -176,12 +176,12 @@ public class UserDatabase {
 
                 // Get result fields
                 int id = resultSet.getInt("ID");
-                String userName = resultSet.getString("USERNAME");
+                String username = resultSet.getString("USERNAME");
                 String password = resultSet.getString("PASSWORD");
                 byte[] salt = resultSet.getBytes("SALT");
                 int points = resultSet.getInt("POINTS");
 
-                return new User(id, userName, password, salt, points);
+                return new User(id, username, password, salt, points);
             }
         }
     }

@@ -157,7 +157,7 @@ public class ProblemRoute extends Handler implements Get {
             try {
                 this.authorName = database.users().getUserById(
                         problem.getAuthorID()
-                ).getUserName();
+                ).getUsername();
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             } catch (NullPointerException e) {

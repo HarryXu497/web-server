@@ -1,15 +1,31 @@
 package database.model;
 
+/**
+ * Represents a problem entity in the application
+ * @author Tommy Shan
+ * @version 1.0 - June 1st 2023
+ */
 public class Problem {
-    private int problemID;
-    private int difficulty;
-    private String title;
-    private String content;
-    private String type;
-    private int authorID;
+    /** The unique id of the problem */
+    private final int problemID;
+
+    /** The difficulty of the problem as an integer from 1 to 10 inclusive */
+    private final int difficulty;
+
+    /** The title of the problem */
+    private final String title;
+
+    /** The content of the problem */
+    private final String content;
+
+    /** The type of the problem (e.g. Dynamic Programming, Graph Theory)*/
+    private final String type;
+
+    /** The unique id of the {@link User} who authored this problem */
+    private final int authorID;
 
     /**
-     * Construct for class database.model.Problem
+     * Constructs a {@link Problem} dataclass
      * @param problemID the id of the problem
      * @param difficulty the difficulty of the problem
      * @param title the title of the problem
@@ -18,119 +34,65 @@ public class Problem {
      * @param authorID the user who authored the problem
      */
     public Problem(int problemID, int difficulty, String title, String content, String type, int authorID) {
-        setProblemID(problemID);
-        setDifficulty(difficulty);
-        setTitle(title);
-        setContent(content);
-        setType(type);
-        setAuthorID(authorID);
-    }
-
-    /**
-     * getTitle
-     * Getter method for variable title
-     * @return variable title
-     */
-    public String getTitle() {
-        return title;
-    }
-
-    /**
-     * setTitle
-     * Setter method for variable title
-     * @param title variable title
-     */
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    /**
-     * getProblemID
-     * Getter method for variable problemID
-     * @return variable problemID
-     */
-    public int getProblemID() {
-        return problemID;
-    }
-
-    /**
-     * setProblemID
-     * Setter method for variable problemID
-     * @param problemID variable problemID
-     */
-    public void setProblemID(int problemID) {
         this.problemID = problemID;
-    }
-
-    /**
-     * getContent
-     * Getter method for variable content
-     * @return variable content
-     */
-    public String getContent() {
-        return content;
-    }
-
-    /**
-     * setContent
-     * Setter method for variable content
-     * @param content variable content
-     */
-    public void setContent(String content) {
+        this.difficulty = difficulty;
+        this.title = title;
         this.content = content;
-    }
-
-    /**
-     * getAuthorID
-     * Getter method for variable author
-     * @return variable author
-     */
-    public int getAuthorID() {
-        return authorID;
-    }
-
-    /**
-     * setAuthorID
-     * Setter method for variable author
-     * @param authorID variable author
-     */
-    public void setAuthorID(int authorID) {
+        this.type = type;
         this.authorID = authorID;
     }
 
     /**
-     * getType
-     * Getter method for variable type
-     * @return variable type
+     * getTitle
+     * Gets the title of the problem
+     * @return the problem title
      */
-    public String getType() {
-        return type;
+    public String getTitle() {
+        return this.title;
     }
 
     /**
-     * setType
-     * Setter method for variable type
-     * @param type variable type
+     * getProblemID
+     * Gets the id of the problem
+     * @return the problem id
      */
-    public void setType(String type) {
-        this.type = type;
+    public int getProblemID() {
+        return this.problemID;
+    }
+
+    /**
+     * getContent
+     * Gets the content of the problem
+     * @return the problem content
+     */
+    public String getContent() {
+        return this.content;
+    }
+
+    /**
+     * getAuthorID
+     * Gets the id of author of the problem
+     * @return the problem's author's id
+     */
+    public int getAuthorID() {
+        return this.authorID;
+    }
+
+    /**
+     * getType
+     * Gets the type of the problem
+     * @return the problem type
+     */
+    public String getType() {
+        return this.type;
     }
 
     /**
      * getDifficulty
-     * Getter method for variable difficulty
-     * @return variable difficulty
+     * Gets the difficulty of the problem
+     * @return the problem difficulty as an integer from 1 to 10 inclusive
      */
     public int getDifficulty() {
-        return difficulty;
-    }
-
-    /**
-     * setDifficulty
-     * Setter method for variable difficulty
-     * @param difficulty variable difficulty
-     */
-    public void setDifficulty(int difficulty) {
-        this.difficulty = difficulty;
+        return this.difficulty;
     }
 }
