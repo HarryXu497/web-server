@@ -2,13 +2,37 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <title>Welcome!</title>
+    <title>500 Error</title>
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="description" content="" />
+    <link rel="stylesheet" href="/static/css/fonts.css">
     <link rel="stylesheet" href="/static/css/reset.css">
-    <link rel="stylesheet" href="/static/css/index.css">
+    <link rel="stylesheet" href="/static/css/nav.css">
+    <link rel="stylesheet" href="/static/css/error.css">
+    <script defer src="/static/js/nav.js"></script>
 </head>
 <body>
-    <h1>500 Error</h1>
+    <nav class="nav">
+        <div class="nav__logo">
+            THOJ@RHHS
+        </div>
+        <div class="nav__links">
+            <ul>
+                <li><a href="/problems">Problems</a></li>
+                <li><a href="/discussion">Discussion</a></li>
+                <li><a href="/about">About</a></li>
+                <li><a href="/log-in">Log In</a></li>
+            </ul>
+            <div class="nav__hamburger">
+                <div class="nav__hamburger__line"></div>
+                <div class="nav__hamburger__line"></div>
+                <div class="nav__hamburger__line"></div>
+            </div>
+        </div>
+    </nav>
+    <main>
+        <h1>500 Error</h1>
+        <h2>Internal Server Error</h2>
+    </main>
 </body>
 </html>

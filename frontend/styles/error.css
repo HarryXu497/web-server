@@ -1,0 +1,41 @@
+body {
+	background-color: black;
+}
+
+main {
+    padding-top: 2rem;
+	height: calc(100vh - 7rem);
+    object-fit: contain;
+    background:
+        linear-gradient(
+              rgba(0, 0, 0, 0.7),
+              rgba(0, 0, 0, 0.7)
+        ),
+        url("/static/images/bg.jpg");
+}
+
+main {
+    color: white;
+}
+
+h1 {
+    font-weight: bold;
+    font-family: "Montserrat", sans-serif;
+    font-size: 3rem;
+
+    margin: 0 auto;
+    margin-top: 2rem;
+
+    width: fit-content;
+}
+
+h2 {
+    font-weight: bold;
+    font-family: "Montserrat", sans-serif;
+    font-size: 2.5rem;
+
+    margin: 0 auto;
+    margin-top: 2rem;
+
+    width: fit-content;
+}

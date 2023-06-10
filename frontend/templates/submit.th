@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <title>Welcome!</title>
+    <title>Submit Code</title>
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="description" content="" />
     <link rel="stylesheet" href="/static/css/fonts.css">
@@ -15,7 +15,7 @@
     {#include frontend/templates/nav.th}
 	<main class="judge">
 		<div class="title">
-			<h1>Submit Problem <span>Hello</span></h1>
+			<h1>Submit Code for <span>{data.problemName}</span></h1>
 		</div>
 		<form method="POST" action="">
             <div id="code-editor">
