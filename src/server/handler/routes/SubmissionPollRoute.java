@@ -105,33 +105,35 @@ public class SubmissionPollRoute extends Handler implements Get {
                             // Get user
                             User currentUser = this.database.users().getUserByUsername(username);
 
-                            List<Integer> solvedProblems = this.database.solvedProblems().getAllSolvedProblems(currentUser.getUserID());
+                            if (currentUser != null) {
 
-                            boolean alreadySolved = solvedProblems.contains(submission.getProblemId());
+                                List<Integer> solvedProblems = this.database.solvedProblems().getAllSolvedProblems(currentUser.getUserID());
 
-                            if (!alreadySolved) {
+                                boolean alreadySolved = solvedProblems.contains(submission.getProblemId());
 
-                                // Get user id
-                                int userId = currentUser.getUserID();
+                                if (!alreadySolved) {
+                                    // Get user id
+                                    int userId = currentUser.getUserID();
 
-                                // Get user information
-                                int oldPoints = currentUser.getPoints();
-                                int problemDifficulty = this.database.problems()
-                                        .getProblemById(submission.getProblemId())
-                                        .getDifficulty();
-                                int problemsSolved = this.database.solvedProblems().getAllSolvedProblems(userId).size();
+                                    // Get user information
+                                    int oldPoints = currentUser.getPoints();
+                                    int problemDifficulty = this.database.problems()
+                                            .getProblemById(submission.getProblemId())
+                                            .getDifficulty();
+                                    int problemsSolved = this.database.solvedProblems().getAllSolvedProblems(userId).size();
 
-                                // Increment if problem solved is one to avoid denominator of 0
-                                if (problemsSolved <= 2) {
-                                    problemsSolved = 2;
+                                    // Increment if problem solved is one to avoid denominator of 0
+                                    if (problemsSolved <= 2) {
+                                        problemsSolved = 2;
+                                    }
+
+                                    // Calculate new points
+                                    double denominator = Math.log(problemsSolved) / Math.log(2);
+                                    int newPoints = oldPoints + (int) Math.floor((problemDifficulty * 100) / (denominator));
+
+                                    // Add points
+                                    this.database.users().updatePoints(userId, newPoints);
                                 }
-
-                                // Calculate new points
-                                double denominator = Math.log(problemsSolved) / Math.log(2);
-                                int newPoints = oldPoints + (int) Math.floor((problemDifficulty * 100) / (denominator));
-
-                                // Add points
-                                this.database.users().updatePoints(userId, newPoints);
                             }
                         } catch (SQLException e) {
                             e.printStackTrace();
@@ -178,33 +180,36 @@ public class SubmissionPollRoute extends Handler implements Get {
                         // Get user
                         User currentUser = this.database.users().getUserByUsername(username);
 
-                        List<Integer> solvedProblems = this.database.solvedProblems().getAllSolvedProblems(currentUser.getUserID());
+                        if (currentUser != null) {
 
-                        boolean alreadySolved = solvedProblems.contains(requestedSubmission.getProblemId());
+                            List<Integer> solvedProblems = this.database.solvedProblems().getAllSolvedProblems(currentUser.getUserID());
 
-                        if (!alreadySolved) {
+                            boolean alreadySolved = solvedProblems.contains(requestedSubmission.getProblemId());
 
-                            // Get user id
-                            int userId = currentUser.getUserID();
+                            if (!alreadySolved) {
 
-                            // Get user information
-                            int oldPoints = currentUser.getPoints();
-                            int problemDifficulty = this.database.problems()
-                                    .getProblemById(requestedSubmission.getProblemId())
-                                    .getDifficulty();
-                            int problemsSolved = this.database.solvedProblems().getAllSolvedProblems(userId).size();
+                                // Get user id
+                                int userId = currentUser.getUserID();
 
-                            // Increment if problem solved is one to avoid denominator of 0
-                            if (problemsSolved <= 2) {
-                                problemsSolved = 2;
+                                // Get user information
+                                int oldPoints = currentUser.getPoints();
+                                int problemDifficulty = this.database.problems()
+                                        .getProblemById(requestedSubmission.getProblemId())
+                                        .getDifficulty();
+                                int problemsSolved = this.database.solvedProblems().getAllSolvedProblems(userId).size();
+
+                                // Increment if problem solved is one to avoid denominator of 0
+                                if (problemsSolved <= 2) {
+                                    problemsSolved = 2;
+                                }
+
+                                // Calculate new points
+                                double denominator = Math.log(problemsSolved) / Math.log(2);
+                                int newPoints = oldPoints + (int) Math.floor((problemDifficulty * 100) / (denominator));
+
+                                // Add points
+                                this.database.users().updatePoints(userId, newPoints);
                             }
-
-                            // Calculate new points
-                            double denominator = Math.log(problemsSolved) / Math.log(2);
-                            int newPoints = oldPoints + (int) Math.floor((problemDifficulty * 100) / (denominator));
-
-                            // Add points
-                            this.database.users().updatePoints(userId, newPoints);
                         }
                     } catch (SQLException e) {
                         e.printStackTrace();
@@ -252,8 +257,12 @@ public class SubmissionPollRoute extends Handler implements Get {
             return;
         }
 
+        if (currentUser == null) {
+            return;
+        }
+
         // Mark as complete
-        this.database.solvedProblems().addTransaction(currentUser.getUserID(), this.codeRunner.getCurrentSubmission().getProblemId());
+        this.database.solvedProblems().markAsSolved(currentUser.getUserID(), this.codeRunner.getCurrentSubmission().getProblemId());
     }
 
     /**

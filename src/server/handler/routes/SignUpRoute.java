@@ -103,12 +103,8 @@ public class SignUpRoute extends Handler implements Get, Post {
         String hashedPassword;
         byte[] salt;
 
-        try {
-            salt = UserDatabase.getSalt();
-            hashedPassword = UserDatabase.hashPassword(password, salt);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
+        salt = UserDatabase.getSalt();
+        hashedPassword = UserDatabase.hashPassword(password, salt);
 
         // Add user with hash and salt
         try {

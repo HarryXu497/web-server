@@ -28,9 +28,7 @@ public class Main {
             database.problems().populateFromDirectory("problems");
             database.users().createAdminUser(username, "cheese");
 
-            User admin = database.users().getUserByUsername(username);
-
-            database.solvedProblems().initializeTransactions(admin, database.problems().getAllProblems());
+            database.solvedProblems().initializeSolvedProblems(database.problems().getAllProblems());
 
             // Routes
             LinkedHashMap<String, Handler> routes = new LinkedHashMap<>();

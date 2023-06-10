@@ -14,18 +14,34 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 
+/**
+ * Wraps raw SQL connections to the problem table in a more accessible API
+ * @author Tommy Shan
+ * @version - June 6th 2023
+ */
 public class ProblemDatabase {
+    /** JDBC URL to connect to the database */
+    private static final String JDBC_URL = "jdbc:sqlite:problem.db";
+
+    /**
+     * Constructs the object and initializes its data.
+     * Creates a problems table if it does not exist.
+     * @throws SQLException if an error occurs while using SQL
+     */
     public ProblemDatabase() throws SQLException {
+        // Load JDBC driver
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
 
+        // Create and execute statement
         try (
-            Connection c = DriverManager.getConnection("jdbc:sqlite:problem.db");
-            Statement stm = c.createStatement()
+            Connection conn = DriverManager.getConnection(JDBC_URL);
+            Statement statement = conn.createStatement()
         ) {
             String sql = "CREATE TABLE IF NOT EXISTS PROBLEMLIST " +
                     "(ID INTEGER PRIMARY KEY NOT NULL, " +
@@ -37,132 +53,190 @@ public class ProblemDatabase {
                     "FOREIGN KEY (USER_ID)" +
                     "   REFERENCES USERLIST (USER_ID));";
 
-            stm.executeUpdate(sql);
+            statement.executeUpdate(sql);
         }
     }
 
-    public void addProblem(Problem p) throws SQLException {
+    /**
+     * addProblem
+     * Attempts to add a problem to the problems table.
+     * @param problem the problem to be inserted
+     * @throws SQLException if an error occurs while using SQL
+     */
+    public void addProblem(Problem problem) throws SQLException {
+        // Load JDBC driver
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
 
+        // Create SQL statement
         String sql = SQLStatement.insertStatement()
                 .insertInto("PROBLEMLIST")
                 .columns("TITLE", "CONTENT", "DIFFICULTY", "TYPE", "USER_ID")
                 .values("?", "?", "?", "?", "?")
                 .toString();
 
+        // Prepare and execute statement
         try (
-                Connection c = DriverManager.getConnection("jdbc:sqlite:problem.db");
-                PreparedStatement stm = c.prepareStatement(sql)
+                Connection conn = DriverManager.getConnection(JDBC_URL);
+                PreparedStatement statement = conn.prepareStatement(sql)
         ) {
-            stm.setString(1, p.getTitle());
-            stm.setString(2, p.getContent());
-            stm.setInt(3, p.getDifficulty());
-            stm.setString(4, p.getType());
-            stm.setInt(5, p.getAuthorID());
+            // Set parameters
+            statement.setString(1, problem.getTitle());
+            statement.setString(2, problem.getContent());
+            statement.setInt(3, problem.getDifficulty());
+            statement.setString(4, problem.getType());
+            statement.setInt(5, problem.getAuthorID());
 
-            stm.executeUpdate();
+            statement.executeUpdate();
         }
     }
 
+    /**
+     * getProblemById
+     * Attempts to retrieve a problem with its id.
+     * @param targetId the id of the problem
+     * @return the requested problem or null if not found
+     * @throws SQLException if an error occurs while using SQL
+     */
     public Problem getProblemById(int targetId) throws SQLException {
+        // Load JDBC driver
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
 
+        // Create SQL statement
         String sql = SQLStatement.selectStatement()
                 .select("*")
                 .from("PROBLEMLIST")
                 .where("ID = ?")
                 .toString();
 
+        // Prepare and execute statement
         try (
-            Connection c = DriverManager.getConnection("jdbc:sqlite:problem.db");
-            PreparedStatement stm = c.prepareStatement(sql)
+            Connection conn = DriverManager.getConnection(JDBC_URL);
+            PreparedStatement statement = conn.prepareStatement(sql)
         ) {
+            // Set parameters
+            statement.setInt(1, targetId);
 
-            stm.setInt(1, targetId);
+            // Get result
+            try (ResultSet resultSet = statement.executeQuery()) {
+                // Return null if no problem found
+                if (!resultSet.isBeforeFirst() ) {
+                    return null;
+                }
 
-            try (ResultSet rs = stm.executeQuery()) {
-                int id = rs.getInt("ID");
-                String title = rs.getString("TITLE");
-                String content = rs.getString("CONTENT");
-                int difficulty = rs.getInt("DIFFICULTY");
-                String type = rs.getString("TYPE");
-                int authorId = rs.getInt("USER_ID");
+                int id = resultSet.getInt("ID");
+                String title = resultSet.getString("TITLE");
+                String content = resultSet.getString("CONTENT");
+                int difficulty = resultSet.getInt("DIFFICULTY");
+                String type = resultSet.getString("TYPE");
+                int authorId = resultSet.getInt("USER_ID");
 
                 return new Problem(id, difficulty, title, content, type, authorId);
             }
         }
     }
 
+    /**
+     * getProblemByTitle
+     * Attempts to retrieve a problem with its title
+     * @param targetTitle the title of the problem
+     * @return the requested problem or null if not found
+     * @throws SQLException if an error occurs while using SQL
+     */
     public Problem getProblemByTitle(String targetTitle) throws SQLException {
+        // Load JDBC driver
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
 
+        // Create SQL statement
         String sql = SQLStatement.selectStatement()
                 .select("*")
                 .from("PROBLEMLIST")
                 .where("TITLE = ?")
                 .toString();
 
+        // Prepare and execute statement
         try (
-                Connection c = DriverManager.getConnection("jdbc:sqlite:problem.db");
-                PreparedStatement stm = c.prepareStatement(sql)
-            ) {
+                Connection conn = DriverManager.getConnection(JDBC_URL);
+                PreparedStatement statement = conn.prepareStatement(sql)
+        ) {
+            // Set parameters
+            statement.setString(1, targetTitle);
 
-            stm.setString(1, targetTitle);
+            // Get result
+            try (ResultSet resultSet = statement.executeQuery()) {
+                // Return null if no problem found
+                if (!resultSet.isBeforeFirst() ) {
+                    return null;
+                }
 
-            try (ResultSet rs = stm.executeQuery()) {
-                int id = rs.getInt("ID");
-                String title = rs.getString("TITLE");
-                String content = rs.getString("CONTENT");
-                int difficulty = rs.getInt("DIFFICULTY");
-                String type = rs.getString("TYPE");
-                int authorId = rs.getInt("USER_ID");
+                // Get fields
+                int id = resultSet.getInt("ID");
+                String title = resultSet.getString("TITLE");
+                String content = resultSet.getString("CONTENT");
+                int difficulty = resultSet.getInt("DIFFICULTY");
+                String type = resultSet.getString("TYPE");
+                int authorId = resultSet.getInt("USER_ID");
 
                 return new Problem(id, difficulty, title, content, type, authorId);
             }
         }
     }
-    public ArrayList<Problem> getProblemByType(String targetType) throws SQLException {
+
+    /**
+     * getProblemByTitle
+     * Attempts to retrieve a problem with its type
+     * @param targetType the type/category of the problem
+     * @return a list of all problems with the specified type
+     * @throws SQLException if an error occurs while using SQL
+     */
+    public List<Problem> getProblemByType(String targetType) throws SQLException {
+        // Load JDBC driver
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
 
+        // Create SQL statement
         String sql = SQLStatement.selectStatement()
                 .select("*")
                 .from("PROBLEMLIST")
                 .where("TYPE = ?")
                 .toString();
 
+        // Get problems
         ArrayList<Problem> problems = new ArrayList<>();
 
+        // Prepare and execute statement
         try (
-                Connection c = DriverManager.getConnection("jdbc:sqlite:problem.db");
-                PreparedStatement statement = c.prepareStatement(sql)
+                Connection conn = DriverManager.getConnection(JDBC_URL);
+                PreparedStatement statement = conn.prepareStatement(sql)
             ) {
 
+            // Set parameters
             statement.setString(1, targetType);
 
-            try (ResultSet rs = statement.executeQuery()) {
-                while (rs.next()) {
-                    int id = rs.getInt("ID");
-                    String title = rs.getString("TITLE");
-                    String content = rs.getString("CONTENT");
-                    int difficulty = rs.getInt("DIFFICULTY");
-                    String type = rs.getString("TYPE");
-                    int authorId = rs.getInt("USER_ID");
+            // Get results and add to list
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    // Get fields
+                    int id = resultSet.getInt("ID");
+                    String title = resultSet.getString("TITLE");
+                    String content = resultSet.getString("CONTENT");
+                    int difficulty = resultSet.getInt("DIFFICULTY");
+                    String type = resultSet.getString("TYPE");
+                    int authorId = resultSet.getInt("USER_ID");
 
                     problems.add(new Problem(id, difficulty, title, content, type, authorId));
                 }
@@ -172,34 +246,44 @@ public class ProblemDatabase {
         return problems;
     }
 
-    public ArrayList<Problem> getAllProblems() throws SQLException {
+    /**
+     * getAllProblems
+     * Attempts to retrieve a problem with its type
+     * @return a list of all problems
+     * @throws SQLException if an error occurs while using SQL
+     */
+    public List<Problem> getAllProblems() throws SQLException {
+        // Load JDBC driver
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
 
+        // Create SQL statement
+        String sql = SQLStatement.selectStatement()
+                .select("*")
+                .from("PROBLEMLIST")
+                .toString();
+
+        // Get all problems
         ArrayList<Problem> problems = new ArrayList<>();
 
+        // Create and execute statement
         try (
-                Connection c = DriverManager.getConnection("jdbc:sqlite:problem.db");
-                Statement stm = c.createStatement()
-            ) {
-
-
-            String sql = SQLStatement.selectStatement()
-                    .select("*")
-                    .from("PROBLEMLIST")
-                    .toString();
-
-            try (ResultSet rs = stm.executeQuery(sql)) {
-                while (rs.next()) {
-                    int id = rs.getInt("ID");
-                    String title = rs.getString("TITLE");
-                    String content = rs.getString("CONTENT");
-                    int difficulty = rs.getInt("DIFFICULTY");
-                    String type = rs.getString("TYPE");
-                    int authorId = rs.getInt("USER_ID");
+                Connection conn = DriverManager.getConnection(JDBC_URL);
+                Statement statement = conn.createStatement()
+        ) {
+            // Get results
+            try (ResultSet resultSet = statement.executeQuery(sql)) {
+                while (resultSet.next()) {
+                    // Get fields
+                    int id = resultSet.getInt("ID");
+                    String title = resultSet.getString("TITLE");
+                    String content = resultSet.getString("CONTENT");
+                    int difficulty = resultSet.getInt("DIFFICULTY");
+                    String type = resultSet.getString("TYPE");
+                    int authorId = resultSet.getInt("USER_ID");
 
                     problems.add(new Problem(id, difficulty, title, content, type, authorId));
                 }
@@ -209,11 +293,15 @@ public class ProblemDatabase {
         return problems;
     }
 
+    /**
+     * populateFromDirectory
+     * Loads problems from a base directory.
+     * Searches for a `problem.txt` file in each problem folder and parses it for metadata.
+     * @param baseDirectory the directory containing all the problems
+     * @throws SQLException if an error occurs while using SQL
+     */
     public void populateFromDirectory(String baseDirectory) throws IOException, SQLException {
-        File dir = new File(baseDirectory);
-
-        File[] problemFolders = dir.listFiles();
-
+        // Create SQL statement to insert with a custom id
         String sql = SQLStatement.insertStatement()
                 .insertInto("PROBLEMLIST")
                 .orReplace()
@@ -221,7 +309,20 @@ public class ProblemDatabase {
                 .values("?", "?", "?", "?", "?", "?")
                 .toString();
 
+        // List all files in the base directory
+        File dir = new File(baseDirectory);
+
+        File[] problemFolders = dir.listFiles();
+
         if (problemFolders != null) {
+
+            // Load JDBC driver
+            try {
+                Class.forName("org.sqlite.JDBC");
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+
             for (File problemDirectory : problemFolders) {
                 // "1", "2", ...
                 String problemId = problemDirectory.getPath().split("\\\\")[1];
@@ -233,6 +334,7 @@ public class ProblemDatabase {
                 String[] problemMetadata = new String[4];
                 StringBuilder problemContent = new StringBuilder();
 
+                // Read file content
                 try (BufferedReader file = new BufferedReader(new FileReader(metadataFile))) {
                     // Read problem metadata
                     for (int i = 0; i < problemMetadata.length; i++) {
@@ -240,22 +342,17 @@ public class ProblemDatabase {
                     }
 
                     // Read problem content
-                    int currentChar;
+                    int currentChar = file.read();
 
-                    while ((currentChar = file.read()) != -1) {
+                    while (currentChar != -1) {
                         problemContent.append((char) currentChar);
+                        currentChar = file.read();
                     }
                 }
 
-                // Load JDBC driver
-                try {
-                    Class.forName("org.sqlite.JDBC");
-                } catch (ClassNotFoundException e) {
-                    throw new RuntimeException(e);
-                }
-
+                // Prepare and execute insert statement
                 try (
-                        Connection conn = DriverManager.getConnection("jdbc:sqlite:problem.db");
+                        Connection conn = DriverManager.getConnection(JDBC_URL);
                         PreparedStatement statement = conn.prepareStatement(sql)
                 ) {
                     // Set parameters

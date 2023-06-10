@@ -12,14 +12,18 @@ import java.sql.*;
 import java.util.Map;
 
 /**
- * Wraps raw SQL connections to the database in a more friendly API
+ * Wraps raw SQL connections to the user table in a more accessible API
  * @author Tommy Shan
  * @version - June 6th 2023
- * */
+ */
 public class UserDatabase {
+    /** JDBC URL to connect to the database */
+    private static final String JDBC_URL = "jdbc:sqlite:user.db";
+
     /**
      * Constructs the object and initializes its data.
      * Creates a users table if it does not exist
+     * @throws SQLException if an error occurs while using SQL
      */
     public UserDatabase() throws SQLException {
         // Loads the JDBC driver
@@ -39,7 +43,7 @@ public class UserDatabase {
 
         // Create and execute statement
         try (
-            Connection conn = DriverManager.getConnection("jdbc:sqlite:user.db");
+            Connection conn = DriverManager.getConnection(JDBC_URL);
             Statement statement = conn.createStatement()
         ) {
             statement.executeUpdate(sql);
@@ -50,7 +54,7 @@ public class UserDatabase {
      * addUser
      * Attempts to add a {@link User} to the database
      * @param user the user to insert into the database
-     * @throws SQLException the error thrown when the class does not exist
+     * @throws SQLException if an error occurs while using SQL
      */
     public void addUser(User user) throws SQLException {
         // Loads the JDBC driver
@@ -69,7 +73,7 @@ public class UserDatabase {
 
         // Prepare and execute statement
         try (
-                Connection conn = DriverManager.getConnection("jdbc:sqlite:user.db");
+                Connection conn = DriverManager.getConnection(JDBC_URL);
                 PreparedStatement statement = conn.prepareStatement(sql);
         ) {
             // Set parameters
@@ -88,7 +92,7 @@ public class UserDatabase {
      * getUserById
      * Attempts to get a {@link User} by its id
      * @param targetId the id of user to get
-     * @return the user with the specified id
+     * @return the user with the specified id or null if not found
      * @throws SQLException if an error occurs while using SQL
      */
     public User getUserById(int targetId) throws SQLException {
@@ -108,20 +112,25 @@ public class UserDatabase {
 
         // Prepare and execute statement
         try (
-                Connection c = DriverManager.getConnection("jdbc:sqlite:user.db");
-                PreparedStatement statement = c.prepareStatement(sql);
+                Connection conn = DriverManager.getConnection(JDBC_URL);
+                PreparedStatement statement = conn.prepareStatement(sql);
         ) {
             // Set parameters
             statement.setInt(1, targetId);
 
             // Execute and get results
-            try (ResultSet results = statement.executeQuery()) {
+            try (ResultSet resultSet = statement.executeQuery()) {
+                // Return null if no user found
+                if (!resultSet.isBeforeFirst() ) {
+                    return null;
+                }
+
                 // Get result fields
-                int id = results.getInt("ID");
-                String userName = results.getString("USERNAME");
-                String password = results.getString("PASSWORD");
-                byte[] salt = results.getBytes("SALT");
-                int points = results.getInt("POINTS");
+                int id = resultSet.getInt("ID");
+                String userName = resultSet.getString("USERNAME");
+                String password = resultSet.getString("PASSWORD");
+                byte[] salt = resultSet.getBytes("SALT");
+                int points = resultSet.getInt("POINTS");
 
                 return new User(id, userName, password, salt, points);
             }
@@ -132,7 +141,7 @@ public class UserDatabase {
      * getByUsername
      * Attempts to retrieve a user with a specified username
      * @param username the username to search for
-     * @return the found user
+     * @return the found user or null if not found
      * @throws SQLException if an error occurs while using SQL
      */
     public User getUserByUsername(String username) throws SQLException {
@@ -152,20 +161,25 @@ public class UserDatabase {
 
         // Prepare and execute statement
         try (
-            Connection c = DriverManager.getConnection("jdbc:sqlite:user.db");
-            PreparedStatement statement = c.prepareStatement(sql);
+            Connection conn = DriverManager.getConnection(JDBC_URL);
+            PreparedStatement statement = conn.prepareStatement(sql);
         ) {
             // Set parameters
             statement.setString(1, username);
 
             // Execute and get results
-            try (ResultSet results = statement.executeQuery()) {
+            try (ResultSet resultSet = statement.executeQuery()) {
+                // Return null if no user found
+                if (!resultSet.isBeforeFirst() ) {
+                    return null;
+                }
+
                 // Get result fields
-                int id = results.getInt("ID");
-                String userName = results.getString("USERNAME");
-                String password = results.getString("PASSWORD");
-                byte[] salt = results.getBytes("SALT");
-                int points = results.getInt("POINTS");
+                int id = resultSet.getInt("ID");
+                String userName = resultSet.getString("USERNAME");
+                String password = resultSet.getString("PASSWORD");
+                byte[] salt = resultSet.getBytes("SALT");
+                int points = resultSet.getInt("POINTS");
 
                 return new User(id, userName, password, salt, points);
             }
@@ -176,6 +190,7 @@ public class UserDatabase {
      * updatePoints
      * Attempts to update the points that a user has
      * @param userId the username to search for
+     * @param newPoints the new amount of points the user has
      * @throws SQLException if an error occurs while using SQL
      */
     public void updatePoints(int userId, int newPoints) throws SQLException {
@@ -196,7 +211,7 @@ public class UserDatabase {
 
         // Prepare and execute statement
         try (
-                Connection conn = DriverManager.getConnection("jdbc:sqlite:user.db");
+                Connection conn = DriverManager.getConnection(JDBC_URL);
                 PreparedStatement statement = conn.prepareStatement(sql);
         ) {
             // Set parameters
@@ -208,7 +223,16 @@ public class UserDatabase {
         }
     }
 
+    /**
+     * authenticate
+     * Attempts to authenticate the user with the specified credentials and returns the current user
+     * @param username the username of the user
+     * @param hashedPassword the hashed and salted password of the user
+     * @return the current user if the credentials are valid or
+     *         null if no user is found or the credentials are invalid
+     */
     public User authenticate(String username, String hashedPassword) {
+        // Get user by username
         User requestedUser;
 
         try {
@@ -217,15 +241,25 @@ public class UserDatabase {
             return null;
         }
 
-        if (requestedUser.getPassword().equals(hashedPassword)) {
+        // Check if the hashed passwords match
+        if ((requestedUser != null) && (requestedUser.getPassword().equals(hashedPassword))) {
             return requestedUser;
         }
 
         return null;
     }
 
+    /**
+     * login
+     * Attempts to log in the user with the specified username and plaintext password.
+     * It computes the hash of the passwords with the username's salt and checks for a match.
+     * @param username the username of the user
+     * @param password the plaintext password of the user
+     * @return the requested user if the credentials are valid or
+     *         null if no user is found or the credentials are invalid
+     */
     public User login(String username, String password) {
-
+        // Get requested user
         User requestedUser;
 
         try {
@@ -234,10 +268,16 @@ public class UserDatabase {
             return null;
         }
 
+        if (requestedUser == null) {
+            return null;
+        }
+
+        // Compute hash using the requested user's salt
         byte[] salt = requestedUser.getSalt();
 
         String newHashedPassword = UserDatabase.hashPassword(password, salt);
 
+        // Check for match
         if (requestedUser.getPassword().equals(newHashedPassword)) {
             return requestedUser;
         }
@@ -247,7 +287,7 @@ public class UserDatabase {
 
     /**
      * getCurrentUser
-     * gets the current user with information from a {@link Request}
+     * Gets the current user with information from a {@link Request}
      * @param req the request with user authentication information
      * @return the current {@link User} or null if there is no user logged in
      */
@@ -268,8 +308,9 @@ public class UserDatabase {
      * All problems on the judge may to attributed to this user
      * @param username the username of the admin
      * @param password the plaintext password of the admin
+     * @throws SQLException if an error occurs while using SQLows
      */
-    public void createAdminUser(String username, String password) throws NoSuchAlgorithmException, SQLException {
+    public void createAdminUser(String username, String password) throws SQLException {
         byte[] salt = UserDatabase.getSalt();
         String hashedPassword = UserDatabase.hashPassword(password, salt);
 
@@ -288,47 +329,66 @@ public class UserDatabase {
                 .values("?", "?", "?", "?", "?")
                 .toString();
 
+        // Prepare and execute statement
         try (
-                Connection c = DriverManager.getConnection("jdbc:sqlite:user.db");
-                PreparedStatement stm = c.prepareStatement(sql);
+                Connection conn = DriverManager.getConnection(JDBC_URL);
+                PreparedStatement statement = conn.prepareStatement(sql);
         ) {
             // Set parameters
             // Custom id
-            stm.setInt(1, 1);
-            stm.setString(2, username);
-            stm.setString(3, hashedPassword);
-            stm.setBytes(4, salt);
-            stm.setInt(5, 0);
+            statement.setInt(1, 1);
+            statement.setString(2, username);
+            statement.setString(3, hashedPassword);
+            statement.setBytes(4, salt);
+            statement.setInt(5, 0);
 
-            stm.executeUpdate();
+            statement.executeUpdate();
         }
     }
 
-    public static byte[] getSalt() throws NoSuchAlgorithmException {
+    /**
+     * getSalt
+     * Creates a secure random salt as bytes.
+     * @return the salt as an array of bytes
+     */
+    public static byte[] getSalt() {
         SecureRandom random = new SecureRandom();
         byte[] salt = new byte[16];
         random.nextBytes(salt);
         return salt;
     }
 
+    /**
+     * hashPassword
+     * Hashes a plaintext password with a given salt
+     * @param password the plaintext password to compute the hash for
+     * @param salt the salt to compute the hash with
+     */
     public static String hashPassword(String password, byte[] salt) {
+        // Get digest with SHA-256
+        MessageDigest messageDigest;
+
         try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            md.update(salt);
-
-            byte[] bytes = md.digest(password.getBytes(StandardCharsets.UTF_8));
-
-            StringBuilder hashedPassword = new StringBuilder();
-
-            for (byte b : bytes) {
-                hashedPassword.append(Integer.toString((b & 0xff) + 0x100, 16).substring(1));
-            }
-
-            return hashedPassword.toString();
-
+            messageDigest = MessageDigest.getInstance("SHA-256");
         } catch (NoSuchAlgorithmException e) {
+            System.out.println("Hashing algorithm SHA-256 cannot be found");
             e.printStackTrace();
             throw new RuntimeException(e);
         }
+
+        // Add salt
+        messageDigest.update(salt);
+
+        // Compute digest with SHA-256
+        byte[] bytes = messageDigest.digest(password.getBytes(StandardCharsets.UTF_8));
+
+        StringBuilder hashedPassword = new StringBuilder();
+
+        // Converts the hash to hexadecimal string
+        for (byte b : bytes) {
+            hashedPassword.append(Integer.toString((b & 0xff) + 0x100, 16).substring(1));
+        }
+
+        return hashedPassword.toString();
     }
 }

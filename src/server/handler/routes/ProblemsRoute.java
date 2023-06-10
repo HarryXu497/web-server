@@ -55,7 +55,11 @@ public class ProblemsRoute extends Handler implements Get {
 
         // User authenticated
         if (currentUser != null) {
-            solvedList = this.database.solvedProblems().getAllSolvedProblems(currentUser.getUserID());
+            try {
+                solvedList = this.database.solvedProblems().getAllSolvedProblems(currentUser.getUserID());
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
 
 

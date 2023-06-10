@@ -80,8 +80,12 @@ public class ProblemRoute extends Handler implements Get {
         boolean showSolved = false;
 
         if (currentUser != null) {
-            List<Integer> userSolved = this.database.solvedProblems().getAllSolvedProblems(currentUser.getUserID());
-            showSolved = userSolved.contains(problemId);
+            try {
+                List<Integer> userSolved = this.database.solvedProblems().getAllSolvedProblems(currentUser.getUserID());
+                showSolved = userSolved.contains(problemId);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
 
         // Compile template with data
