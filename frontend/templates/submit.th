@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="/static/css/reset.css">
     <link rel="stylesheet" href="/static/css/nav.css">
     <link rel="stylesheet" href="/static/css/submit.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <script defer src="/static/js/nav.js"></script>
 </head>
 <body>

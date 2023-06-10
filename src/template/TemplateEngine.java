@@ -102,16 +102,19 @@ public class TemplateEngine {
      * @throws IOException if an error occurs while opening or reading the file
      */
     private String read(String inputFile) throws IOException {
-        List<String> lines = new ArrayList<>();
+        StringBuilder content = new StringBuilder();
 
-        try (BufferedReader br = new BufferedReader(new FileReader(inputFile))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                lines.add(line);
+        try (BufferedReader input = new BufferedReader(new FileReader(inputFile))) {
+            int currentChar = input.read();
+
+            while (currentChar != -1) {
+                content.append((char) currentChar);
+
+                currentChar = input.read();
             }
         }
 
-        return String.join("\n", lines);
+        return content.toString();
     }
 
     /**

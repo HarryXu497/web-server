@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * Wraps raw SQL connections to the problem table in a more accessible API
  * @author Tommy Shan
- * @version - June 6th 2023
+ * @version - June 1st 2023
  */
 public class ProblemDatabase {
     /** JDBC URL to connect to the database */

@@ -36,6 +36,7 @@ public class AssetEngine {
         IMAGE_EXTENSIONS.add("jpg");
         IMAGE_EXTENSIONS.add("jpeg");
         IMAGE_EXTENSIONS.add("png");
+        IMAGE_EXTENSIONS.add("ico");
     }
 
     /** the registry for templates */
@@ -115,16 +116,19 @@ public class AssetEngine {
      * @throws IOException if an error occurs while opening or reading the file
      */
     private String readText(String inputFile) throws IOException {
-        List<String> lines = new ArrayList<>();
+        StringBuilder content = new StringBuilder();
 
-        try (BufferedReader br = new BufferedReader(new FileReader(inputFile))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                lines.add(line);
+        try (BufferedReader input = new BufferedReader(new FileReader(inputFile))) {
+            int currentChar = input.read();
+
+            while (currentChar != -1) {
+                content.append((char) currentChar);
+
+                currentChar = input.read();
             }
         }
 
-        return String.join("\n", lines);
+        return content.toString();
     }
 
     /**

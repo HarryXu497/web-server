@@ -82,11 +82,13 @@ public class Test {
         // Handle runtime exceptions
         StringBuilder runtimeException = new StringBuilder();
 
-        try (BufferedReader br = new BufferedReader(new FileReader(errorFilePath))) {
-            int c;
+        try (BufferedReader errorFile = new BufferedReader(new FileReader(errorFilePath))) {
+            int currentChar = errorFile.read();
 
-            while ((c = br.read()) != -1) {
-                runtimeException.append((char) c);
+            while (currentChar != -1) {
+                runtimeException.append((char) currentChar);
+
+                currentChar = errorFile.read();
             }
         }
 
@@ -114,22 +116,26 @@ public class Test {
         // Read all content from output file
         StringBuilder outputFileContents = new StringBuilder();
 
-        try (BufferedReader br = new BufferedReader(new FileReader(workingDirectory + this.outputFilePath))) {
-            int s;
+        try (BufferedReader outputFile = new BufferedReader(new FileReader(workingDirectory + this.outputFilePath))) {
+            int currentChar = outputFile.read();
 
-            while ((s = br.read()) != -1) {
-                outputFileContents.append((char) s);
+            while (currentChar != -1) {
+                outputFileContents.append((char) currentChar);
+
+                currentChar = outputFile.read();
             }
         }
 
         // Read all content from answer file
         StringBuilder answerFileContents = new StringBuilder();
 
-        try (BufferedReader br = new BufferedReader(new FileReader(workingDirectory + this.answerFilePath))) {
-            int s;
+        try (BufferedReader answerFile = new BufferedReader(new FileReader(workingDirectory + this.answerFilePath))) {
+            int currentChar = answerFile.read();
 
-            while ((s = br.read()) != -1) {
-                answerFileContents.append((char) s);
+            while (currentChar != -1) {
+                answerFileContents.append((char) currentChar);
+
+                currentChar = answerFile.read();
             }
         }
 

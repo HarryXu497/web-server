@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  * Wraps raw SQL connections to the user table in a more accessible API
  * @author Tommy Shan
- * @version - June 6th 2023
+ * @version - June 1st 2023
  */
 public class UserDatabase {
     /** JDBC URL to connect to the database */

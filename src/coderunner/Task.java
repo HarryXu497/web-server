@@ -129,10 +129,12 @@ public class Task {
 
             // Error output -> compilation error
             // Read error stream
-            int errorChar;
+            int errorChar = compilationErr.read();
 
-            while ((errorChar = compilationErr.read()) != -1) {
+            while (errorChar != -1) {
                 fullErrorText.append((char) errorChar);
+
+                errorChar = compilationErr.read();
             }
 
             String errorText = fullErrorText.toString();
@@ -145,10 +147,12 @@ public class Task {
 
             // Standard out -> successful compile
             // read output stream
-            int successChar;
+            int successChar = compilationIn.read();
 
-            while ((successChar = compilationIn.read()) != -1) {
+            while (successChar != -1) {
                 successfulOutput.append((char) successChar);
+
+                successChar = compilationIn.read();
             }
         }
 

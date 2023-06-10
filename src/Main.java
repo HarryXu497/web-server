@@ -1,7 +1,6 @@
 import assets.AssetEngine;
 import coderunner.CodeRunner;
 import database.Database;
-import database.model.User;
 import server.WebServer;
 import server.handler.Handler;
 import server.handler.routes.*;
@@ -12,11 +11,17 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class Main {
+    /** Resets the color of the console */
+    private static final String ANSI_RESET = "\u001B[0m";
+
+    /** Sets the color of the console output to red */
+    private static final String ANSI_RED = "\u001B[31m";
+
     public static void main(String[] args) {
         try {
             TemplateEngine templateEngine = new TemplateEngine("frontend/templates");
 
-            AssetEngine assetEngine = new AssetEngine("frontend/styles", "frontend/images", "frontend/js");
+            AssetEngine assetEngine = new AssetEngine("frontend/styles", "frontend/images", "frontend/js", "frontend/favicon");
 
             CodeRunner codeRunner = new CodeRunner();
 
@@ -52,10 +57,11 @@ public class Main {
             assets.put("frontend/styles/", "/static/css/");
             assets.put("frontend/images/", "/static/images/");
             assets.put("frontend/js/", "/static/js/");
+            assets.put("frontend/favicon/", "/");
 
             WebServer server = new WebServer(templateEngine, assetEngine, routes, assets, notFoundHandler);
 
-            server.serve(5000);
+            server.serve(5000, ANSI_RED + "[INFO] Accepting clients on port 5000" + ANSI_RESET);
         } catch (Exception e) {
             System.out.println("An Error occurred");
             e.printStackTrace();

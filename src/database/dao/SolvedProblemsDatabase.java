@@ -1,7 +1,6 @@
 package database.dao;
 
 import database.model.Problem;
-import database.model.User;
 import database.statement.SQLStatement;
 
 import java.sql.*;
@@ -13,7 +12,7 @@ import java.util.List;
  * This table acts as a many-to-many join table between the problem and user table.
  * It is used to mark problems as solved by users.
  * @author Tommy Shan
- * @version - June 7th 2023
+ * @version - June 4th 2023
  */
 public class SolvedProblemsDatabase {
     /** JDBC URL to connect to the database */

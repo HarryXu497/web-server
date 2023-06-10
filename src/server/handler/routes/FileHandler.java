@@ -64,6 +64,9 @@ public class FileHandler extends Handler implements Get {
             case "jpeg":
                 contentType = "image/jpeg";
                 break;
+            case "ico":
+                contentType = "image/x-icon";
+                break;
         }
 
         headers.put("Content-Type", contentType);

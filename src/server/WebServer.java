@@ -20,7 +20,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -34,20 +33,11 @@ import java.util.Map;
  * @version 1.0 - May 20th 2023
  */
 public class WebServer {
-    /** determines if the server is currently running */
-    private static boolean running = true;
-
-    /** determines if the server is currently accepting requests */
-    private static boolean accepting = true;
-
     /** The request handlers of the server */
     private final Handlers requestHandlers;
 
     /** The template engine of the server */
     private final TemplateEngine engine;
-
-    /** The asset engine of the server */
-    private final AssetEngine assets;
 
     /**
      * Constructs a web server with a templating engine and the directory of styles
@@ -58,8 +48,6 @@ public class WebServer {
         this.requestHandlers = new Handlers();
 
         this.engine = engine;
-
-        this.assets = assets;
 
         // Maps each file in each directory of assets to a corresponding route
         for (Map.Entry<String, String> assetPair : assetMap.entrySet()) {
@@ -90,14 +78,20 @@ public class WebServer {
      * serve
      * Serves the server at the specified port
      * @param port the port to serve on
+     * @param message the message to output when the server is accepting requests
      */
-    public void serve(int port) {
+    public void serve(int port, String message) {
         // open the server socket
         try (ServerSocket socket = new ServerSocket(port)) {
             // Server loop
             // Accept client connections and delegate each connection to a separate thread
             try {
-                while (accepting) {
+                // Output message when server is up
+                if (message != null) {
+                    System.out.println(message);
+                }
+
+                while (true) {
                     Socket client = socket.accept();
 
                     Thread t = new Thread(new ConnectionHandler(client));
@@ -109,6 +103,15 @@ public class WebServer {
         } catch (IOException e) {
             System.out.println("Error opening server socket");
         }
+    }
+
+    /**
+     * serve
+     * Serves the server at the specified port
+     * @param port the port to serve on
+     */
+    public void serve(int port) {
+        this.serve(port, null);
     }
 
     /**
