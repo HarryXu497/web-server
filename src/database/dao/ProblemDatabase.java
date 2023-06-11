@@ -25,6 +25,9 @@ public class ProblemDatabase {
     /** JDBC URL to connect to the database */
     private static final String JDBC_URL = "jdbc:sqlite:problem.db";
 
+    /** Class name of the JDBC driver */
+    private static final String JDBC_CLASS_NAME = "org.sqlite.JDBC";
+
     /**
      * Constructs the object and initializes its data.
      * Creates a problems table if it does not exist.
@@ -33,7 +36,7 @@ public class ProblemDatabase {
     public ProblemDatabase() throws SQLException {
         // Load JDBC driver
         try {
-            Class.forName("org.sqlite.JDBC");
+            Class.forName(JDBC_CLASS_NAME);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -66,7 +69,7 @@ public class ProblemDatabase {
     public void addProblem(Problem problem) throws SQLException {
         // Load JDBC driver
         try {
-            Class.forName("org.sqlite.JDBC");
+            Class.forName(JDBC_CLASS_NAME);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -104,7 +107,7 @@ public class ProblemDatabase {
     public Problem getProblemById(int targetId) throws SQLException {
         // Load JDBC driver
         try {
-            Class.forName("org.sqlite.JDBC");
+            Class.forName(JDBC_CLASS_NAME);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -153,7 +156,7 @@ public class ProblemDatabase {
     public Problem getProblemByTitle(String targetTitle) throws SQLException {
         // Load JDBC driver
         try {
-            Class.forName("org.sqlite.JDBC");
+            Class.forName(JDBC_CLASS_NAME);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -203,7 +206,7 @@ public class ProblemDatabase {
     public List<Problem> getProblemByType(String targetType) throws SQLException {
         // Load JDBC driver
         try {
-            Class.forName("org.sqlite.JDBC");
+            Class.forName(JDBC_CLASS_NAME);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -255,7 +258,7 @@ public class ProblemDatabase {
     public List<Problem> getAllProblems() throws SQLException {
         // Load JDBC driver
         try {
-            Class.forName("org.sqlite.JDBC");
+            Class.forName(JDBC_CLASS_NAME);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -318,7 +321,7 @@ public class ProblemDatabase {
 
             // Load JDBC driver
             try {
-                Class.forName("org.sqlite.JDBC");
+                Class.forName(JDBC_CLASS_NAME);
             } catch (ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }

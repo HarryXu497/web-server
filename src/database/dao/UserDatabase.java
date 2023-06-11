@@ -8,7 +8,12 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Map;
 
 /**
@@ -20,6 +25,9 @@ public class UserDatabase {
     /** JDBC URL to connect to the database */
     private static final String JDBC_URL = "jdbc:sqlite:user.db";
 
+    /** Class name of the JDBC driver */
+    private static final String JDBC_CLASS_NAME = "org.sqlite.JDBC";
+
     /**
      * Constructs the object and initializes its data.
      * Creates a users table if it does not exist
@@ -28,7 +36,7 @@ public class UserDatabase {
     public UserDatabase() throws SQLException {
         // Loads the JDBC driver
         try {
-            Class.forName("org.sqlite.JDBC");
+            Class.forName(JDBC_CLASS_NAME);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -43,8 +51,8 @@ public class UserDatabase {
 
         // Create and execute statement
         try (
-            Connection conn = DriverManager.getConnection(JDBC_URL);
-            Statement statement = conn.createStatement()
+                Connection conn = DriverManager.getConnection(JDBC_URL);
+                Statement statement = conn.createStatement()
         ) {
             statement.executeUpdate(sql);
         }
@@ -59,7 +67,7 @@ public class UserDatabase {
     public void addUser(User user) throws SQLException {
         // Loads the JDBC driver
         try {
-            Class.forName("org.sqlite.JDBC");
+            Class.forName(JDBC_CLASS_NAME);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -98,7 +106,7 @@ public class UserDatabase {
     public User getUserById(int targetId) throws SQLException {
         // Load JDBC driver
         try {
-            Class.forName("org.sqlite.JDBC");
+            Class.forName(JDBC_CLASS_NAME);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -147,7 +155,7 @@ public class UserDatabase {
     public User getUserByUsername(String targetUsername) throws SQLException {
         // Load JDBC driver
         try {
-            Class.forName("org.sqlite.JDBC");
+            Class.forName(JDBC_CLASS_NAME);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -196,7 +204,7 @@ public class UserDatabase {
     public void updatePoints(int userId, int newPoints) throws SQLException {
         // Load JDBC driver
         try {
-            Class.forName("org.sqlite.JDBC");
+            Class.forName(JDBC_CLASS_NAME);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -316,7 +324,7 @@ public class UserDatabase {
 
         // Load JDBC driver
         try {
-            Class.forName("org.sqlite.JDBC");
+            Class.forName(JDBC_CLASS_NAME);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }

@@ -1,117 +1,86 @@
 package database.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
+/**
+ * Represents a comment entity made on a problem
+ * @author Tommy Shan
+ * @version 1.0 - June 1st 2023
+ */
 public class Comment {
-    private String content;
-    private User author;
-    private Date date;
-    private int vote;
-    private boolean isPublic;
+    /** The content of the comment */
+    private final String content;
+
+    /** The id of the problem the comment is commenting on */
+    private final int problemID;
+
+    /** The id of the user that created this comment */
+    private final int authorID;
+
+    /** The date that the comment was posted */
+    private final LocalDateTime date;
+
+    /** The amount of up/down votes on this comment*/
+    private final int vote;
 
     /**
-     * Constructor for class database.model.Comment
+     * Constructs this dataclass with its fields
      * @param content the content of the comment
-     * @param author the user that authored the comment
+     * @param problemID the id of the problem this comment responds to
+     * @param authorID the id of user that authored the comment
      * @param date the date that the comment is posted
      * @param vote the number of vote of the comment
-     * @param isPublic the publicity of the comment
      */
-    public Comment(String content, User author, Date date, int vote, boolean isPublic) {
-        setContent(content);
-        setAuthor(author);
-        setDate(date);
-        setVote(vote);
-        setPublic(isPublic);
-    }
-
-    /**
-     * getContent
-     * Getter method for variable content
-     * @return variable content
-     */
-    public String getContent() {
-        return content;
-    }
-
-    /**
-     * setContent
-     * Setter method for variable content
-     * @param content variable content
-     */
-    public void setContent(String content) {
+    public Comment(String content, int problemID, int authorID, LocalDateTime date, int vote) {
         this.content = content;
-    }
-
-    /**
-     * isPublic
-     * Getter method for variable isPublic
-     * @return variable isPublic
-     */
-    public boolean isPublic() {
-        return isPublic;
-    }
-
-    /**
-     * setPublic
-     * Setter method for variable isPublic
-     * @param isPublic variable isPublic
-     */
-    public void setPublic(boolean isPublic) {
-        this.isPublic = isPublic;
-    }
-
-    /**
-     * getVote
-     * Getter method for variable vote
-     * @return variable vote
-     */
-    public int getVote() {
-        return vote;
-    }
-
-    /**
-     * setVote
-     * Setter method for variable vote
-     * @param vote variable vote
-     */
-    public void setVote(int vote) {
+        this.problemID = problemID;
+        this.authorID = authorID;
+        this.date = date;
         this.vote = vote;
     }
 
     /**
-     * getDate
-     * Getter method for variable date
-     * @return variable date
+     * getContent
+     * Gets the content of this comment
+     * @return the comment content
      */
-    public Date getDate() {
+    public String getContent() {
+        return this.content;
+    }
+
+    /**
+     * getProblemID
+     * Gets the id of the problem this comment was posted on
+     * @return the comment problem id
+     */
+    public int getProblemID() {
+        return this.problemID;
+    }
+
+    /**
+     * getVote
+     * Gets the votes on this comment
+     * @return the comment problem id
+     */
+    public int getVote() {
+        return this.vote;
+    }
+
+    /**
+     * getDate
+     * Gets the {@link LocalDateTime} that this comment was posted
+     * @return the comment date
+     */
+    public LocalDateTime getDate() {
         return date;
     }
 
     /**
-     * setDate
-     * Setter method for variable date
-     * @param date variable date
+     * getAuthorID
+     * Gets the id of the user that posted this comment
+     * @return the comment author id
      */
-    public void setDate(Date date) {
-        this.date = date;
-    }
-
-    /**
-     * getAuthor
-     * Getter method for variable author
-     * @return variable author
-     */
-    public User getAuthor() {
-        return author;
-    }
-
-    /**
-     * setAuthor
-     * Setter method for variable author
-     * @param author variable author
-     */
-    public void setAuthor(User author) {
-        this.author = author;
+    public int getAuthorID() {
+        return authorID;
     }
 }

@@ -3,7 +3,7 @@ package template;
 import java.util.Arrays;
 
 /**
- * represents a directive in the template, which is a special syntax which allows for control flow in HTML
+ * Represents a directive in the template, which is a special syntax which allows for control flow in HTML
  * <div>
  * Example:
  * <pre>

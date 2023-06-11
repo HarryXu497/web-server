@@ -28,7 +28,7 @@ public class ProblemRecommender {
         int[] relativity = new int[problems.size()];
         for(int i = 0; i < problems.size(); i++) {
             relativity[i] = 0;
-            // If the different between two problems' difficulty is equals to 0, the problem earn 10 relativity points. As the difference increased by 1, the relativity point decreased by 1, until 0.
+            // If the different between two problems' difficulty is equal to 0, the problem earn 10 relativity points. As the difference increased by 1, the relativity point decreased by 1, until 0.
             relativity[i] += Math.max(0, 10 - Math.abs(problems.get(i).getDifficulty() - curProblem.getDifficulty()));
             // If the author of the two problems are same, the problem earn 1 additional relativity point.
             relativity[i] += (problems.get(i).getAuthorID() == curProblem.getAuthorID() ? 1 : 0);

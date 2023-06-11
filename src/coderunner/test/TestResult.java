@@ -1,7 +1,7 @@
 package coderunner.test;
 
 /**
- * represents the result of a test, consisting of a test code and optionally some data
+ * Represents the result of a test, consisting of a test code and optionally some data
  * @author Harry Xu
  * @version 1.0 - June 4th 2023
  */
@@ -24,7 +24,7 @@ public class TestResult {
 
     /**
      * getStatusCode
-     * gets the status code associated with this TestResult
+     * Gets the status code associated with this {@link TestResult}
      * @return the status code
      */
     public TestCode getStatusCode() {
@@ -33,7 +33,7 @@ public class TestResult {
 
     /**
      * getMessage
-     * gets the message associated with this TestResult
+     * Gets the message associated with this {@link TestResult}
      * @return the message
      */
     public String getMessage() {

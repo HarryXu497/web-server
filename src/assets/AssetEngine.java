@@ -1,7 +1,5 @@
 package assets;
 
-import template.TemplateNotFoundException;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -22,8 +20,10 @@ import java.util.Set;
  * @version 1.0 - June 8th 2023
  */
 public class AssetEngine {
-    /** Content Types */
+    /** Common extensions of text files */
     private final static Set<String> TEXT_EXTENSIONS = new HashSet<>();
+
+    /** Common extensions of image files */
     private final static Set<String> IMAGE_EXTENSIONS = new HashSet<>();
 
     static {
@@ -39,15 +39,20 @@ public class AssetEngine {
         IMAGE_EXTENSIONS.add("ico");
     }
 
-    /** the registry for templates */
+    /** the registry for assets */
     private final Map<String, byte[]> assets;
 
     /**
-     * Constructs a template engine with predefined templates registered
-     * @param paths the templates to be registered
+     * Constructs an {@link AssetEngine} with predefined assets registered
+     * @param paths the assets to be registered
      * @throws IOException if an error occurs while working with the files
+     * @throws NullPointerException if {@code points} is null
      */
     public AssetEngine(String... paths) throws IOException {
+        if (paths == null) {
+            throw new NullPointerException("paths cannot be null");
+        }
+
         this.assets = new HashMap<>();
 
         for (String path : paths) {
@@ -73,11 +78,11 @@ public class AssetEngine {
 
     /**
      * getAsset
-     * get the raw asset from the registry as an HTTP compatible string
-     * This is necessary to implement 404 and other error pages, as well as non template files such as stylesheets
-     * @param path the registered path of the template
-     * @return the read template string
-     * @throws TemplateNotFoundException if no template is registered under the path
+     * get the raw asset from the registry as an HTTP compatible array of bytes
+     * This is necessary to implement 404 and other error pages, as well as non asset files such as stylesheets
+     * @param path the registered path of the asset
+     * @return the read asset string
+     * @throws AssetNotFoundException if no asset is registered under the path
      * */
     public byte[] getAsset(String path) {
         if (!this.assets.containsKey(path)) {
@@ -154,6 +159,7 @@ public class AssetEngine {
             }
         }
 
+        // Copy list to primitive array
         byte[] buffer = new byte[bytes.size()];
 
         for (int i = 0; i < bytes.size(); i++) {

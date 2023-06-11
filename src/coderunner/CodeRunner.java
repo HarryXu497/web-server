@@ -11,6 +11,8 @@ import java.util.Map;
 
 /**
  * A class to run submitted java source code and evaluate the results.
+ * This class runs all its submissions in a singular background thread,
+ * which is queued to allow all submissions to be processed
  * @author Harry Xu
  * @version 1.0 - June 4th 2023
  */
@@ -36,8 +38,8 @@ public class CodeRunner {
         this.syncObject = new Object();
 
         // Start processing thread
-        Thread t = new Thread(new CodeTest());
-        t.start();
+        Thread processingThread = new Thread(new CodeTest());
+        processingThread.start();
     }
 
     /**

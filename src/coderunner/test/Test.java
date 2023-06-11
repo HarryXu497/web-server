@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Represents a singular test case for a problem submission
+ * Represents a singular test case for a problem submission to be run and tested
  * @author Harry Xu
  * @version 1.0 - June 4th 2023
  */
@@ -70,12 +70,10 @@ public class Test {
         // Start process execution
         Process executionProcess = process.start();
 
-        // TODO: maybe make this customizable
         // Timeout after 3000 milliseconds
         if (!executionProcess.waitFor(3000, TimeUnit.MILLISECONDS)) {
             executionProcess.destroy();
             this.result = new TestResult(TestCode.TIME_LIMIT_EXCEEDED, null);
-            System.out.println("timeout");
             return;
         }
 
@@ -101,7 +99,7 @@ public class Test {
 
     /**
      * test
-     * checks and compares the contents of the output and answer files.
+     * Checks and compares the contents of the output and answer files.
      * @throws IOException if an IO error occurs while reading from the two files
      */
     public TestResult test() throws IOException {

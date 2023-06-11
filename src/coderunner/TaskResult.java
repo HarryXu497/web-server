@@ -1,7 +1,7 @@
 package coderunner;
 
 /**
- * represents the result of a {@link Task},
+ * Represents the result of a {@link Task},
  * which wraps a {@link TaskCode} and some optional data around the result.
  * @author Harry Xu
  * @version 1.0 - June 4th 2023
@@ -25,7 +25,7 @@ public class TaskResult {
 
     /**
      * getTaskCode
-     * gets the {@link TaskCode} of this task result
+     * Gets the {@link TaskCode} of this task result
      * @return the {@link TaskCode}
      */
     public TaskCode getTaskCode() {
@@ -34,7 +34,7 @@ public class TaskResult {
 
     /**
      * getData
-     * gets the data for task result
+     * Gets the data for task result
      * @return the data as a string
      */
     public String getData() {

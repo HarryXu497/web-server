@@ -5,7 +5,13 @@ import coderunner.test.TestCode;
 import coderunner.test.TestResult;
 import filter.Filter;
 
-import java.io.*;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -17,7 +23,7 @@ import java.util.concurrent.TimeUnit;
  * @version 1.0 - May 28th 2023
  */
 public class Task {
-    /** the source code sent from the client */
+    /** The source code sent from the client */
     private final String sourceCode;
 
     /** The path to the source file */
@@ -26,13 +32,13 @@ public class Task {
     /** The list of tests to run on the source code */
     private final List<Test> tests;
 
-    /** The results of the tests*/
+    /** The results of the tests */
     private final TestResult[] testResults;
 
     /** Compilation Result */
     private TaskResult compilationResult;
 
-    /** The current test being run*/
+    /** The current test being run */
     private int testIndex;
 
     /**
@@ -42,7 +48,8 @@ public class Task {
      * @param inputFiles a list of file paths to the input files for the tests
      * @param answerFiles a list of file paths to the output files for the tests
      * @throws IOException if an IO error occurs while reading
-     * */
+     * @throws IllegalArgumentException if the {@code inputFiles} and the {@code answerFiles} are not the same length
+     */
     public Task(String sourceCode, String sourceFile, List<String> inputFiles, List<String> outputFiles, List<String> answerFiles) throws IOException {
         if (inputFiles.size() != answerFiles.size()) {
             throw new IllegalArgumentException("The two input lists should be the same length");
@@ -71,23 +78,25 @@ public class Task {
 
     /**
      * write
-     * opens and writes the source code to the specified source code file
+     * Opens and writes the source code to the specified source code file
      * @throws IOException if an IO error occurs while writing to the file
      */
     public void write() throws IOException {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(this.sourceFile))) {
+        try (BufferedWriter source = new BufferedWriter(new FileWriter(this.sourceFile))) {
+            // Write custom source code if the user submits empty code
             if (this.sourceCode.trim().length() == 0) {
-                bw.write("What are you doing?");
+                source.write("What are you doing?");
             } else {
-                bw.write(this.sourceCode);
+                source.write(this.sourceCode);
             }
         }
     }
 
     /**
      * compile
-     * reads and compiles the source code to a class file at the root of the project directory
+     * Reads and compiles the source code to a class file at the root of the project directory
      * @throws IOException if an IO error occurs while reading to the file
+     * @throws InterruptedException if the current thread is interrupted while waiting.
      */
     public TaskResult compile() throws IOException, InterruptedException {
         // Filter code for illegal imports
@@ -102,6 +111,7 @@ public class Task {
             }
         }
 
+        // Filter for malicious imports
         String errorMessage = Filter.filter(sourceCode.toString());
 
         // Return error message
@@ -122,8 +132,8 @@ public class Task {
         StringBuilder successfulOutput = new StringBuilder();
 
         try (
-                BufferedReader compilationIn = new BufferedReader(new InputStreamReader(compilation.getInputStream()));
-                BufferedReader compilationErr = new BufferedReader(new InputStreamReader(compilation.getErrorStream()))
+            BufferedReader compilationIn = new BufferedReader(new InputStreamReader(compilation.getInputStream()));
+            BufferedReader compilationErr = new BufferedReader(new InputStreamReader(compilation.getErrorStream()))
         ) {
             StringBuilder fullErrorText = new StringBuilder();
 
@@ -162,7 +172,7 @@ public class Task {
 
     /**
      * nextTest
-     * runs the next set of test files on the compiled code
+     * Runs the next set of test files on the compiled code
      * @return the result of the test
      */
     public TestResult nextTest() {
@@ -189,7 +199,7 @@ public class Task {
 
     /**
      * hasNextTest
-     * checks if there is another test available to execute
+     * Checks if there is another test available to execute
      * @return if there is another test to run
      */
     public boolean hasNextTest() {
@@ -198,7 +208,7 @@ public class Task {
 
     /**
      * getTestResults
-     * gets the cached test results
+     * Gets the cached test results
      * @return the test results as an array
      */
     public TestResult[] getTestResults() {
@@ -207,7 +217,7 @@ public class Task {
 
     /**
      * getCompilationResult
-     * gets the cached compilation result
+     * Gets the cached compilation result
      * @return the compilation result
      */
     public TaskResult getCompilationResult() {

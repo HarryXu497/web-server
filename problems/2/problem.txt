@@ -2,7 +2,7 @@ Balls and Boxes
 Intermediate Math
 7
 1
-There are N distinguishable boxes and M distinguishable balls. Find the number of ways to put all M (1 <= M <= 10^3) balls into these N (1 <= N <= 10^3) boxes and each box should have at least one ball.
+There are N distinguishable boxes and M distinguishable balls. Find the number of ways to put all M ($1 <= M <= 10^3$) balls into these N ($1 <= N <= 10^3$) boxes and each box should have at least one ball.
 
 ## Input Specification ##
 

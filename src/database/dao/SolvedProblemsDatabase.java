@@ -3,7 +3,13 @@ package database.dao;
 import database.model.Problem;
 import database.statement.SQLStatement;
 
-import java.sql.*;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +24,9 @@ public class SolvedProblemsDatabase {
     /** JDBC URL to connect to the database */
     private static final String JDBC_URL = "jdbc:sqlite:problem_user.db";
 
+    /** Class name of the JDBC driver */
+    private static final String JDBC_CLASS_NAME = "org.sqlite.JDBC";
+
     /**
      * Constructs the object and initializes its data.
      * Creates a problems table if it does not exist.
@@ -26,7 +35,7 @@ public class SolvedProblemsDatabase {
     public SolvedProblemsDatabase() throws SQLException {
         // Load JDBC driver
         try {
-            Class.forName("org.sqlite.JDBC");
+            Class.forName(JDBC_CLASS_NAME);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -56,7 +65,7 @@ public class SolvedProblemsDatabase {
     public void markAsSolved(int userId, int problemId) throws SQLException {
         // Load JDBC driver
         try {
-            Class.forName("org.sqlite.JDBC");
+            Class.forName(JDBC_CLASS_NAME);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -92,7 +101,7 @@ public class SolvedProblemsDatabase {
     public List<Integer> getAllSolvedProblems(int userId) throws SQLException {
         // Load JDBC driver
         try {
-            Class.forName("org.sqlite.JDBC");
+            Class.forName(JDBC_CLASS_NAME);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }

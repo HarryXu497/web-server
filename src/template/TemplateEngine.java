@@ -6,11 +6,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -23,15 +21,20 @@ import java.util.Set;
  * @version 1.0 - May 20th 2023
  */
 public class TemplateEngine {
-    /** the registry for templates*/
+    /** Rhe registry for templates*/
     private final Map<String, String> templates;
 
     /**
      * Constructs a template engine with predefined templates registered
      * @param paths the templates to be registered
      * @throws IOException if an error occurs while working with the files
+     * @throws NullPointerException if {@code paths} is null
      */
     public TemplateEngine(String... paths) throws IOException {
+        if (paths == null) {
+            throw new NullPointerException("paths cannot be null");
+        }
+
         this.templates = new HashMap<>();
 
         for (String path : paths) {

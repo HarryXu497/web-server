@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * A multithreaded web server which parses HTTP requests, dispatches route handlers, and stringifies HTTP responses to the client.
@@ -78,17 +79,17 @@ public class WebServer {
      * serve
      * Serves the server at the specified port
      * @param port the port to serve on
-     * @param message the message to output when the server is accepting requests
+     * @param onOpen a consumer that receives the port as its argument
      */
-    public void serve(int port, String message) {
+    public void serve(int port, Consumer<Integer> onOpen) {
         // open the server socket
         try (ServerSocket socket = new ServerSocket(port)) {
             // Server loop
             // Accept client connections and delegate each connection to a separate thread
             try {
                 // Output message when server is up
-                if (message != null) {
-                    System.out.println(message);
+                if (onOpen != null) {
+                    onOpen.accept(port);
                 }
 
                 while (true) {

@@ -6,13 +6,13 @@ package assets;
  * @version 1.0 - June 8th 2023
  */
 public class AssetNotFoundException extends RuntimeException {
-    /** Constructs a default AssetNotFoundException */
+    /** Constructs a default {@link AssetNotFoundException} */
     public AssetNotFoundException() {
         super();
     }
 
     /**
-     * Constructs a AssetNotFoundException with an error message
+     * Constructs a {@link AssetNotFoundException} with an error message
      * @param message the error message
      */
     public AssetNotFoundException(String message) {
