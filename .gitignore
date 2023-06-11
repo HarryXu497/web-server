@@ -29,3 +29,8 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### Database ###
+problem.db
+problem_user.db
+user.db
