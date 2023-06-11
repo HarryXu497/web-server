@@ -53,7 +53,7 @@ public class AboutRoute extends Handler implements Get {
         Map<String, String> headers = Handler.htmlHeaders();
 
         return new Response(
-                new Response.StatusLine(ResponseCode.NOT_FOUND),
+                new Response.StatusLine(ResponseCode.OK),
                 headers,
                 body
         );

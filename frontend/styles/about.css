@@ -33,7 +33,6 @@ h1 {
     width: clamp(20rem, 60%, 64rem);
     margin: 0 auto;
     color: white;
-    height: 100%;
 
     white-space: pre-wrap;
 
