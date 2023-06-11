@@ -11,7 +11,6 @@ import server.response.Response;
 import server.response.ResponseCode;
 import template.TemplateEngine;
 import template.TemplateNotFoundException;
-import template.TemplateSyntaxException;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -38,17 +37,20 @@ public class WebServer {
     private final Handlers requestHandlers;
 
     /** The template engine of the server */
-    private final TemplateEngine engine;
+    private final TemplateEngine templateEngine;
 
     /**
      * Constructs a web server with a templating engine and the directory of styles
-     * @param engine the templating engine used to compile .th files to html
+     * @param templateEngine the templating engine used to compile .th files to html
+     * @param assets the engine containing static assets such as styles, scripts, and images
+     * @param routes a {@link LinkedHashMap} of URL patterns to handlers
      * @param assetMap maps the assets in a directory to a URL on which to host them
-     * */
-    public WebServer(TemplateEngine engine, AssetEngine assets, LinkedHashMap<String, Handler> routes, Map<String, String> assetMap, Handler notFoundRoute) {
+     * @param notFoundRoute the handler to handler the request if no other matching handler can be found
+     */
+    public WebServer(TemplateEngine templateEngine, AssetEngine assets, LinkedHashMap<String, Handler> routes, Map<String, String> assetMap, Handler notFoundRoute) {
         this.requestHandlers = new Handlers();
 
-        this.engine = engine;
+        this.templateEngine = templateEngine;
 
         // Maps each file in each directory of assets to a corresponding route
         for (Map.Entry<String, String> assetPair : assetMap.entrySet()) {
@@ -222,7 +224,7 @@ public class WebServer {
                     Response notFound = new Response(
                             new Response.StatusLine(ResponseCode.NOT_FOUND),
                             new HashMap<>(),
-                            engine.compile("frontend/templates/not-found.th", null)
+                            templateEngine.compile("frontend/templates/not-found.th", null)
                     );
 
                     this.output.write(notFound.toBytes());
@@ -242,7 +244,7 @@ public class WebServer {
                     Response serverError = new Response(
                             new Response.StatusLine(ResponseCode.INTERNAL_SERVER_ERROR),
                             new HashMap<>(),
-                            engine.getTemplate("frontend/templates/error.th")
+                            templateEngine.getTemplate("frontend/templates/error.th")
                     );
 
                     this.output.write(serverError.toBytes());

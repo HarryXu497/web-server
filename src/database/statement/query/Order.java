@@ -7,6 +7,8 @@ package database.statement.query;
  * @version 1.0 - June 2nd 2023
  */
 public enum Order {
+    /** Ascending Order*/
     ASC,
+    /** Descending Order*/
     DESC,
 }

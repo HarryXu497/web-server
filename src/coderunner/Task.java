@@ -46,6 +46,7 @@ public class Task {
      * @param sourceCode the source code to be tested by this Task
      * @param sourceFile the path to the file to write the source code to for compilation
      * @param inputFiles a list of file paths to the input files for the tests
+     * @param outputFiles a list of files paths to redirect output to for each test case
      * @param answerFiles a list of file paths to the output files for the tests
      * @throws IOException if an IO error occurs while reading
      * @throws IllegalArgumentException if the {@code inputFiles} and the {@code answerFiles} are not the same length
@@ -95,6 +96,7 @@ public class Task {
     /**
      * compile
      * Reads and compiles the source code to a class file at the root of the project directory
+     * @return a {@link TaskResult} containing a {@link TestCode} and optional data
      * @throws IOException if an IO error occurs while reading to the file
      * @throws InterruptedException if the current thread is interrupted while waiting.
      */

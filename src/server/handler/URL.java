@@ -44,7 +44,8 @@ public class URL {
      * matches
      * determines if a URL matches with the defined pattern of this class
      * @param route the url to match against
-     * */
+     * @return if the route matches the pattern defined by this {@link URL}
+     */
     public boolean matches(String route) {
         // Split into tokens
         String[] routeSegments = route.split("/");

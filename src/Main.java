@@ -43,6 +43,11 @@ public class Main {
     /** Sets the color of the console output to red */
     private static final String ANSI_RED = "\u001B[31m";
 
+    /**
+     * main
+     * Serves the {@link WebServer} at port 5000
+     * @param args command line arguments
+     */
     public static void main(String[] args) {
         try {
             // Instantiate singleton dependencies

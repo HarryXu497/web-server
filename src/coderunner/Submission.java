@@ -19,6 +19,7 @@ public class Submission {
      * Constructs a submission with a task and submission id
      * @param task the submission task
      * @param submissionId the unique id identifier
+     * @param problemId the unique id of the problem being submitted to
      */
     public Submission(Task task, String submissionId, int problemId) {
         this.task = task;

@@ -371,6 +371,7 @@ public class UserDatabase {
      * Hashes a plaintext password with a given salt
      * @param password the plaintext password to compute the hash for
      * @param salt the salt to compute the hash with
+     * @return the hashed password
      */
     public static String hashPassword(String password, byte[] salt) {
         // Get digest with SHA-256

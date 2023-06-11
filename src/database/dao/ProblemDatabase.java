@@ -301,6 +301,7 @@ public class ProblemDatabase {
      * Loads problems from a base directory.
      * Searches for a `problem.txt` file in each problem folder and parses it for metadata.
      * @param baseDirectory the directory containing all the problems
+     * @throws IOException if an exception occurs while opening or reading files
      * @throws SQLException if an error occurs while using SQL
      */
     public void populateFromDirectory(String baseDirectory) throws IOException, SQLException {

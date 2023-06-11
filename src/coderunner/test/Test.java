@@ -100,6 +100,7 @@ public class Test {
     /**
      * test
      * Checks and compares the contents of the output and answer files.
+     * @return a {@link TestResult} containing a {@link TestCode} and optional data
      * @throws IOException if an IO error occurs while reading from the two files
      */
     public TestResult test() throws IOException {

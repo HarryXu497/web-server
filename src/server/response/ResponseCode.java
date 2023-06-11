@@ -6,14 +6,23 @@ package server.response;
  * @version 1.0 - May 20th 2023
  */
 public enum ResponseCode {
+    /** 200 OK */
     OK(200, "OK"),
+    /** 201 Created */
     CREATED(201, "Created"),
+    /** 302 Found */
     FOUND(302, "Found"),
+    /** 302 See Other */
     SEE_OTHER(303, "See Other"),
+    /** 400 Bad Request */
     BAD_REQUEST(400, "Bad Request"),
+    /** 401 Unauthorized */
     UNAUTHORIZED(401, "Unauthorized"),
+    /** 403 Forbidden */
     FORBIDDEN(403, "Forbidden"),
+    /** 404 Not Found */
     NOT_FOUND(404, "Not Found"),
+    /** 500 Internal Server Error */
     INTERNAL_SERVER_ERROR(500, "Interval Server Error");
 
     /** HTTP response code */

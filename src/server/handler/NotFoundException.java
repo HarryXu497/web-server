@@ -13,7 +13,10 @@ public class NotFoundException extends RuntimeException {
         super();
     }
 
-    /** Constructs a NotFoundException with an error message */
+    /**
+     * Constructs a NotFoundException with an error message
+     * @param message the error message
+     */
     public NotFoundException(String message) {
         super(message);
     }
