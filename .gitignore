@@ -34,3 +34,7 @@ bin/
 problem.db
 problem_user.db
 user.db
+
+## Test Files ##
+Main.class
+problems/*/Main.java
