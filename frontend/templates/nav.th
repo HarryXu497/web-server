@@ -1,6 +1,6 @@
 <nav class="nav">
     <div class="nav__logo">
-        THOJ@RHHS
+        <a href="/">THOJ@RHHS</a>
     </div>
     <div class="nav__links">
         <ul>

@@ -60,3 +60,8 @@ nav button[type="submit"] {
 nav button[type="submit"]:hover {
     cursor: pointer;
 }
+
+.nav__logo a {
+    color: white;
+    text-decoration: none;
+}
