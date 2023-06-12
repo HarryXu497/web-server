@@ -17,7 +17,7 @@
     <main class="hero">
         <h1>Online Programming Judge</h1>
         <h2>Computer Science @ RHHS</h2>
-        <a class="hero__learn-more">
+        <a class="hero__learn-more" href="/about">
             <button>
                 Learn More
             </button>
