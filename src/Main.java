@@ -45,6 +45,9 @@ public class Main {
     /** Sets the color of the console output to red */
     private static final String ANSI_RED = "\u001B[31m";
 
+    /** Sets the color of the console output to blue */
+    private static final String ANSI_BLUE = "\u001B[34m";
+
     /**
      * main
      * Serves the {@link WebServer} at port 5000
@@ -96,7 +99,7 @@ public class Main {
             // Request Logger
             Consumer<Request> logger = request -> {
                 Request.StatusLine statusLine = request.getStatusLine();
-                System.out.println("[INFO] " + statusLine.getMethod() + " " + statusLine.getUrl() + " " + statusLine.getProtocol());
+                System.out.println(ANSI_BLUE + "[INFO] " + statusLine.getMethod() + " " + statusLine.getUrl() + " " + statusLine.getProtocol() + ANSI_RESET);
             };
 
             WebServer server = new WebServer(templateEngine, assetEngine, routes, assets, notFoundHandler, logger);
