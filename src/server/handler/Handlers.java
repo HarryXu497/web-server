@@ -72,9 +72,6 @@ public class Handlers {
                 // Populate the request parameters
                 req.getStatusLine().populateRequestParams(url, route);
 
-                // TODO: remove this
-                System.out.println(req.getStatusLine());
-
                 // Dispatch the handle method
                 try {
                     return entry.getValue().handle(req);

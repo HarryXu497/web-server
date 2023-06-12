@@ -14,11 +14,13 @@ import server.handler.routes.SignUpRoute;
 import server.handler.routes.SubmissionPollRoute;
 import server.handler.routes.SubmitRoute;
 import server.handler.routes.TestsRoute;
+import server.request.Request;
 import template.TemplateEngine;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * A web application for problem/contest hosting and judging code
@@ -91,9 +93,15 @@ public class Main {
             assets.put("frontend/js/", "/static/js/");
             assets.put("frontend/favicon/", "/");
 
-            WebServer server = new WebServer(templateEngine, assetEngine, routes, assets, notFoundHandler);
+            // Request Logger
+            Consumer<Request> logger = request -> {
+                Request.StatusLine statusLine = request.getStatusLine();
+                System.out.println("[INFO] " + statusLine.getMethod() + " " + statusLine.getUrl() + " " + statusLine.getProtocol());
+            };
 
-            server.serve(5000, port -> System.out.println(ANSI_RED + "[INFO] Accepting clients on port " + port + ANSI_RESET));
+            WebServer server = new WebServer(templateEngine, assetEngine, routes, assets, notFoundHandler, logger);
+
+            server.serve(5000, port -> System.out.println(ANSI_RED + "[STATUS] Accepting clients on port " + port + ANSI_RESET));
         } catch (Exception e) {
             System.out.println("An Error occurred");
             e.printStackTrace();

@@ -39,6 +39,9 @@ public class WebServer {
     /** The template engine of the server */
     private final TemplateEngine templateEngine;
 
+    /** Logs requests to the console */
+    private final Consumer<Request> requestLogger;
+
     /**
      * Constructs a web server with a templating engine and the directory of styles
      * @param templateEngine the templating engine used to compile .th files to html
@@ -47,7 +50,7 @@ public class WebServer {
      * @param assetMap maps the assets in a directory to a URL on which to host them
      * @param notFoundRoute the handler to handler the request if no other matching handler can be found
      */
-    public WebServer(TemplateEngine templateEngine, AssetEngine assets, LinkedHashMap<String, Handler> routes, Map<String, String> assetMap, Handler notFoundRoute) {
+    public WebServer(TemplateEngine templateEngine, AssetEngine assets, LinkedHashMap<String, Handler> routes, Map<String, String> assetMap, Handler notFoundRoute, Consumer<Request> requestLogger) {
         this.requestHandlers = new Handlers();
 
         this.templateEngine = templateEngine;
@@ -75,6 +78,8 @@ public class WebServer {
         if (notFoundRoute != null) {
             this.requestHandlers.registerNotFoundHandler(notFoundRoute);
         }
+
+        this.requestLogger = requestLogger;
     }
 
     /**
@@ -211,6 +216,10 @@ public class WebServer {
 
             // Parse request into Request object
             Request req = Request.parse(rawRequest);
+
+            synchronized (requestLogger) {
+                requestLogger.accept(req);
+            }
 
             // Dispatch the correct handler
             try {
