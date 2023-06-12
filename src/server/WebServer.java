@@ -84,7 +84,7 @@ public class WebServer {
      * @param onOpen a consumer that receives the port as its argument
      */
     public void serve(int port, Consumer<Integer> onOpen) {
-        // open the server socket
+        // Open the server socket
         try (ServerSocket socket = new ServerSocket(port)) {
             // Server loop
             // Accept client connections and delegate each connection to a separate thread
@@ -217,22 +217,8 @@ public class WebServer {
                 Response res = requestHandlers.dispatch(req);
                 this.output.write(res.toBytes());
             } catch (HandlerException | NotFoundException e) {
+                // No 404 handler
                 e.printStackTrace();
-                // No handler/inappropriate handler
-                // Load not found page
-                try {
-                    Response notFound = new Response(
-                            new Response.StatusLine(ResponseCode.NOT_FOUND),
-                            new HashMap<>(),
-                            templateEngine.compile("frontend/templates/not-found.th", null)
-                    );
-
-                    this.output.write(notFound.toBytes());
-                } catch (IOException | TemplateNotFoundException ex) {
-                    ex.printStackTrace();
-                    System.out.println("Cannot render 404 page");
-                }
-
             } catch (RuntimeException e) {
                 e.printStackTrace();
                 // Handler cannot load template
