@@ -49,6 +49,7 @@ public class WebServer {
      * @param routes a {@link LinkedHashMap} of URL patterns to handlers
      * @param assetMap maps the assets in a directory to a URL on which to host them
      * @param notFoundRoute the handler to handler the request if no other matching handler can be found
+     * @param requestLogger the logging function that will be called with the request
      */
     public WebServer(TemplateEngine templateEngine, AssetEngine assets, LinkedHashMap<String, Handler> routes, Map<String, String> assetMap, Handler notFoundRoute, Consumer<Request> requestLogger) {
         this.requestHandlers = new Handlers();
