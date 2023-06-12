@@ -4,7 +4,7 @@ THOJ is a web application for problem/contest hosting and judging code written b
 
 ## Inspiration
 
-The students/teachers at RHHS usually need to go through a quite complicated process in order to host a contest. Therefore, THOJ is developed for the purpose of providing students and teachers with a convenient place to host a contest.
+The students/teachers at RHHS usually need to go through a quite complicated process in order to host a contest. Therefore, THOJ was developed for the purpose of providing students and teachers with a convenient place to host a contest.
 
 ## What It Does?
  * Host local contests in the RHHS community.
@@ -21,9 +21,9 @@ The students/teachers at RHHS usually need to go through a quite complicated pro
  * A filter to prevent malicious code from being inserted into submitted code.
  * A backend database with SQLite to allow for data persistence.
 
-## What We Demonstrate?
+## What We Are Demonstrating?
  * Class Hierarchy
- * Object-Oriented Programming
+ * Object-Oriented Programming and Design
  * Front-End Website Development (HTML, JS, CSS)
  * Back-End Website Development (Java)
  * Algorithm Design and Implementation (e.g. Graph Theory, String Matching, Password Hashing)
@@ -32,6 +32,8 @@ The students/teachers at RHHS usually need to go through a quite complicated pro
 ## What's Next for THOJ?
  * Improve features to provide users with a better user experience.
  * Complete additional features to convenience users.
+ * Add contests and comments
+ * Allow users to upload their own problems
  * Upload more problems to the judge
  * Promote the website to the RHHS community.
 
