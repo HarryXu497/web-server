@@ -1,0 +1,17 @@
+A Plus B
+Simple Math
+1
+1
+Tommy feels sleepy during geography class, so he decides to do his math homework. He is shocked when he opened his homework packaged that's assigned by Mr. Choi...
+
+It's too hard for him, a grade 9 student, to solve the problem. So he asked you to help him solve the problem for him.
+
+Given two numbers A and B, determine the value of A + B.
+
+## Sample Input
+1 1
+
+## Sample Output
+2
+
+** Note: A new line at the end of the program is expected.
