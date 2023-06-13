@@ -1,0 +1,19 @@
+Marking is Not Fun! (Hard)
+String Algorithm
+5
+1
+Mr. Mangat is marking some code for computer science. However, he is easily bored and he wants to mark unique sections of code.
+
+To be entertained for the longest time, he asks you to write a program to determine the length of the longest substring with unique characters in the code he is marking. Can you do it? Your mark depends on it.
+
+** Note: A new line at the end of the program is expected.
+
+## Sample Input
+```
+abcbcbcbc
+```
+
+## Sample Output
+```
+3
+```

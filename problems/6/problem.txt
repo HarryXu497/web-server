@@ -1,0 +1,45 @@
+Counting Syllables
+Ad Hoc
+50
+1
+Once upon a time, in a small village nestled among the hills, there lived a young boy named Tim. Tim was an inquisitive child who loved to explore and learn new things. One day, as he was wandering around the village, he heard a strange sound that he had never heard before. It was a word being pronounced in a rhythmic manner - "le-mon". Intrigued, Tim followed the sound to a nearby orchard where he saw his CS teacher, Mr. Mangat, picking lemons from the trees.
+
+Tim had never seen a lemon before, and he was fascinated by the bright yellow colour and the sour smell. He asked Mr. Mangat what he was doing and Mr. Mangat replied, "I am picking lemons. Would you like to try one?" Tim eagerly accepted the offer and took a bite of the lemon. The sour taste made him pucker up his lips, but he liked it nonetheless.
+
+As Tim was about to leave, Mr. Mangat called out to him, "Hey, do you know what syllables are?" Tim shook his head, and Mr. Mangat explained, "Syllables are the parts of a word that are pronounced as a unit. For example, 'le-mon' has two syllables. Say it with me - le-mon." Tim repeated after him, and he was amazed by how the two syllables created a rhythm in the word.
+
+Mr. Mangat found out that Tim is an inquisitive child and wants him to practice more on counting syllables. However, Tim is only three years old and doesn't know how to properly count the number of syllables. Tim heard that you are recently learning Strings in CS class; so he asks you for help.
+
+## Input Specification
+
+There will be $10^3$ lines of input.
+
+There will be one string on each line of inputs, indicating the words on the practice that Mr. Mangat provided.
+
+** Note: the sample input contains $3$ words. However, the test cases will contain $10^3$ words. All the words are selected with simple random sample method from the English dictionary.
+
+## Output Specification
+
+Output $10^3$ lines of integer.
+
+On each line, output the number of syllables in the $i^{th}$ word.
+
+** Note: A new line at the end of the program is expected.
+
+## Sample Input
+
+```
+lemon
+poem
+tree
+long-standing
+```
+
+## Sample Output
+
+```
+2
+2
+1
+3
+```
