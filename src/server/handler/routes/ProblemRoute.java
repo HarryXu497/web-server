@@ -124,7 +124,7 @@ public class ProblemRoute extends Handler implements Get {
         /** Problem type */
         public String type;
 
-        /** Problem difficulty from 1 to 10 inclusive */
+        /** Problem difficulty from 1 to 100inclusive */
         public int difficulty;
 
         /** Name of the problem's author */

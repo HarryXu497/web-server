@@ -9,7 +9,7 @@ public class Problem {
     /** The unique id of the problem */
     private final int problemID;
 
-    /** The difficulty of the problem as an integer from 1 to 10 inclusive */
+    /** The difficulty of the problem as an integer from 1 to 100inclusive */
     private final int difficulty;
 
     /** The title of the problem */
@@ -90,7 +90,7 @@ public class Problem {
     /**
      * getDifficulty
      * Gets the difficulty of the problem
-     * @return the problem difficulty as an integer from 1 to 10 inclusive
+     * @return the problem difficulty as an integer from 1 to 100inclusive
      */
     public int getDifficulty() {
         return this.difficulty;
