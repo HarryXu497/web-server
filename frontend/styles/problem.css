@@ -5,7 +5,7 @@ body {
 main {
     position: absolute;
     padding-top: 2rem;
-	height: calc(100vh - 5rem);
+	min-height: calc(100vh - 5rem);
 	width: 100%;
     object-fit: contain;
     background:
@@ -105,4 +105,8 @@ main {
 
 .solved-status {
     font-weight: bold;
+}
+
+code {
+    font-family: monospace;
 }

@@ -4,7 +4,7 @@ body {
 
 main {
     padding-top: 2rem;
-	height: calc(100vh - 7rem);
+	min-height: calc(100vh - 7rem);
     object-fit: contain;
     background:
         linear-gradient(

@@ -9,11 +9,12 @@ To be entertained for the longest time, he asks you to write a program to determ
 ** Note: A new line at the end of the program is expected.
 
 ## Sample Input
-```
+<code>
 abcbcbcbc
-```
+</code>
 
 ## Sample Output
-```
+<code>
 3
-```
+</code>
+

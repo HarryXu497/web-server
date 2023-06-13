@@ -1,11 +1,14 @@
-import java.util.*;
+import java.util.Scanner;
 
 class Main {
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
-        int a = input.nextInt();
-        int b = input.nextInt();
-        System.out.println(a+b);
         
+        long A = input.nextLong();
+        long B = input.nextLong();
+        
+        System.out.println(A + B);
+        
+        input.close();
     }
 }

@@ -28,18 +28,19 @@ On each line, output the number of syllables in the $i^{th}$ word.
 
 ## Sample Input
 
-```
+<code>
 lemon
 poem
 tree
 long-standing
-```
+</code>
 
 ## Sample Output
 
-```
+<code>
 2
 2
 1
 3
-```
+</code>
+

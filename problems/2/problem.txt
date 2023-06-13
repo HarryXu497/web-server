@@ -15,13 +15,12 @@ The first line of input contains two space-separated integers, N and M.
 Output the number of ways satisfy the conditional described above. Modulo your answer by 10^9 + 7.
 
 ## Sample Input
-
-```
+<code>
 2 4
-```
+</code>
 
 ## Sample Output
-
-```
+<code>
 14
-```
+</code>
+

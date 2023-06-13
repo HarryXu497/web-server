@@ -9,9 +9,14 @@ It's too hard for him, a grade 9 student, to solve the problem. So he asked you 
 Given two numbers A and B, determine the value of A + B.
 
 ## Sample Input
+<code>
 1 1
+</code>
 
 ## Sample Output
+<code>
 2
+</code>
 
 ** Note: A new line at the end of the program is expected.
+
