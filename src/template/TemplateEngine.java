@@ -21,7 +21,7 @@ import java.util.Set;
  * @version 1.0 - May 20th 2023
  */
 public class TemplateEngine {
-    /** Rhe registry for templates*/
+    /** The registry for templates */
     private final Map<String, String> templates;
 
     /**
